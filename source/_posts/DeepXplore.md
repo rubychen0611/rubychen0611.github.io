@@ -2,7 +2,11 @@
 title: 【论文笔记】DeepXplore
 date: 2020-08-19 21:59:46
 categories: 论文笔记
-tags: DNN测试
+tags:
+- DNN测试
+- 测试标准
+- 差分测试
+- 测试输入生成
 mathjax: true
 ---
 

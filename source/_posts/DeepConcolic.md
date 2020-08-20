@@ -2,15 +2,16 @@
 title: 【论文笔记】DeepConcolic
 date: 2020-08-19 14:41:03
 categories: 论文笔记
-tags: DNN测试
+tags:
+- DNN测试
+- Concolic测试
+- 测试输入生成
 mathjax: true
 ---
 
 原文：Concolic Testing for Deep Neural Networks （ASE'18) <!--more-->
 
 代码地址：https://github.com/TrustAI/DeepConcolic （利普希茨覆盖测试部分用MATLAB写的）
-
-
 
 
 
