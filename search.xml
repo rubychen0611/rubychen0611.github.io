@@ -96,6 +96,91 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>测试标准</tag>
+        <tag>组合测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DLFuzz</title>
+    <url>/2020/08/20/DLFuzz/</url>
+    <content><![CDATA[<p>原文：DLFuzz: Differential Fuzzing Testing of Deep Learning Systems （ESEC/FSE’18）<a id="more"></a></p>
+<p>代码：<a href="https://github.com/turned2670/DLFuzz">https://github.com/turned2670/DLFuzz</a> </p>
+<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
+<li>输入集合（未标注）</li>
+<li>待测试DNN</li>
+<li>$k$：除原预测标签外，top-k个其他标签</li>
+<li>$m$：欲覆盖的神经元个数</li>
+<li><p>strategies：神经元选择策略</p>
+<ul>
+<li><p>策略1：选择过去测试中常被覆盖的神经元</p>
+</li>
+<li><p>策略2：选择过去测试中极少被覆盖到的神经元</p>
+</li>
+<li><p>策略3：选择权重高的神经元</p>
+</li>
+<li>策略4：选择激活阈值附近的神经元</li>
+</ul>
+</li>
+<li>$\lambda$：平衡两个目标（预测类别差异和覆盖新的神经元）的参数</li>
+<li>predict_weight：代码里在上公式中$\sum c_i$前的权重，默认为0.5（未在论文里出现的参数）</li>
+<li>iter_times: 每个种子的迭代次数</li>
+<li>threshold: 神经元激活阈值</li>
+<li>learning_step：步长，代码里设为0.02</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
+<li><p>梯度约束：<font color="red">论文里说可以加保持符号约束或DeepXplore里的约束，但代码似乎没加任何约束，直接在输入上增加梯度*步长</font></p>
+</li>
+<li><p>生成图像距离约束：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</p>
+</li>
+<li><p>约束：一个输入能提升的神经元覆盖率随着时间的增加而下降，对应的保留种子的阈值也随着运行时间的增加而降低<font color="red">（代码里体现为保留种子时最少需要提升的覆盖率随迭代次数增加而降低）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig1.png" alt="fig1" style="zoom: 80%;"></p>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p>MNIST（LeNet-1, LeNet-4, LeNet-5）和ImageNet（VGG-16, VGG-19, ResNet50）</p>
+<font color="red">与DeepXplore相同</font>
+
+<h3 id="默认参数设置"><a href="#默认参数设置" class="headerlink" title="默认参数设置"></a>默认参数设置</h3><ul>
+<li><p>随机选择20个初始输入<font color="red">（类别是否平衡？20是否过少？）</font></p>
+</li>
+<li><p>$k=4,m=10$，strategy为策略1，iter_times=3 </p>
+</li>
+</ul>
+<h3 id="实验1：DLFuzz与DeepXplore比较"><a href="#实验1：DLFuzz与DeepXplore比较" class="headerlink" title="实验1：DLFuzz与DeepXplore比较"></a>实验1：DLFuzz与DeepXplore比较</h3><ul>
+<li><p>实验方法：对相同的20个初始输入，比较DLFuzz相对DeepXplore神经元覆盖率、l2距离、生成对抗样本的个数、每个对抗样本平均生成时间</p>
+</li>
+<li><p>实验结果：</p>
+<ul>
+<li><p>覆盖率提升<font color="red">（DLFuzz的优化目标选择了10个神经元，DeepXplore只选了一个）</font></p>
+</li>
+<li><p>L2距离很小，生成的扰动更隐秘<font color="red">（DeepXplore未对距离做限制，甚至认为L1距离越大多样性越好）</font></p>
+</li>
+<li><p>生成对抗样本数量更多（DeepXplore对每组DNN每张图片最多只生成一个对抗样本，DLFuzz每个模型每张图片可以生成多个对抗样本）</p>
+</li>
+<li><p>更短的时间消耗（除了ResNet50，因为神经元数量大所以选择神经元的耗时长）</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/20/DLFuzz/fig2.png" alt="fig2" style="zoom:67%;"></p>
+<h3 id="实验2：四种神经元选择策略比较"><a href="#实验2：四种神经元选择策略比较" class="headerlink" title="实验2：四种神经元选择策略比较"></a>实验2：四种神经元选择策略比较</h3><ul>
+<li><p>实验方法：比较四种策略和DeepXplore，随着测试图片生成数量增多，神经元覆盖率的增长趋势</p>
+</li>
+<li><p>实验结果：策略1略好<font color="red">（生成数量是否过少？19张神经元覆盖率就趋于平缓）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig3.png" alt="fig3" style="zoom:60%;"></p>
+</li>
+</ul>
+<h3 id="实验3：用生成图片重新训练"><a href="#实验3：用生成图片重新训练" class="headerlink" title="实验3：用生成图片重新训练"></a>实验3：用生成图片重新训练</h3><ul>
+<li>实验方法：用生成的114个对抗样本重新训练MNIST的三个DNN模型，平均提升准确率1.8%<font color="red">（太少？）</font></li>
+</ul>
+]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
       </tags>
   </entry>
   <entry>
@@ -237,6 +322,183 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>Concolic测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DNN测试输入生成论文可控制参数及变量总结</title>
+    <url>/2020/08/20/Variables-Comparison/</url>
+    <content><![CDATA[<a id="more"></a>
+<h2 id="共同参数或变量总结"><a href="#共同参数或变量总结" class="headerlink" title="共同参数或变量总结"></a>共同参数或变量总结</h2><ul>
+<li>初始输入种子集合相关变量<ul>
+<li>数量：1个到几千个不等</li>
+<li>采样方式：均为随机<ul>
+<li>DeepXplore还要求了<strong>类别平衡</strong></li>
+</ul>
+</li>
+<li>是否标注<ul>
+<li>若已标注，是否要求<strong>初始预测结果正确</strong>（DeepCT要求了）</li>
+<li>未标注（DeepXplore要求其使用的多个模型预测一致，DLFuzz）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>测试标准/覆盖率相关变量<ul>
+<li>计算方式<ul>
+<li>DeepTest中修改了卷积层神经元覆盖率的计算方式：输出特征图的平均值与激活阈值做比较</li>
+</ul>
+</li>
+<li>神经元覆盖率采用的激活阈值<ul>
+<li>原算法：将所有输出值缩放到[0,1]，然后设置阈值（<font color="red">离群点等会否导致不同数据集阈值差距很不同</font>）</li>
+<li>DeepXplore中用过多种阈值（0、0.25、0.75等），后人多数用的0，也有0.75等</li>
+</ul>
+</li>
+<li>覆盖神经元集合的选择：<ul>
+<li>多数选择所有层的神经元</li>
+<li>个别选择去掉一些层<ul>
+<li>如DeepXplore测试达到100%覆盖率所用的时间时去掉了全连接层<font color="red">（但覆盖全连接层意义应该更大？）</font></li>
+<li>TensorFuzz要求用户自己选择层</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>图像上增加的扰动相关变量</p>
+<ul>
+<li>扰动生成方式<ul>
+<li>基于梯度优化</li>
+<li>基于覆盖率引导的模糊测试</li>
+<li>基于约束求解</li>
+<li>基于搜索</li>
+</ul>
+</li>
+<li>扰动种类<ul>
+<li>DeepTest说不同种类变换能激活不同神经元（<font color="red">存疑</font>）</li>
+</ul>
+</li>
+<li>扰动位置：<ul>
+<li>DeepXplore中的单个矩形位置由用户提前设定，多个黑色矩形的位置随机</li>
+</ul>
+</li>
+<li>扰动大小：<ul>
+<li>DeepXplore中的矩形大小由用户提前设定（与数据集图像大小有关）</li>
+</ul>
+</li>
+<li>扰动约束条件：<ul>
+<li>$L_0-norm$<ul>
+<li>如DeepCheck（识别重要像素攻击）</li>
+</ul>
+</li>
+<li>$L_1-norm$<ul>
+<li>DeepXplore未对距离做限制，甚至认为$L_1$距离越<strong>大</strong>多样性越好</li>
+</ul>
+</li>
+<li>$L_2-norm$<ul>
+<li>如DLFuzz：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</li>
+</ul>
+</li>
+<li>$L\infty-norm$<ul>
+<li>如TensorFuzz</li>
+</ul>
+</li>
+<li>平衡$L_0$和$L\infty-norm$<ul>
+<li>如DeepHunter采用的</li>
+</ul>
+</li>
+<li>约束MSE（DeepTest)：$|MSE(trans,param)-MSE_{org}|\leq \epsilon$ <font color="red">(用到了oracle)</font></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>模糊测试相关变量（DLFuzz、TensorFuzz、DeepHunter、DeepTest）</p>
+<ul>
+<li>判断种子是否应该保留在队列时最少需提升的覆盖率</li>
+<li>每个种子的迭代次数</li>
+<li>从队列中优先挑选哪些种子的策略<ul>
+<li>随机</li>
+<li>选择新鲜的</li>
+<li>平衡新鲜和多样性</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>优化算法相关变量<ul>
+<li>优化目标选择需要新激活的神经元个数？</li>
+</ul>
+</li>
+<li>其他<ul>
+<li>每个种子生成对抗样本的个数<ul>
+<li>有的方法只生成一张，有的多张</li>
+</ul>
+</li>
+<li>蜕变关系<ul>
+<li>图像分类问题：扰动满足约束的情况下，预测类别应该不变</li>
+<li>回归问题：<ul>
+<li>DeepTest：因为只测试了Driving数据集（回归问题），使用MSE判断蜕变关系是否满足$(\theta_i-\theta_{ti}) \leq \lambda MSE_{orig}$</li>
+<li>DeepRoad：没有使用MSE，直接比较输出结果是否小于阈值$\epsilon$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="测试输入生成类论文总结"><a href="#测试输入生成类论文总结" class="headerlink" title="测试输入生成类论文总结"></a>测试输入生成类论文总结</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">文章名</th>
+<th style="text-align:left">可控制参数/变量总结</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">DeepXplore<br>(SOSP’17)</td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepXplore.png" alt="DeepXplore"></td>
+</tr>
+<tr>
+<td style="text-align:center">TensorFuzz<br>(ICML’19)</td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/TensorFuzz.png" alt="TensorFuzz" style="zoom:80%;"></td>
+</tr>
+<tr>
+<td style="text-align:center">DeepTest<br>(ICSE’18)</td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepTest.png" alt="DeepTest" style="zoom:80%;"></td>
+</tr>
+<tr>
+<td style="text-align:center">DLFuzz<br>(ESEC/FSE’18)</td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DLFuzz.png" alt="DLFuzz" style="zoom: 80%;"></td>
+</tr>
+<tr>
+<td style="text-align:center">DeepHunter<br>（ISSTA’19）</td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepHunter.png" alt="DeepHunter" style="zoom:80%;"></td>
+</tr>
+<tr>
+<td style="text-align:center">DeepConcolic<br>（ASE’18）</td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepConcolic.png" alt="DeepConcolic" style="zoom: 80%;"></td>
+</tr>
+<tr>
+<td style="text-align:center">DeepCT<br>(SANER’19)<br><font color="red">(未找到代码)</font></td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepCT.png" alt="DeepCT" style="zoom: 80%;"></td>
+</tr>
+<tr>
+<td style="text-align:center">DeepCheck<br>（ISSRE’18）<br><font color="red">(未找到代码)</font></td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/MyBlog\source\_posts\Variables-Comparison\DeepCheck.png" alt="DeepCheck" style="zoom: 80%;"></td>
+</tr>
+<tr>
+<td style="text-align:center">DeepRoad<br>（ASE’18）<br><font color="red">(未找到代码)</font></td>
+<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepRoad.png" alt="DeepRoad" style="zoom:80%;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+]]></content>
+      <categories>
+        <category>科研笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
       </tags>
   </entry>
   <entry>
@@ -348,6 +610,9 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>测试标准</tag>
+        <tag>差分测试</tag>
       </tags>
   </entry>
 </search>
