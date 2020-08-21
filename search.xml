@@ -563,45 +563,45 @@
 <thead>
 <tr>
 <th style="text-align:center">文章名</th>
-<th style="text-align:left">可控制参数/变量总结</th>
+<th>可控制参数/变量总结</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:center">DeepXplore<br>(SOSP’17)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepXplore.png" alt="DeepXplore"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DeepXplore.png" alt="DeepXplore"></td>
 </tr>
 <tr>
 <td style="text-align:center">TensorFuzz<br>(ICML’19)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/TensorFuzz.png" alt="TensorFuzz" style="zoom:80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/TensorFuzz.png" alt="TensorFuzz" style="zoom:80%;"></td>
 </tr>
 <tr>
 <td style="text-align:center">DeepTest<br>(ICSE’18)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepTest.png" alt="DeepTest" style="zoom:80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DeepTest.png" alt="DeepTest" style="zoom:80%;"></td>
 </tr>
 <tr>
 <td style="text-align:center">DLFuzz<br>(ESEC/FSE’18)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DLFuzz.png" alt="DLFuzz" style="zoom: 80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DLFuzz.png" alt="DLFuzz" style="zoom: 80%;"></td>
 </tr>
 <tr>
 <td style="text-align:center">DeepHunter<br>（ISSTA’19）</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepHunter.png" alt="DeepHunter" style="zoom:80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DeepHunter.png" alt="DeepHunter" style="zoom:80%;"></td>
 </tr>
 <tr>
 <td style="text-align:center">DeepConcolic<br>（ASE’18）</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepConcolic.png" alt="DeepConcolic" style="zoom: 80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DeepConcolic.png" alt="DeepConcolic" style="zoom: 80%;"></td>
 </tr>
 <tr>
 <td style="text-align:center">DeepCT<br>(SANER’19)<br><font color="red">(未找到代码)</font></td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepCT.png" alt="DeepCT" style="zoom: 80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DeepCT.png" alt="DeepCT" style="zoom: 80%;"></td>
 </tr>
 <tr>
 <td style="text-align:center">DeepCheck<br>（ISSRE’18）<br><font color="red">(未找到代码)</font></td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/MyBlog\source\_posts\Variables-Comparison\DeepCheck.png" alt="DeepCheck" style="zoom: 80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DeepCheck.png" alt="DeepCheck" style="zoom: 80%;"></td>
 </tr>
 <tr>
 <td style="text-align:center">DeepRoad<br>（ASE’18）<br><font color="red">(未找到代码)</font></td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepRoad.png" alt="DeepRoad" style="zoom:80%;"></td>
+<td><img src="/2020/08/20/Variables-Comparison/DeepRoad.png" alt="DeepRoad" style="zoom:80%;"></td>
 </tr>
 </tbody>
 </table>
