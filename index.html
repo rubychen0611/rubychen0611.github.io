@@ -227,7 +227,21 @@
                 </span>
             </span>
 
-          
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
 
         </div>
       </header>
@@ -290,7 +304,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-08-20 15:39:31 / 修改时间：20:52:34" itemprop="dateCreated datePublished" datetime="2020-08-20T15:39:31+08:00">2020-08-20</time>
+              <time title="创建时间：2020-08-20 15:39:31 / 修改时间：20:53:29" itemprop="dateCreated datePublished" datetime="2020-08-20T15:39:31+08:00">2020-08-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -302,7 +316,21 @@
                 </span>
             </span>
 
-          
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
 
         </div>
       </header>
@@ -313,171 +341,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <a id="more"></a>
-<h2 id="共同参数或变量总结"><a href="#共同参数或变量总结" class="headerlink" title="共同参数或变量总结"></a>共同参数或变量总结</h2><ul>
-<li>初始输入种子集合相关变量<ul>
-<li>数量：1个到几千个不等</li>
-<li>采样方式：均为随机<ul>
-<li>DeepXplore还要求了<strong>类别平衡</strong></li>
-</ul>
-</li>
-<li>是否标注<ul>
-<li>若已标注，是否要求<strong>初始预测结果正确</strong>（DeepCT要求了）</li>
-<li>未标注（DeepXplore要求其使用的多个模型预测一致，DLFuzz）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>测试标准/覆盖率相关变量<ul>
-<li>计算方式<ul>
-<li>DeepTest中修改了卷积层神经元覆盖率的计算方式：输出特征图的平均值与激活阈值做比较</li>
-</ul>
-</li>
-<li>神经元覆盖率采用的激活阈值<ul>
-<li>原算法：将所有输出值缩放到[0,1]，然后设置阈值（<font color="red">离群点等会否导致不同数据集阈值差距很不同</font>）</li>
-<li>DeepXplore中用过多种阈值（0、0.25、0.75等），后人多数用的0，也有0.75等</li>
-</ul>
-</li>
-<li>覆盖神经元集合的选择：<ul>
-<li>多数选择所有层的神经元</li>
-<li>个别选择去掉一些层<ul>
-<li>如DeepXplore测试达到100%覆盖率所用的时间时去掉了全连接层<font color="red">（但覆盖全连接层意义应该更大？）</font></li>
-<li>TensorFuzz要求用户自己选择层</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>图像上增加的扰动相关变量</p>
-<ul>
-<li>扰动生成方式<ul>
-<li>基于梯度优化</li>
-<li>基于覆盖率引导的模糊测试</li>
-<li>基于约束求解</li>
-<li>基于搜索</li>
-</ul>
-</li>
-<li>扰动种类<ul>
-<li>DeepTest说不同种类变换能激活不同神经元（<font color="red">存疑</font>）</li>
-</ul>
-</li>
-<li>扰动位置：<ul>
-<li>DeepXplore中的单个矩形位置由用户提前设定，多个黑色矩形的位置随机</li>
-</ul>
-</li>
-<li>扰动大小：<ul>
-<li>DeepXplore中的矩形大小由用户提前设定（与数据集图像大小有关）</li>
-</ul>
-</li>
-<li>扰动约束条件：<ul>
-<li>$L_0-norm$<ul>
-<li>如DeepCheck（识别重要像素攻击）</li>
-</ul>
-</li>
-<li>$L_1-norm$<ul>
-<li>DeepXplore未对距离做限制，甚至认为$L_1$距离越<strong>大</strong>多样性越好</li>
-</ul>
-</li>
-<li>$L_2-norm$<ul>
-<li>如DLFuzz：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</li>
-</ul>
-</li>
-<li>$L\infty-norm$<ul>
-<li>如TensorFuzz</li>
-</ul>
-</li>
-<li>平衡$L_0$和$L\infty-norm$<ul>
-<li>如DeepHunter采用的</li>
-</ul>
-</li>
-<li>约束MSE（DeepTest)：$|MSE(trans,param)-MSE_{org}|\leq \epsilon$ <font color="red">(用到了oracle)</font></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>模糊测试相关变量（DLFuzz、TensorFuzz、DeepHunter、DeepTest）</p>
-<ul>
-<li>判断种子是否应该保留在队列时最少需提升的覆盖率</li>
-<li>每个种子的迭代次数</li>
-<li>从队列中优先挑选哪些种子的策略<ul>
-<li>随机</li>
-<li>选择新鲜的</li>
-<li>平衡新鲜和多样性</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>优化算法相关变量<ul>
-<li>优化目标选择需要新激活的神经元个数？</li>
-</ul>
-</li>
-<li>其他<ul>
-<li>每个种子生成对抗样本的个数<ul>
-<li>有的方法只生成一张，有的多张</li>
-</ul>
-</li>
-<li>蜕变关系<ul>
-<li>图像分类问题：扰动满足约束的情况下，预测类别应该不变</li>
-<li>回归问题：<ul>
-<li>DeepTest：因为只测试了Driving数据集（回归问题），使用MSE判断蜕变关系是否满足$(\theta_i-\theta_{ti}) \leq \lambda MSE_{orig}$</li>
-<li>DeepRoad：没有使用MSE，直接比较输出结果是否小于阈值$\epsilon$</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="测试输入生成类论文总结"><a href="#测试输入生成类论文总结" class="headerlink" title="测试输入生成类论文总结"></a>测试输入生成类论文总结</h2><div class="table-container">
-<table>
-<thead>
-<tr>
-<th style="text-align:center">文章名</th>
-<th style="text-align:left">可控制参数/变量总结</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">DeepXplore<br>(SOSP’17)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepXplore.png" alt="DeepXplore"></td>
-</tr>
-<tr>
-<td style="text-align:center">TensorFuzz<br>(ICML’19)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/TensorFuzz.png" alt="TensorFuzz" style="zoom:80%;"></td>
-</tr>
-<tr>
-<td style="text-align:center">DeepTest<br>(ICSE’18)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepTest.png" alt="DeepTest" style="zoom:80%;"></td>
-</tr>
-<tr>
-<td style="text-align:center">DLFuzz<br>(ESEC/FSE’18)</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DLFuzz.png" alt="DLFuzz" style="zoom: 80%;"></td>
-</tr>
-<tr>
-<td style="text-align:center">DeepHunter<br>（ISSTA’19）</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepHunter.png" alt="DeepHunter" style="zoom:80%;"></td>
-</tr>
-<tr>
-<td style="text-align:center">DeepConcolic<br>（ASE’18）</td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepConcolic.png" alt="DeepConcolic" style="zoom: 80%;"></td>
-</tr>
-<tr>
-<td style="text-align:center">DeepCT<br>(SANER’19)<br><font color="red">(未找到代码)</font></td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepCT.png" alt="DeepCT" style="zoom: 80%;"></td>
-</tr>
-<tr>
-<td style="text-align:center">DeepCheck<br>（ISSRE’18）<br><font color="red">(未找到代码)</font></td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/MyBlog\source\_posts\Variables-Comparison\DeepCheck.png" alt="DeepCheck" style="zoom: 80%;"></td>
-</tr>
-<tr>
-<td style="text-align:center">DeepRoad<br>（ASE’18）<br><font color="red">(未找到代码)</font></td>
-<td style="text-align:left"><img src="/2020/08/20/Variables-Comparison/DeepRoad.png" alt="DeepRoad" style="zoom:80%;"></td>
-</tr>
-</tbody>
-</table>
-</div>
-
+          <h2 id="共同参数或变量总结"><a href="#共同参数或变量总结" class="headerlink" title="共同参数或变量总结"></a>共同参数或变量总结</h2>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/20/Variables-Comparison/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -533,7 +405,21 @@
                 </span>
             </span>
 
-          
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
 
         </div>
       </header>
@@ -614,7 +500,21 @@
                 </span>
             </span>
 
-          
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
 
         </div>
       </header>
@@ -695,7 +595,21 @@
                 </span>
             </span>
 
-          
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
 
         </div>
       </header>
@@ -853,11 +767,41 @@
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Ruby Chen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">10k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">9 分钟</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
-  </div>
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
 
 
 
