@@ -327,15 +327,9 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>【论文笔记】DeepTest</title>
     <url>/2020/08/20/DeepTest/</url>
-    <content><![CDATA[<p>title: 【论文笔记】DeepTest<br>date: 2020-08-20 16:56:17<br>tags:</p>
-<ul>
-<li>DNN测试</li>
-<li>测试输入生成</li>
-<li>模糊测试<br>categories: 论文笔记<br>mathjax: true</li>
-</ul>
-<p>原文：DeepTest: Automated Testing of Deep-Neural-Network-driven Autonomous Cars  (ICSE’18)  <a id="more"></a></p>
+    <content><![CDATA[<p>原文：DeepTest: Automated Testing of Deep-Neural-Network-driven Autonomous Cars  (ICSE’18)  <a id="more"></a></p>
 <p>代码地址：<a href="https://github.com/ARiSE-Lab/deepTest">https://github.com/ARiSE-Lab/deepTest</a></p>
 <h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
 <li><p>神经元覆盖率计算方式：卷积层与DeepXplore有所不同，<font color="red">输出特征图的平均值与激活阈值做比较</font></p>
@@ -474,6 +468,14 @@
 </li>
 </ul>
 ]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
+      </tags>
   </entry>
   <entry>
     <title>【论文笔记】DeepXplore</title>
