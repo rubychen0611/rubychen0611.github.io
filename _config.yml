@@ -4,7 +4,7 @@
 
 # Site
 title: Ruby's Blog
-subtitle: ''
+subtitle: '十年水流东，十年水流西'
 description: '自爱兼爱，善感而不多愁。'
 keywords:
 author: Ruby Chen
@@ -111,3 +111,21 @@ deploy:
   repository: https://github.com/rubychen0611/rubychen0611.github.io.git
   branch: master
 ## Docs: https://hexo.io/docs/one-command-deployment
+
+symbols_count_time:
+  symbols: true # 文章字数
+  time: true # 阅读时长
+  total_symbols: true # 所有文章总字数
+  total_time: true # 所有文章阅读中时长
+
+live2d:
+  enable: true
+  scriptFrom: local
+  model:
+    use: live2d-widget-model-hijiki
+  display:
+    position: right
+    width: 175
+    height: 325
+  mobile:
+    show: true

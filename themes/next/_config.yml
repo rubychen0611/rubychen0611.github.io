@@ -67,8 +67,7 @@ footer:
   copyright:
 
   # Powered by Hexo & NexT
-  powered: true
-
+  powered: false
   # Beian ICP and gongan information for Chinese users. See: http://www.beian.miit.gov.cn, http://www.beian.gov.cn
   beian:
     enable: false
@@ -79,7 +78,8 @@ footer:
     gongan_num:
     # The icon for gongan beian. See: http://www.beian.gov.cn/portal/download
     gongan_icon_url:
-
+  
+  counter: true
 # Creative Commons 4.0 International License.
 # See: https://creativecommons.org/share-your-work/licensing-types-examples
 # Available values of license: by | by-nc | by-nc-nd | by-nc-sa | by-nd | by-sa | zero
@@ -121,6 +121,8 @@ menu:
   tags: /tags/ || fa fa-tags
   categories: /categories/ || fa fa-th
   archives: /archives/ || fa fa-archive
+  links: /links/ || fa fa-link
+  guestbook: /guestbook/ || fa fa-comment
   # schedule: /schedule/ || fa fa-calendar
   # sitemap: /sitemap.xml || fa fa-sitemap
   # commonweal: /404/ || fa fa-heartbeat
@@ -249,6 +251,7 @@ post_meta:
 
 # Post wordcount display settings
 # Dependencies: https://github.com/theme-next/hexo-symbols-count-time
+  
 symbols_count_time:
   separated_meta: true
   item_text_post: true
@@ -372,7 +375,7 @@ back2top:
 
 # Reading progress bar
 reading_progress:
-  enable: false
+  enable: true
   # Available values: top | bottom
   position: top
   color: "#37c6c0"
@@ -408,7 +411,7 @@ github_banner:
 # ---------------------------------------------------------------
 
 font:
-  enable: false
+  enable: true
 
   # Uri of fonts host, e.g. https://fonts.googleapis.com (Default).
   host:
@@ -422,7 +425,7 @@ font:
   global:
     external: true
     family: Lato
-    size:
+    size: 0.9
 
   # Font settings for site title (.site-title).
   title:
@@ -610,16 +613,16 @@ changyan:
 # Valine
 # For more information: https://valine.js.org, https://github.com/xCss/Valine
 valine:
-  enable: false
-  appid: # Your leancloud application appid
-  appkey: # Your leancloud application appkey
+  enable: true
+  appid: LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz # Your leancloud application appid
+  appkey: gosR0ey4a9G3xmN5tvWEcrBS # Your leancloud application appkey
   notify: false # Mail notifier
   verify: false # Verification code
-  placeholder: Just go go # Comment box placeholder
+  placeholder: 留下你的评论吧 # Comment box placeholder
   avatar: mm # Gravatar style
   guest_info: nick,mail,link # Custom comment header
   pageSize: 10 # Pagination size
-  language: # Language, available values: en, zh-cn
+  language: zh-cn # Language, available values: en, zh-cn
   visitor: false # Article reading statistic
   comment_count: true # If false, comment count will only be displayed in post page, not in home page
   recordIP: false # Whether to record the commenter IP
@@ -711,7 +714,7 @@ firestore:
 # Show Views / Visitors of the website / page with busuanzi.
 # Get more information on http://ibruce.info/2015/04/04/busuanzi
 busuanzi_count:
-  enable: false
+  enable: true
   total_visitors: true
   total_visitors_icon: fa fa-user
   total_views: true
@@ -824,7 +827,7 @@ mermaid:
 # For more information: http://velocityjs.org
 motion:
   enable: true
-  async: false
+  async: true
   transition:
     # Transition variants:
     # fadeIn | flipXIn | flipYIn | flipBounceXIn | flipBounceYIn
@@ -995,3 +998,26 @@ vendors:
 css: css
 js: js
 images: images
+
+canvas_nest:
+  #enable: false
+  enable: true
+  onmobile: true # Display on mobile or not
+  color: "255,0,0" # RGB values, use `,` to separate
+  opacity: 0.5 # The opacity of line: 0~1
+  zIndex: -1 # z-index property of the background
+  count: 99 # The number of lines
+  
+mylinks:
+- nickname: Mirror  #友链名称
+  site: https://mirror58229.github.io/  #友链地址
+  info: Stay Moved.  #友链说明
+  avatar: https://mirror58229.github.io/images/avatar.jpg  #友链头像
+
+# hexo-tag-cloud
+tag_cloud:
+  textFont: Trebuchet MS, Helvetica
+  textColor: '#CE646F'
+  textHeight: 15
+  outlineColor: '#FFEBEE'
+  maxSpeed: 0.1

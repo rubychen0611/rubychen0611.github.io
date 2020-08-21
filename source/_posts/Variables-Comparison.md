@@ -75,7 +75,7 @@ mathjax: true
 ## 测试输入生成类论文总结
 
 |                            文章名                            | 可控制参数/变量总结                                          |
-| :----------------------------------------------------------: | :----------------------------------------------------------- |
+| :----------------------------------------------------------: | ------------------------------------------------------------ |
 |                   DeepXplore<br/>(SOSP’17)                   | ![DeepXplore](Variables-Comparison/DeepXplore.png)           |
 |                   TensorFuzz<br/>(ICML’19)                   | <img src="Variables-Comparison/TensorFuzz.png" alt="TensorFuzz" style="zoom:80%;" /> |
 |                    DeepTest<br/>(ICSE'18)                    | <img src="Variables-Comparison/DeepTest.png" alt="DeepTest" style="zoom:80%;" /> |
@@ -83,7 +83,7 @@ mathjax: true
 |                 DeepHunter<br/>（ISSTA’19）                  | <img src="Variables-Comparison/DeepHunter.png" alt="DeepHunter" style="zoom:80%;" /> |
 |                 DeepConcolic<br/>（ASE’18）                  | <img src="Variables-Comparison/DeepConcolic.png" alt="DeepConcolic" style="zoom: 80%;" /> |
 | DeepCT<br/>(SANER’19)<br/><font color='red'>(未找到代码)</font> | <img src="Variables-Comparison/DeepCT.png" alt="DeepCT" style="zoom: 80%;" /> |
-| DeepCheck<br/>（ISSRE’18）<br/><font color='red'>(未找到代码)</font> | <img src="E:\MyBlog\source\_posts\Variables-Comparison\DeepCheck.png" alt="DeepCheck" style="zoom: 80%;" /> |
+| DeepCheck<br/>（ISSRE’18）<br/><font color='red'>(未找到代码)</font> | <img src="Variables-Comparison/DeepCheck.png" alt="DeepCheck" style="zoom: 80%;" /> |
 | DeepRoad<br/>（ASE’18）<br/><font color='red'>(未找到代码)</font> | <img src="Variables-Comparison/DeepRoad.png" alt="DeepRoad" style="zoom:80%;" /> |
 
 
