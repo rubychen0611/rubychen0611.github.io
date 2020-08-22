@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ruby.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rubychen0611.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】DeepXplore">
+<meta property="og:url" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/index.html">
+<meta property="og:site_name" content="Ruby&#39;s Blog">
+<meta property="og:description" content="原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/算法.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/dataset.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/para.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex1-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex1-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex1-3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex2-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex2-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex2-3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex2-4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex2-5.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/ex3-1.png">
+<meta property="article:published_time" content="2020-08-19T13:59:46.000Z">
+<meta property="article:modified_time" content="2020-08-20T05:49:39.456Z">
+<meta property="article:author" content="Ruby Chen">
+<meta property="article:tag" content="DNN测试">
+<meta property="article:tag" content="测试输入生成">
+<meta property="article:tag" content="测试标准">
+<meta property="article:tag" content="差分测试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://rubychen0611.github.io/2020/08/19/DeepXplore/1.png">
+
+<link rel="canonical" href="https://rubychen0611.github.io/2020/08/19/DeepXplore/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【论文笔记】DeepXplore | Ruby's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Ruby's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">十年水流东，十年水流西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-link fa-fw"></i>友情链接</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-comment fa-fw"></i>留言板</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/08/19/DeepXplore/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.jpg">
+      <meta itemprop="name" content="Ruby Chen">
+      <meta itemprop="description" content="自爱兼爱，善感而不多愁。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ruby's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【论文笔记】DeepXplore
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-19 21:59:46" itemprop="dateCreated datePublished" datetime="2020-08-19T21:59:46+08:00">2020-08-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-08-20 13:49:39" itemprop="dateModified" datetime="2020-08-20T13:49:39+08:00">2020-08-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">论文笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论数：</span>
+    
+    <a title="valine" href="/2020/08/19/DeepXplore/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/19/DeepXplore/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
+<p>代码地址：<a target="_blank" rel="noopener" href="https://github.com/peikexin9/deepxplore">https://github.com/peikexin9/deepxplore</a></p>
+<h2 id="可控制参数或变量"><a href="#可控制参数或变量" class="headerlink" title="可控制参数或变量"></a>可控制参数或变量</h2><ul>
+<li><p>种子输入集合数量 (类别均衡，随机选择，<u>约束：所有DNN模型必须对每个种子的初始预测结果相同</u>)</p>
+</li>
+<li><p>多个DNN</p>
+</li>
+<li><p>$\lambda_1$：平衡其他DNN和被选中DNN预测的差别（$\lambda_1$越大，选中DNN预测为原类别c的概率越低，$\lambda_1$越小，越能维持其他DNN的预测结果）</p>
+<p><img src="/2020/08/19/DeepXplore/1.png" alt="公式1"></p>
+</li>
+<li><p>$\lambda_2$：平衡两个优化目标大小（即预测差异和神经元覆盖率，$\lambda_2$越大，越关注覆盖更多神经元，否则更关注生成预测差异图片）</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/2.png" alt="公式2"></p>
+<ul>
+<li>$s$: 梯度下降步长（$s$过大可能会导致极小值附近震荡，$s$过小导致迭代次数多）</li>
+<li>$t$: 神经元覆盖率阈值（$t$越大，达到覆盖率目标越难）</li>
+<li>$p$: 覆盖率目标</li>
+<li>梯度下降迭代最大次数（代码里）</li>
+<li><font color="red">在每次迭代的梯度$G$上施加的真实领域约束:</font><ul>
+<li>（1）不同亮度模拟光照：$G$被$mean(G)$ 取代</li>
+<li>（2）单个矩形($m*n$大小)模拟意外或故意遮挡：<ul>
+<li>选择矩形左上顶点所在的位置$(i,j)$，将$G_{i:i+m,j:j+n}$施加于原图相应位置。</li>
+<li><font color="red">$m$、$n$的大小和$(i,j)$为自定义的参数，迭代多次都在相同位置</font></li>
+</ul>
+</li>
+<li>（3） 多个随机黑色小矩形模拟镜头污垢<ul>
+<li>位置随机的若干个$m*m$大小的黑色矩形<font color="red">（每次迭代位置不同，$m$值自定义，与数据集图片大小有关）</font></li>
+<li>如果$mean(G_{i:i+m,j:j+m})$，则图片不动，否则变黑（即只允许降低像素值）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><img src="/2020/08/19/DeepXplore/算法.png" alt="算法" style="zoom:80%;"></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/19/DeepXplore/dataset.png" alt="dataset"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>种子输入集合：随机从测试集选择2000个输入（保持<font color="red">类别平衡</font>，满足所有DNN预测结果相同的约束）</li>
+<li>参数$\lambda_1,\lambda_2,s,t$</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/para.png" alt="para" style="zoom:67%;"></p>
+<h3 id="实验1：神经元覆盖率的优势"><a href="#实验1：神经元覆盖率的优势" class="headerlink" title="实验1：神经元覆盖率的优势"></a>实验1：神经元覆盖率的优势</h3><h4 id="实验1-1：神经元覆盖率与代码覆盖率比较"><a href="#实验1-1：神经元覆盖率与代码覆盖率比较" class="headerlink" title="实验1-1：神经元覆盖率与代码覆盖率比较"></a>实验1-1：神经元覆盖率与代码覆盖率比较</h4><ul>
+<li><p>实验方法：随机选择10个测试输入，测量代码覆盖率和神经元覆盖率大小</p>
+</li>
+<li><p>参数设置：设置$t=0.75$（神经元激活阈值，<font color="red">按比例缩放至[0,1]区间，不同DNN阈值区别很大？）前面都设的0，故意设大t凸显结果差异）</font></p>
+</li>
+<li><p>实验结果：少量测试输入即可达到100%代码覆盖率，但神经元覆盖率最多只有34%：</p>
+<p><img src="/2020/08/19/DeepXplore/ex1-1.png" alt="ex1-1" style="zoom:80%;"></p>
+</li>
+</ul>
+<h4 id="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"><a href="#实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用" class="headerlink" title="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"></a>实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</h4><ul>
+<li>实验方法：从MNIST测试集随机选择2000种子输入，分别设置$\lambda_2$为1和0（$\lambda_2=0$时优化目标里不考虑覆盖新的神经元）。测量生成预测差异样本（difference-inducing inputs）的多样性<strong>（平均$L_1$距离：改变前后像素值之差的和，<font color="red">是否适合作为衡量多样性的指标？</font>）</strong></li>
+<li>参数设置：$t=0.25$</li>
+<li>实验结果：神经元覆盖率帮助提升了生成样本的多样性<font color="red">（①神经元覆盖率NC提升并不明显？作者的解释是NC很高的情况下，NC的一点点提升就能带来多样性的大幅提升。②生成数量#Diffs减少了：作者的解释是设置$\lambda_2=1$后更倾向于生成不同输入而不是提高输入数量，作者认为生成数量并不是一个好的衡量生成样本的方式）</font></li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-2.png" alt="ex1-2" style="zoom:75%;"></p>
+<h4 id="实验1-3：不同类别输入对激活神经元的影响"><a href="#实验1-3：不同类别输入对激活神经元的影响" class="headerlink" title="实验1-3：不同类别输入对激活神经元的影响"></a>实验1-3：不同<strong><em>类别</em></strong>输入对激活神经元的影响</h4><ul>
+<li>实验方法：MNIST数据集的LeNet-5模型，运行100对相同类别（如类别8）图片，和100对不同类别（如类别8和类别4）图片，测量平均激活神经元个数和共同激活神经元的个数（overlap）。</li>
+<li>实验结果：相同类别共同激活的平均神经元个数$&gt;$不同类别。神经元覆盖率可以有效地估计DNN测试中激活的不同规则的数量。</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-3.png" alt="ex1-3" style="zoom:80%;"></p>
+<h3 id="实验2：DeepXplore的效果"><a href="#实验2：DeepXplore的效果" class="headerlink" title="实验2：DeepXplore的效果"></a>实验2：DeepXplore的效果</h3><h4 id="实验2-1：DeepXplore在神经元覆盖率上的表现"><a href="#实验2-1：DeepXplore在神经元覆盖率上的表现" class="headerlink" title="实验2-1：DeepXplore在神经元覆盖率上的表现"></a>实验2-1：DeepXplore在神经元覆盖率上的表现</h4><ul>
+<li><p>实验方法：使用三种方法（DeepXplore、对抗样本FGSM、原测试集随机选择）生成相同数量（测试集的1%）的输入，比较神经元覆盖率</p>
+</li>
+<li><p>实验结果：DeepXplore能达到更高的覆盖率，且随着$t$的提升，覆盖率逐渐降低。</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-1.png" alt="ex2-1"></p>
+<h4 id="实验2-2：运行时间"><a href="#实验2-2：运行时间" class="headerlink" title="实验2-2：运行时间"></a>实验2-2：运行时间</h4><ul>
+<li><p>实验方法：不同数据集和模型生成100%覆盖率输入所需时间及相应的生成数量。<font color="red">所有图像分类模型不考虑全连接层的覆盖（作者解释因为全连接层有的神经元非常难覆盖到，但全连接层的覆盖情况应该意义更大？）</font></p>
+</li>
+<li><p>实验结果：DeepXplore生成高覆盖率的输入效率非常高。</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-2.png" alt="ex2-2" style="zoom: 67%;"></p>
+<h4 id="实验2-3：不同参数设置的影响"><a href="#实验2-3：不同参数设置的影响" class="headerlink" title="实验2-3：不同参数设置的影响"></a>实验2-3：不同参数设置的影响</h4><ul>
+<li>实验方法：改变参数$s$、$\lambda_1$、$\lambda_2$，比较<font color="red">找到第一个导致预测差异的输入平均运行时间（这个指标是否足够适合评价参数？）</font></li>
+<li>实验结果</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-3.png" alt="ex2-3" style="zoom:67%;"></p>
+<p><img src="/2020/08/19/DeepXplore/ex2-4.png" alt="ex2-4" style="zoom:60%;"></p>
+<h4 id="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"><a href="#实验2-4：当多个DNN决策边界相似时DeepXplore的效果" class="headerlink" title="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"></a>实验2-4：当多个DNN决策边界相似时DeepXplore的效果</h4><ul>
+<li>实验方法：<ul>
+<li>对照组：MNIST训练集（60000个样本）和LeNet-1模型，10个epoch</li>
+<li>实验组：改变①训练集样本个数，②DNN卷积层模型filter个数，③训练epoch数</li>
+<li>设置初始种子数为100，对比发现生成第一个使得实验组DNN和对照组DNN预测差异样本的平均迭代次数</li>
+</ul>
+</li>
+<li>实验结果：DeepXplore从非常相似的DNN中也能发现错误样本（除了第一行diff为1时），越相似，迭代轮数越多。</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-5.png" alt="ex2-5" style="zoom:67%;"></p>
+<h3 id="实验3：使用DeepXplore提升DNN"><a href="#实验3：使用DeepXplore提升DNN" class="headerlink" title="实验3：使用DeepXplore提升DNN"></a>实验3：使用DeepXplore提升DNN</h3><h4 id="实验3-1：使用生成样本扩大训练集，重新训练DNN"><a href="#实验3-1：使用生成样本扩大训练集，重新训练DNN" class="headerlink" title="实验3-1：使用生成样本扩大训练集，重新训练DNN"></a>实验3-1：使用生成样本扩大训练集，重新训练DNN</h4><ul>
+<li>与对抗样本训练不同的是：不需标注（采取投票形式）</li>
+<li>实验方法：重新训练MNIST数据集的三个模型5个epoch，增加100张DeepXplore生成的错误图片，与对抗样本和随机从测试集选择样本比较准确率。<font color="red">（测试样本是什么？多个DNN从何而来？）</font></li>
+<li>实验结果：DeepXplore平均提升准确率1%-3%</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex3-1.png" alt="ex3-1" style="zoom:85%;"></p>
+<h4 id="实验3-2：检测被污染的训练样本"><a href="#实验3-2：检测被污染的训练样本" class="headerlink" title="实验3-2：检测被污染的训练样本"></a>实验3-2：检测被污染的训练样本</h4><ul>
+<li>实验过程：用两个MNIST LeNet-5模型，一个正常训练，另一个类别9的样本中30%被故意标记成了类别1。使用DeepXplore生成被错误预测成9或1的样本，在训练集中找和错误样本结构相似的样本。能识别出95.6%的污染样本。<font color="red">（写得很简略）</font></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag"># DNN测试</a>
+              <a href="/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/" rel="tag"># 测试输入生成</a>
+              <a href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag"># 测试标准</a>
+              <a href="/tags/%E5%B7%AE%E5%88%86%E6%B5%8B%E8%AF%95/" rel="tag"># 差分测试</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/19/DeepConcolic/" rel="prev" title="【论文笔记】DeepConcolic">
+      <i class="fa fa-chevron-left"></i> 【论文笔记】DeepConcolic
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/20/DeepCT/" rel="next" title="【论文笔记】DeepCT">
+      【论文笔记】DeepCT <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%8E%A7%E5%88%B6%E5%8F%82%E6%95%B0%E6%88%96%E5%8F%98%E9%87%8F"><span class="nav-number">1.</span> <span class="nav-text">可控制参数或变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">3.</span> <span class="nav-text">实验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E5%92%8C%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">数据集和模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">参数设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C1%EF%BC%9A%E7%A5%9E%E7%BB%8F%E5%85%83%E8%A6%86%E7%9B%96%E7%8E%87%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">3.3.</span> <span class="nav-text">实验1：神经元覆盖率的优势</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C1-1%EF%BC%9A%E7%A5%9E%E7%BB%8F%E5%85%83%E8%A6%86%E7%9B%96%E7%8E%87%E4%B8%8E%E4%BB%A3%E7%A0%81%E8%A6%86%E7%9B%96%E7%8E%87%E6%AF%94%E8%BE%83"><span class="nav-number">3.3.1.</span> <span class="nav-text">实验1-1：神经元覆盖率与代码覆盖率比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C1-2%EF%BC%9A%E7%A5%9E%E7%BB%8F%E5%85%83%E8%A6%86%E7%9B%96%E7%8E%87%E5%AF%B9DeepXplore%E7%94%9F%E6%88%90%E8%83%BD%E5%AF%BC%E8%87%B4%E9%A2%84%E6%B5%8B%E5%B7%AE%E5%BC%82%E6%A0%B7%E6%9C%AC%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">3.3.2.</span> <span class="nav-text">实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C1-3%EF%BC%9A%E4%B8%8D%E5%90%8C%E7%B1%BB%E5%88%AB%E8%BE%93%E5%85%A5%E5%AF%B9%E6%BF%80%E6%B4%BB%E7%A5%9E%E7%BB%8F%E5%85%83%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">3.3.3.</span> <span class="nav-text">实验1-3：不同类别输入对激活神经元的影响</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C2%EF%BC%9ADeepXplore%E7%9A%84%E6%95%88%E6%9E%9C"><span class="nav-number">3.4.</span> <span class="nav-text">实验2：DeepXplore的效果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C2-1%EF%BC%9ADeepXplore%E5%9C%A8%E7%A5%9E%E7%BB%8F%E5%85%83%E8%A6%86%E7%9B%96%E7%8E%87%E4%B8%8A%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="nav-number">3.4.1.</span> <span class="nav-text">实验2-1：DeepXplore在神经元覆盖率上的表现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C2-2%EF%BC%9A%E8%BF%90%E8%A1%8C%E6%97%B6%E9%97%B4"><span class="nav-number">3.4.2.</span> <span class="nav-text">实验2-2：运行时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C2-3%EF%BC%9A%E4%B8%8D%E5%90%8C%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">3.4.3.</span> <span class="nav-text">实验2-3：不同参数设置的影响</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C2-4%EF%BC%9A%E5%BD%93%E5%A4%9A%E4%B8%AADNN%E5%86%B3%E7%AD%96%E8%BE%B9%E7%95%8C%E7%9B%B8%E4%BC%BC%E6%97%B6DeepXplore%E7%9A%84%E6%95%88%E6%9E%9C"><span class="nav-number">3.4.4.</span> <span class="nav-text">实验2-4：当多个DNN决策边界相似时DeepXplore的效果</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C3%EF%BC%9A%E4%BD%BF%E7%94%A8DeepXplore%E6%8F%90%E5%8D%87DNN"><span class="nav-number">3.5.</span> <span class="nav-text">实验3：使用DeepXplore提升DNN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C3-1%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%94%9F%E6%88%90%E6%A0%B7%E6%9C%AC%E6%89%A9%E5%A4%A7%E8%AE%AD%E7%BB%83%E9%9B%86%EF%BC%8C%E9%87%8D%E6%96%B0%E8%AE%AD%E7%BB%83DNN"><span class="nav-number">3.5.1.</span> <span class="nav-text">实验3-1：使用生成样本扩大训练集，重新训练DNN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C3-2%EF%BC%9A%E6%A3%80%E6%B5%8B%E8%A2%AB%E6%B1%A1%E6%9F%93%E7%9A%84%E8%AE%AD%E7%BB%83%E6%A0%B7%E6%9C%AC"><span class="nav-number">3.5.2.</span> <span class="nav-text">实验3-2：检测被污染的训练样本</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Ruby Chen"
+      src="/images/head.jpg">
+  <p class="site-author-name" itemprop="name">Ruby Chen</p>
+  <div class="site-description" itemprop="description">自爱兼爱，善感而不多愁。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rubychen0611" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rubychen0611" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rubychen0611@yeah.net" title="E-Mail → mailto:rubychen0611@yeah.net" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://instagram.com/rubychen611" title="Instagram → https:&#x2F;&#x2F;instagram.com&#x2F;rubychen611" rel="noopener" target="_blank"><i class="fab fa-instagram fa-fw"></i>Instagram</a>
+      </span>
+  </div>
+
+
+
+      </div>
+	  
+	  
+  <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+  <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div id="myCanvasContainer" class="widget tagcloud">
+      <canvas width="250" height="250" id="resCanvas" style="width:100%">
+        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Concolic%E6%B5%8B%E8%AF%95/" rel="tag">Concolic测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag">DNN测试</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%AE%E5%88%86%E6%B5%8B%E8%AF%95/" rel="tag">差分测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95/" rel="tag">模糊测试</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag">测试标准</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/" rel="tag">测试输入生成</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%84%E5%90%88%E6%B5%8B%E8%AF%95/" rel="tag">组合测试</a><span class="tag-list-count">1</span></li></ul>
+      </canvas>
+    </div>
+  </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ruby Chen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">16k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">15 分钟</span>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='255,0,0' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz',
+      appKey     : 'gosR0ey4a9G3xmN5tvWEcrBS',
+      placeholder: "留下你的评论吧",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":175,"height":325},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
