@@ -178,8 +178,8 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
         <tag>测试标准</tag>
+        <tag>测试输入生成</tag>
         <tag>组合测试</tag>
       </tags>
   </entry>
@@ -798,8 +798,8 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
         <tag>测试标准</tag>
+        <tag>测试输入生成</tag>
         <tag>差分测试</tag>
       </tags>
   </entry>
