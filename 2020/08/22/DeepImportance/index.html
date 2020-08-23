@@ -20,33 +20,30 @@
     var CONFIG = {"hostname":"rubychen0611.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="原文：DeepHunter: A Coverage-Guided Fuzz Testing Framework for Deep Neural Networks （ISSTA’19) Coverage-guided Fuzzing for Feedforward Neural Networks (ASE’19)">
+  <meta name="description" content="原文：Importance-Driven Deep Learning System Testing （ICSE’20)">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【论文笔记】DeepHunter">
-<meta property="og:url" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/index.html">
+<meta property="og:title" content="【论文笔记】DeepImportance">
+<meta property="og:url" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/index.html">
 <meta property="og:site_name" content="Ruby&#39;s Blog">
-<meta property="og:description" content="原文：DeepHunter: A Coverage-Guided Fuzz Testing Framework for Deep Neural Networks （ISSTA’19) Coverage-guided Fuzzing for Feedforward Neural Networks (ASE’19)">
+<meta property="og:description" content="原文：Importance-Driven Deep Learning System Testing （ICSE’20)">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/1.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/4.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/3.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/4.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/5.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/6.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/7.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/8.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/9.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/10.png">
-<meta property="article:published_time" content="2020-08-20T08:56:28.000Z">
-<meta property="article:modified_time" content="2020-08-21T11:13:38.955Z">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig5.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig6.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig7.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig8.png">
+<meta property="article:published_time" content="2020-08-22T07:03:46.522Z">
+<meta property="article:modified_time" content="2020-08-23T02:46:28.394Z">
 <meta property="article:author" content="Ruby Chen">
 <meta property="article:tag" content="DNN测试">
-<meta property="article:tag" content="测试输入生成">
-<meta property="article:tag" content="模糊测试">
+<meta property="article:tag" content="测试标准">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://rubychen0611.github.io/2020/08/20/DeepHunter/1.png">
+<meta name="twitter:image" content="https://rubychen0611.github.io/2020/08/22/DeepImportance/Fig1.png">
 
-<link rel="canonical" href="https://rubychen0611.github.io/2020/08/20/DeepHunter/">
+<link rel="canonical" href="https://rubychen0611.github.io/2020/08/22/DeepImportance/">
 
 
 <script id="page-configurations">
@@ -59,7 +56,7 @@
   };
 </script>
 
-  <title>【论文笔记】DeepHunter | Ruby's Blog</title>
+  <title>【论文笔记】DeepImportance | Ruby's Blog</title>
   
 
 
@@ -219,7 +216,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/08/20/DeepHunter/">
+    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/08/22/DeepImportance/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/head.jpg">
@@ -232,7 +229,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          【论文笔记】DeepHunter
+          【论文笔记】DeepImportance
         </h1>
 
         <div class="post-meta">
@@ -242,14 +239,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-08-20 16:56:28" itemprop="dateCreated datePublished" datetime="2020-08-20T16:56:28+08:00">2020-08-20</time>
+              <time title="创建时间：2020-08-22 15:03:46" itemprop="dateCreated datePublished" datetime="2020-08-22T15:03:46+08:00">2020-08-22</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-08-21 19:13:38" itemprop="dateModified" datetime="2020-08-21T19:13:38+08:00">2020-08-21</time>
+                <time title="修改时间：2020-08-23 10:46:28" itemprop="dateModified" datetime="2020-08-23T10:46:28+08:00">2020-08-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -277,8 +274,8 @@
       </span>
       <span class="post-meta-item-text">评论数：</span>
     
-    <a title="valine" href="/2020/08/20/DeepHunter/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/20/DeepHunter/" itemprop="commentCount"></span>
+    <a title="valine" href="/2020/08/22/DeepImportance/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/22/DeepImportance/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -288,7 +285,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.9k</span>
+              <span>3.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -307,205 +304,133 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>原文：DeepHunter: A Coverage-Guided Fuzz Testing Framework for Deep Neural Networks （ISSTA’19)</p>
-<p>Coverage-guided Fuzzing for Feedforward Neural Networks (ASE’19)  <a id="more"></a></p>
-<p>代码地址：<a target="_blank" rel="noopener" href="https://bitbucket.org/xiaofeixie/deephunter/src/master/">https://bitbucket.org/xiaofeixie/deephunter/src/master/</a></p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
-<li><p>输入和可控变量：</p>
+        <p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
+<p>代码地址：<a target="_blank" rel="noopener" href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
 <ul>
-<li>初始种子集合</li>
-<li>种子选择策略：<ul>
-<li>①随机</li>
-<li>②根据新鲜程度选择</li>
-<li>③平衡新鲜和多样<ul>
-<li>带有参数$\gamma$、$p_{min}$</li>
+<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
+<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
 </ul>
 </li>
+<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
+<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
 </ul>
-</li>
-<li>蜕变变换方法<ul>
-<li>8种图像变换方法<ul>
-<li>4种像素级别变换（像素值改变）：反相、亮度、模糊、噪声</li>
-<li>4种仿射变换（移动像素位置）：平移、缩放、裁剪、旋转</li>
-</ul>
-</li>
-<li>约束策略中的$\alpha$、$\beta$参数</li>
-</ul>
-</li>
-<li>K：常数，变换次数</li>
-<li>覆盖率标准：5种（NC、KMNC、NBC、SNAC、TKNC）标准及其附带参数</li>
-</ul>
-</li>
-<li><p>输出：1、能最大化覆盖率的预测正确的样例 2、预测错误的样例</p>
-<p><img src="/2020/08/20/DeepHunter/1.png" alt="1" style="zoom:60%;"></p>
-<h3 id="保持蜕变变换语义不变的策略"><a href="#保持蜕变变换语义不变的策略" class="headerlink" title="保持蜕变变换语义不变的策略"></a>保持蜕变变换语义不变的策略</h3><ul>
-<li><p>8种图像变换方法</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
+<p>步骤：</p>
+<p>1、分析重要神经元</p>
+<p>2、重要神经元激活值聚类</p>
+<p>3、评价测试集的重要神经元覆盖率</p>
+<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
+<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
 <ul>
-<li>4种像素级别变换（像素值改变）：反相、亮度、模糊、噪声</li>
-<li>4种仿射变换（移动像素位置）：平移、缩放、裁剪、旋转</li>
+<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
+<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
+<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
+<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
 </ul>
 </li>
-<li><p>假设一次变换语义不变（参数合适的情况下）。</p>
+</ul>
 </li>
-<li><font color="red">策略：只允许一次仿射变换，像素变换可以使用多次，但要进行约束</font>
-
+<li><p>重要性计算算法</p>
+<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
 <ul>
-<li><p>约束条件：像素变换应满足f(s,s’)的条件，$L_0$表示发生变化的像素数目的最大值，$L_\infty$表示像素值变化的最大值。即：要么发生变化的像素数不多，要么变化的像素数多，但像素值变化都不大。平衡二者</p>
-<p><img src="/2020/08/20/DeepHunter/4.png" alt="4" style="zoom:70%;"></p>
-</li>
+<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
+<li>6-8行：反向传播计算相关性</li>
+<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
+<li>第11行：返回最重要的m个神经元</li>
 </ul>
 </li>
-<li><p>reference image：一张图像在经过一系列变换后（最多一次仿射变换），计算f(s,s’)。如果没有仿射变换的话，参考图像为原图；否则参考图像为中间经过一次仿射变换后的图像。</p>
+<li><p>相关性分析</p>
 <ul>
-<li><p>如果有仿射变换，则$L_0$、$L_\infty$计算方法如下</p>
-<p><img src="/2020/08/20/DeepHunter/3.png" alt="3" style="zoom:60%;"></p>
+<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
+<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
+</ul>
+</li>
+</ul>
+<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
+<li>动机<ul>
+<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
+<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
+</ul>
+</li>
+<li>算法<ul>
+<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
+<li>如何确定$k$值？<ul>
+<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
+</ul>
 </li>
 </ul>
 </li>
-<li><p>种子选择策略（三种）</p>
+</ul>
+<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
+<p>重要神经元激活值簇的组合定义为：</p>
+<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
+<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>神经元覆盖率NC：阈值为0.75</li>
+<li>TKNC：$k=3$</li>
+<li>KMNC：$k=1000$</li>
+<li>NBC、SNAC：训练集激活值的最值为上下界</li>
+<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
+<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
+<li>$m \in \{6,8,10,12\}$</li>
+<li>最大运行时间：3h</li>
+<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
+</ul>
+<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
+<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
+<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
+<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
+<li><p>实验方法：</p>
 <ul>
-<li><p>传统程序和TensorFuzz、DeepTest：用栈，选最新生成的种子</p>
+<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
 </li>
-<li><p>uniform：随机选一个种子</p>
-</li>
-<li><p>新策略Probability：平衡新鲜性和多样性，种子s被选择的概率：</p>
-<p><img src="/2020/08/20/DeepHunter/4.png" alt="4" style="zoom:60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和DNN模型"><a href="#数据集和DNN模型" class="headerlink" title="数据集和DNN模型"></a>数据集和DNN模型</h3><p><img src="/2020/08/20/DeepHunter/5.png" alt="5" style="zoom:60%;"></p>
-<h3 id="共同参数设置"><a href="#共同参数设置" class="headerlink" title="共同参数设置"></a>共同参数设置</h3><ul>
-<li><p>NC阈值：0.75（与DeepXplore相同）</p>
-</li>
-<li><p>KMNC的K=1000</p>
-</li>
-<li><p>SNAC、NBC、TKNC与DeepGauge相同设置</p>
-</li>
-<li><p>TRY_NUM=50</p>
-</li>
-<li><p>$\gamma=20$，$p_{min}=0.5$ </p>
-</li>
-<li>$K=20$</li>
-</ul>
-<h3 id="RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？"><a href="#RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？" class="headerlink" title="RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？"></a>RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？</h3><ul>
-<li><p>实验设计</p>
-<ul>
-<li><p>比较三种变换及约束策略：<font color="red">（仅约束策略还是连带变换策略？没说清楚）</font></p>
-<ul>
-<li><p>DeepHunter：用f(s,s’)限制，设置$\alpha=0.02，\beta=0.2$</p>
-</li>
-<li><p>TensorFuzz： 用 $L_\infty=0.4$限制</p>
-</li>
-<li><p>DeepTest： 用保守的参数限制(原文的MSE限制仅限回归任务，所以没用)</p>
-</li>
-</ul>
-</li>
-<li><p>每个数据集随机选择30个种子输入生成5000张图片，3个数据集*3种生成方法*生成5000张图片=共45000张图片</p>
-</li>
-<li><p>9个测试者每人看一组图片：如果生成的图片与原图分类不同、或是没有语义则被标记为invalid。</p>
+<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
+<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
 </li>
 </ul>
 </li>
 <li><p>实验结果</p>
-<p><img src="/2020/08/20/DeepHunter/6.png" alt="10"></p>
+<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
 <ul>
-<li>对三种策略：CIFAR-10数据集的无效率普遍高于其他两个数据集<ul>
-<li>原因：CIFAR-10分辨率较低，即使是DNN能识别的有效输入，对于人类常难以识别</li>
-</ul>
-</li>
-<li>即使DeepTest的参数设置很保守，但是仍生成了很多无效输入；TensorFuzz经过L∞限制后无效输入少了很多</li>
-<li>结论：DeepHunter的蜕变变换策略有效减少了生成无效图片的数量</li>
+<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
+<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
 </ul>
 </li>
 </ul>
-<h3 id="RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？"><a href="#RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？" class="headerlink" title="RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？"></a>RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？</h3><ul>
-<li><p>RQ2&amp;3 实验设计</p>
+<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
+<li>生成对抗样本<ul>
+<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
 <ul>
-<li>比较5种seed选取策略<ul>
-<li>Random testing (RT)without coverage guidance. 作为baseline，随机测试，无覆盖率作为向导</li>
-<li>DeepHunter+Uniform (DH+UF) ：使用不同的覆盖率标准作为向导，随机选择种子顺序</li>
-<li>DeepHunter+Probability (DH+Prob)：使用不同的覆盖率标准作为向导，用概率策略选择种子顺序</li>
-<li>DeepTest seed selection strategy with coverage guidance：选最新的；如果一个种子生成的所有新样例都不能提升覆盖率，则该种子被移出队列。队列可能变空。</li>
-<li>TensorFuzz seed selection strategy with coverage guidance：随机选一个种子和队列最后的5个种子，再从中随机选一个</li>
+<li>实验结果：<ul>
+<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
+<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
+<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
 </ul>
 </li>
-<li><p>21个fuzzers：5 个覆盖准则 × 4 个seed选择策略 + 1 RT with no coverage guidance，使用的模型为MNIST和CIFAR-10的四个模型；每个fuzzer运行10遍取平均</p>
-</li>
-<li><p>初始种子1000个：被所有模型都正确分类的测试数据</p>
-</li>
-<li>每个fuzzer迭代次数相同（5000次），使用的蜕变变换策略相同<font color="red">（是什么？）</font></li>
 </ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/20/DeepHunter/7.png" alt="7" style="zoom:60%;"></p>
-</li>
-<li><p>结论</p>
+<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
+<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
+</ul>
+<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
 <ul>
-<li><p>尽管基本结构与传统程序很不同，CGF方法与随机测试相比较还是能有效最大化DNN程序的覆盖率</p>
-</li>
-<li><p>与传统软件的fuzzer优先选择最新生成的用例作为种子不同，DNN testing中种子选择的优先策略（多样性）也很重要</p>
-</li>
-<li><p>不同覆盖率标准提升的难易程度不同，KMNC, TKNC, 和 NC提升较容易。NBC and SNAC关注corner cases，本身初始seed覆盖率就极低，提升较难</p>
-</li>
+<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
+<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
+<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
 </ul>
-</li>
+<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
+<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
+<li>选择重要性神经元的层</li>
 </ul>
-<h3 id="RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？"><a href="#RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？" class="headerlink" title="RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？"></a>RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？</h3><ul>
-<li><p>实验结果</p>
-<ul>
-<li><p>检测错误数量</p>
-<p><img src="/2020/08/20/DeepHunter/8.png" alt="8" style="zoom:60%;"></p>
-<ul>
-<li>DH+Prob和DH+UF检测错误数目多于另外三种策略，且模型较小时二者类似，模型较大时DF+Prob更优</li>
-<li>KMNC在检测错误数目上少于其他4个覆盖率标准，因为cover更简单；但DH+Prob的表现还是优于其他策略</li>
-<li>在最后的seed queue中，易于cover的覆盖率标准剩余的seed更多</li>
-</ul>
-</li>
-<li><p>检测出的错误的多样性</p>
-<p><img src="/2020/08/20/DeepHunter/9.png" alt="9" style="zoom:60%;"></p>
-<ul>
-<li>定义从同一个seed变换产生的错误属于同一类别，共1000类</li>
-<li>DH+Prob和DH+UF能检测出更多类的错误，DeepTest和TensorFuzz检测出的错误甚至有的比RT还少，因为这二者都倾向于选择最新的seed</li>
-<li>RT：过于随机，难以发现corner cases</li>
-<li>选最新的seed：能发现Corner cases，但类别过于单一</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测"><a href="#RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测" class="headerlink" title="RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测?"></a>RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测?</h3><ul>
-<li><p>实验设计</p>
-<ul>
-<li><p>每个数据集选择一个模型，原模型都是32bit</p>
-</li>
-<li><p>3种量化方式</p>
-<ul>
-<li><p>随机选10%的权重缩减：32比特-&gt;16比特</p>
-</li>
-<li><p>随机选50%的权重缩减：32比特-&gt;16比特</p>
-</li>
-<li><p>所有权重缩减：32比特-&gt;16比特</p>
-</li>
-</ul>
-</li>
-<li><p>对前两种量化方式（10%和50%的量化模型）：sample10次得到10个模型，每个模型运行5遍取均值</p>
-</li>
-<li><p>为每个原始模型分配10小时生成图片，重复每种配置5次并平均结果</p>
-</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/20/DeepHunter/10.png" alt="10" style="zoom:60%;"></p>
-<ul>
-<li>corner相关的覆盖率标准更易发现量化错误</li>
-<li>DNN模型越大，发现的错误越多</li>
-<li>QR率越大，错误越多</li>
-</ul>
-</li>
-</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》），DeepCheck也用过类似的方法；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
 
     </div>
 
@@ -516,8 +441,7 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag"># DNN测试</a>
-              <a href="/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/" rel="tag"># 测试输入生成</a>
-              <a href="/tags/%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95/" rel="tag"># 模糊测试</a>
+              <a href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag"># 测试标准</a>
           </div>
 
         
@@ -526,13 +450,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/08/20/DeepTest/" rel="prev" title="【论文笔记】DeepTest">
-      <i class="fa fa-chevron-left"></i> 【论文笔记】DeepTest
+    <a href="/2020/08/21/Google-Girl-Hackathon/" rel="prev" title="Google Girl Hackathon Season VI赛后感">
+      <i class="fa fa-chevron-left"></i> Google Girl Hackathon Season VI赛后感
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/08/21/Google-Girl-Hackathon/" rel="next" title="Google Girl Hackathon Season VI赛后感">
-      Google Girl Hackathon Season VI赛后感 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -592,7 +513,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8C%81%E8%9C%95%E5%8F%98%E5%8F%98%E6%8D%A2%E8%AF%AD%E4%B9%89%E4%B8%8D%E5%8F%98%E7%9A%84%E7%AD%96%E7%95%A5"><span class="nav-number">1.1.</span> <span class="nav-text">保持蜕变变换语义不变的策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">2.</span> <span class="nav-text">实验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E5%92%8CDNN%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">数据集和DNN模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E5%90%8C%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">共同参数设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ1%EF%BC%88%E8%9C%95%E5%8F%98%E5%8F%98%E6%8D%A2%EF%BC%89%EF%BC%9A%E4%BB%8E%E4%BA%BA%E7%B1%BB%E8%A7%92%E5%BA%A6%E7%9C%8B%EF%BC%8C%E4%B8%8D%E5%90%8C%E7%9A%84%E5%8F%98%E6%8D%A2%E5%8F%8A%E7%BA%A6%E6%9D%9F%E7%AD%96%E7%95%A5%E5%AF%B9%E7%94%9F%E6%88%90%E5%92%8C%E5%8E%9F%E5%9B%BE%E7%89%87%E7%9B%B8%E5%90%8C%E8%AF%AD%E4%B9%89%E7%9A%84%E6%96%B0%E5%9B%BE%E6%95%88%E6%9E%9C%E5%A6%82%E4%BD%95%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ2%EF%BC%88%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%89%EF%BC%9ACGF%E6%98%AF%E5%90%A6%E5%9C%A8DNN%E6%B5%8B%E8%AF%95%E9%A2%86%E5%9F%9F%E4%BB%8D%E8%83%BD%E6%9C%89%E6%95%88%E6%8F%90%E5%8D%87%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%9F%E4%B8%8D%E5%90%8C%E8%A6%86%E7%9B%96%E6%A0%87%E5%87%86%E4%B8%8B%EF%BC%8C%E4%B8%8D%E5%90%8C%E7%9A%84seed%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5%E5%AF%B9%E6%8F%90%E5%8D%87%E8%A6%86%E7%9B%96%E7%8E%87%E6%95%88%E6%9E%9C%E5%A6%82%E4%BD%95%EF%BC%9F"><span class="nav-number">2.4.</span> <span class="nav-text">RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ3%EF%BC%88%E9%94%99%E8%AF%AF%E6%A3%80%E6%B5%8B%EF%BC%89%EF%BC%9A%E7%8E%B0%E6%9C%89%E7%9A%84%E8%A6%86%E7%9B%96%E6%A0%87%E5%87%86%E5%9C%A8%E5%BC%95%E5%AF%BC%E9%94%99%E8%AF%AF%E6%A3%80%E6%B5%8B%E7%9A%84%E6%95%88%E6%9E%9C%E4%B8%8A%E6%9C%89%E4%BD%95%E4%B8%8D%E5%90%8C%EF%BC%9F%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%90%8Cseed%E9%80%89%E5%8F%96%E6%A0%87%E5%87%86%E6%A3%80%E6%B5%8B%E9%94%99%E8%AF%AF%E7%9A%84%E6%95%88%E6%9E%9C%E6%9C%89%E4%BD%95%E4%B8%8D%E5%90%8C%EF%BC%9F%E4%B8%8D%E5%90%8Cseed%E9%80%89%E5%8F%96%E6%A0%87%E5%87%86%E6%A3%80%E6%B5%8B%E5%87%BA%E7%9A%84%E9%94%99%E8%AF%AF%E8%A1%8C%E4%B8%BA%E6%9C%89%E4%BD%95%E4%B8%8D%E5%90%8C%EF%BC%9F"><span class="nav-number">2.5.</span> <span class="nav-text">RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ4%EF%BC%88%E5%B9%B3%E5%8F%B0%E8%BF%81%E7%A7%BB%EF%BC%89%EF%BC%9ADeepHunter%E6%98%AF%E5%90%A6%E9%80%82%E7%94%A8%E4%BA%8E%E5%B9%B3%E5%8F%B0%E8%BF%81%E7%A7%BB%E8%BF%87%E7%A8%8B%E4%B8%ADDNN%E9%87%8F%E5%8C%96%E5%BC%95%E5%85%A5%E7%9A%84%E5%85%B7%E4%BD%93%E7%BC%BA%E9%99%B7%E6%A3%80%E6%B5%8B"><span class="nav-number">2.6.</span> <span class="nav-text">RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测?</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%9C%BA"><span class="nav-number">2.</span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview"><span class="nav-number">3.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E7%A5%9E%E7%BB%8F%E5%85%83%E5%88%86%E6%9E%90"><span class="nav-number">3.2.</span> <span class="nav-text">重要神经元分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E7%A5%9E%E7%BB%8F%E5%85%83%E8%81%9A%E7%B1%BB"><span class="nav-number">3.3.</span> <span class="nav-text">重要神经元聚类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E9%87%8D%E8%A6%81%E6%80%A7%E7%9A%84%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%88IDC%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">基于重要性的覆盖率（IDC）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">4.</span> <span class="nav-text">实验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E5%92%8C%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.1.</span> <span class="nav-text">数据集和模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">4.2.</span> <span class="nav-text">参数设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ1-%E9%87%8D%E8%A6%81%E6%80%A7-%E7%A5%9E%E7%BB%8F%E5%85%83%E9%87%8D%E8%A6%81%E6%80%A7%E5%88%86%E6%9E%90%E8%83%BD%E8%AF%86%E5%88%AB%E5%87%BA%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E7%A5%9E%E7%BB%8F%E5%85%83%E5%90%97"><span class="nav-number">4.3.</span> <span class="nav-text">RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ2-%E5%A4%9A%E6%A0%B7%E6%80%A7-DeepImportance%E8%83%BD%E6%9C%89%E5%8A%A9%E4%BA%8E%E9%80%89%E6%8B%A9%E5%A4%9A%E6%A0%B7%E5%8C%96%E7%9A%84%E6%B5%8B%E8%AF%95%E9%9B%86%E5%90%97"><span class="nav-number">4.4.</span> <span class="nav-text">RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ3-%E6%9C%89%E6%95%88%E6%80%A7-DeepImportance%E5%9C%A8%E8%AF%86%E5%88%ABDL%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E9%94%99%E8%AF%AF%E8%A1%8C%E4%B8%BA%E6%97%B6%E7%9A%84%E6%95%88%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ4-%E7%9B%B8%E5%85%B3%E6%80%A7-DeepImportance%E4%B8%8E%E7%8E%B0%E6%9C%89%E8%A6%86%E7%9B%96%E7%8E%87%E6%A0%87%E5%87%86%E7%9A%84%E7%9B%B8%E5%85%B3%E6%80%A7"><span class="nav-number">4.6.</span> <span class="nav-text">RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ5-%E5%B1%82%E7%81%B5%E6%95%8F%E5%BA%A6-%E7%89%B9%E5%AE%9A%E7%A5%9E%E7%BB%8F%E5%85%83%E5%B1%82%E7%9A%84%E9%80%89%E6%8B%A9%E5%A6%82%E4%BD%95%E5%BD%B1%E5%93%8DDeepImportance%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">4.7.</span> <span class="nav-text">RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%8E%A7%E5%88%B6%E5%8F%82%E6%95%B0-%E5%8F%98%E9%87%8F"><span class="nav-number">5.</span> <span class="nav-text">可控制参数&#x2F;变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">思考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
