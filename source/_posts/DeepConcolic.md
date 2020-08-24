@@ -74,11 +74,11 @@ $\{\exists x.ap[x]_{k,i}=true|2\leq k \leq K-1,1 \leq i \leq s_k\}$
 
 ### MC/DC覆盖率（SS coverage）
 
-DeepCover提出，
+DeepCover提出，略
 
 ### 神经元边缘覆盖率（NBC）
 
-DeepGauge中提出，
+DeepGauge中提出，略
 
 
 

@@ -129,3 +129,11 @@ live2d:
     height: 325
   mobile:
     show: true
+
+feed:
+  type: rss2
+  path: rss2.xml
+  limit: 10
+  hub:
+  content: 'true'
+

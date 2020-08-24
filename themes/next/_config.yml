@@ -693,8 +693,8 @@ cnzz_siteid:
 # Do not enable both `valine.visitor` and `leancloud_visitors`.
 leancloud_visitors:
   enable: false
-  app_id: # <your app id>
-  app_key: # <your app key>
+  app_id: LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz # <your app id>
+  app_key: gosR0ey4a9G3xmN5tvWEcrBS # <your app key>
   # Required for apps from CN region
   server_url: # <your server url>
   # Dependencies: https://github.com/theme-next/hexo-leancloud-counter-security
@@ -1013,6 +1013,10 @@ mylinks:
   site: https://mirror58229.github.io/  #友链地址
   info: Stay Moved.  #友链说明
   avatar: https://mirror58229.github.io/images/avatar.jpg  #友链头像
+- nickname: siyuan  #友链名称
+  site: https://keyile.github.io/  #友链地址
+  info: 知行合一  #友链说明
+  avatar: https://keyile.github.io/images/avatar.jpg  #友链头像
 
 # hexo-tag-cloud
 tag_cloud:
