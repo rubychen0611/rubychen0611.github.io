@@ -20,27 +20,33 @@
     var CONFIG = {"hostname":"rubychen0611.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)">
+  <meta name="description" content="原文：Testing Deep Neural Networks （TECS’19）">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【论文笔记】DeepCT">
-<meta property="og:url" content="https://rubychen0611.github.io/2020/08/20/DeepCT/index.html">
+<meta property="og:title" content="【论文笔记】DeepCover">
+<meta property="og:url" content="https://rubychen0611.github.io/2020/08/24/DeepCover/index.html">
 <meta property="og:site_name" content="Ruby&#39;s Blog">
-<meta property="og:description" content="原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)">
+<meta property="og:description" content="原文：Testing Deep Neural Networks （TECS’19）">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepCT/fig1.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepCT/al.png">
-<meta property="og:image" content="https://rubychen0611.github.io/2020/08/20/DeepCT/fig2.png">
-<meta property="article:published_time" content="2020-08-20T01:51:42.000Z">
-<meta property="article:modified_time" content="2020-08-20T05:50:24.356Z">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig1.jpg">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig5.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig6.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig7.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig8.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig9.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig10.png">
+<meta property="article:published_time" content="2020-08-24T07:18:05.000Z">
+<meta property="article:modified_time" content="2020-08-24T13:01:41.225Z">
 <meta property="article:author" content="Ruby Chen">
 <meta property="article:tag" content="DNN测试">
-<meta property="article:tag" content="测试输入生成">
 <meta property="article:tag" content="测试标准">
-<meta property="article:tag" content="组合测试">
+<meta property="article:tag" content="MC&#x2F;DC">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://rubychen0611.github.io/2020/08/20/DeepCT/fig1.png">
+<meta name="twitter:image" content="https://rubychen0611.github.io/2020/08/24/DeepCover/Fig2.png">
 
-<link rel="canonical" href="https://rubychen0611.github.io/2020/08/20/DeepCT/">
+<link rel="canonical" href="https://rubychen0611.github.io/2020/08/24/DeepCover/">
 
 
 <script id="page-configurations">
@@ -53,7 +59,7 @@
   };
 </script>
 
-  <title>【论文笔记】DeepCT | Ruby's Blog</title>
+  <title>【论文笔记】DeepCover | Ruby's Blog</title>
   
 
 
@@ -214,7 +220,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/08/20/DeepCT/">
+    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/08/24/DeepCover/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/head.jpg">
@@ -227,7 +233,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          【论文笔记】DeepCT
+          【论文笔记】DeepCover
         </h1>
 
         <div class="post-meta">
@@ -238,7 +244,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-08-20 09:51:42 / 修改时间：13:50:24" itemprop="dateCreated datePublished" datetime="2020-08-20T09:51:42+08:00">2020-08-20</time>
+              <time title="创建时间：2020-08-24 15:18:05 / 修改时间：21:01:41" itemprop="dateCreated datePublished" datetime="2020-08-24T15:18:05+08:00">2020-08-24</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -266,8 +272,8 @@
       </span>
       <span class="post-meta-item-text">评论数：</span>
     
-    <a title="valine" href="/2020/08/20/DeepCT/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/20/DeepCT/" itemprop="commentCount"></span>
+    <a title="valine" href="/2020/08/24/DeepCover/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/24/DeepCover/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -277,14 +283,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
+              <span>4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -296,93 +302,183 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)  <a id="more"></a></p>
-<p>代码：没找到</p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出了DNN系统的组合测试方法，根据目标要覆盖的神经元激活模式组合，从种子输入开始，通过search-based testing, 或guided random testing, 或symbolic constraint solving based testing方法生成满足条件的输入，同时最小化L∞距离。以生成覆盖更多的神经元激活模式组合的输入。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><ul>
-<li>为什么层析（tomographic）？<ul>
-<li>DNN学习到的特征随着层数增加越来越复杂、抽象</li>
-</ul>
-</li>
-<li>为什么组合（combinatorial）？<ul>
-<li>每层神经元只与前后两层发生交互。逻辑单元之间可能存在逻辑(无形)的相互作用，其中当前层的神经元共同决定其下一层神经元的逻辑。我们想用CT捕捉和检查每一层神经元之间的这些无形的相互作用。</li>
-</ul>
-</li>
-</ul>
-<h2 id="组合测试标准"><a href="#组合测试标准" class="headerlink" title="组合测试标准"></a>组合测试标准</h2><h3 id="神经元激活配置（Neuron-activation-configuration"><a href="#神经元激活配置（Neuron-activation-configuration" class="headerlink" title="神经元激活配置（Neuron-activation configuration)"></a>神经元激活配置（Neuron-activation configuration)</h3><p>对第$i$层的一组神经元$M=\{n_1,n_2,…,n_k\}$，激活配置为一个元组$c=(b_1,b_2,…,b_k)$，其中$b_i \in \{0,1\}$。若测试集$T$中存在样本$t$能使得激活模式等于$c$，则称$T$可以覆盖$c$。</p>
-<p>$\Theta(t,L_i)$: 第$i$层神经元所有$t$-路覆盖组合</p>
-<p>$\theta \in \Theta(t,L_i)$：是$t$个神经元的集合，拥有$2^t$种激活配置</p>
-<p>$\Theta_{Full}(t,L_i,T) \subseteq \Theta(t,L_i)$：能被$T$完全覆盖的$t$-路覆盖组合</p>
-<h3 id="t-路组合稀疏覆盖"><a href="#t-路组合稀疏覆盖" class="headerlink" title="$t$-路组合稀疏覆盖"></a>$t$-路组合稀疏覆盖</h3><p>$T$的组合稀疏覆盖=覆盖了所有神经元配置的组合数 / 所有组合数</p>
-<p>例子：</p>
-<p><img src="/2020/08/20/DeepCT/fig1.png" alt="fig1" style="zoom:60%;"></p>
-<p>$L_i$层中共有4个神经元${n1,n2,n3,n4}$，<br>2-路组合共有六种：$\{n1,n2\}，\{n1,n3\}，\{n1,n4\}，\{n2,n3\}，\{n2,n4\}，\{n3,n4\}$<br>每个2-路组合有四种神经元激活配置$(0，0)、(0，1)、(1，0)$和$(1，1)$<br>在6个双向组合中，T只覆盖了$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}$和$\{n3，n4\}$的四种神经元激活配置(只有这四个组合出现了四种神经元激活配置)<br>则Li层的2-路组合稀疏覆盖率$= 4 / 6= 66.6\%$</p>
-<p>由于$t$-路组合稀疏覆盖不能考虑每个神经元组合内的覆盖，接下来我们引入t-way组合稠密覆盖。</p>
-<h3 id="t-路组合稠密覆盖"><a href="#t-路组合稠密覆盖" class="headerlink" title="$t$-路组合稠密覆盖"></a>$t$-路组合稠密覆盖</h3><p>$T$的组合稀疏覆盖= 被覆盖了的激活配置数 / 所有组合的所有激活配置数目</p>
-<p>例子：同上图</p>
-<p>由于$L_i$中有六个神经元的双向组合，并且每个组合有四个神经元激活配置,总共有24种激活配置</p>
-<p>测试集T可以覆盖20种配置，未覆盖的神经元激活配置为$\{n1，n3\}=(0，1)，\{n1，n3\}=(1，0)，\{n2，n4\}=(0，1)，\{n2，n4\}=(1，0)$,因此，T的双向组合密集覆盖率为83.3%。</p>
-<h3 id="p-t-完备性"><a href="#p-t-完备性" class="headerlink" title="$(p,t)$完备性"></a>$(p,t)$完备性</h3><p>达到$p$(百分比)覆盖的组合比例</p>
-<p>例子：同上图</p>
-<p>在神经元的双向组合中，$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}，\{n3，n4\}$的覆盖双向构型比为100%，$\{n1，n3\}$和$\{n2，n4\}$的覆盖双向构型比为50%。则$L_i$的(0.5，2)-完备性为100%，$L_i$的(1，2)-完备性为66.6%。即达到100%覆盖的有4个,达到50%以上覆盖的有6个。</p>
-<h2 id="DNN的鲁棒性测试"><a href="#DNN的鲁棒性测试" class="headerlink" title="DNN的鲁棒性测试"></a>DNN的鲁棒性测试</h2><h3 id="d-局部鲁棒性"><a href="#d-局部鲁棒性" class="headerlink" title="$d$-局部鲁棒性"></a>$d$-局部鲁棒性</h3><script type="math/tex; mode=display">\forall x':\parallel x'-x \parallel \leq d \Rightarrow C(x) = C(x')</script><p>约束：$L_{\infty}-norm$</p>
-<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p><img src="/2020/08/20/DeepCT/al.png" alt="al" style="zoom:67%;"></p>
+        <p>原文：Testing Deep Neural Networks （TECS’19）<a id="more"></a></p>
+<p>（与DeepConcolic作者相同）</p>
+<p>代码地址：<a target="_blank" rel="noopener" href="https://github.com/TrustAI/DeepCover">https://github.com/TrustAI/DeepCover</a></p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>受MC/DC思想启发提出4种覆盖标准，使用线性规划模型进行约束求解（借助DeepConcolic的方法），生成满足“独立影响”条件且变化较小的测试用例。</p>
+<h2 id="传统MC-DC覆盖"><a href="#传统MC-DC覆盖" class="headerlink" title="传统MC/DC覆盖"></a>传统MC/DC覆盖</h2><p>MC/DC是DO-178B Level A认证标准中规定的，欧美民用航空器强制要求遵守该标准。MC/DC覆盖测试<font color="red">在每个判定中的每个条件都曾独立影响判定的结果至少一次（独立影响意思是在其他条件不变的情况下，改变一个条件）</font>。</p>
+<p>举个例子，制作咖啡需要同时满足壶、杯子和咖啡豆的条件：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>( kettle &amp;&amp; cup &amp;&amp; coffee ) &#123;</span><br><span class="line">  <span class="keyword">return</span> cup_of_coffee;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>三个条件的取值共有8种情况：</p>
+<p><img src="/2020/08/24/DeepCover/Fig2.png" alt="Fig2" style="zoom:80%;"></p>
+<p>但仅4种情况（Test 4、6、7、8）就可以达到100%MC/DC覆盖率，因为：</p>
 <ul>
-<li>输入<ul>
-<li>DNN</li>
-<li>$t$:测试粒度，每个组合内神经元个数</li>
-<li>组合测试标准</li>
-<li>初始种子集合</li>
+<li>Tests 4 &amp; 8 ：Kettle可以独立影响结果</li>
+<li>Tests 6 &amp; 8 ：Mug可以独立影响结果</li>
+<li>Tests 7 &amp; 8：Coffe可以独立影响结果</li>
+</ul>
+<p><img src="/2020/08/24/DeepCover/Fig1.jpg" alt="Fig1" style="zoom:30%;"></p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="DNN中的决策和条件"><a href="#DNN中的决策和条件" class="headerlink" title="DNN中的决策和条件"></a>DNN中的决策和条件</h3><ul>
+<li>$\Psi_k$: 一个集合，其中每个元素是神经网络第$k$层节点的一个子集合，表示一个<strong>特征</strong><ul>
+<li>核心思想：不仅要测试某个特征的存在，而且要测试简单特征对更复杂特性的影响。</li>
 </ul>
 </li>
-<li>输出<ul>
-<li>正确样本集合</li>
-<li>对抗样本集合</li>
+<li>$t_k = |\Psi_k|$：特征个数</li>
+<li>$\psi_{k,l} (1 \leq l \leq t_k)$：第$l$个特征</li>
+<li>每个特征代表一个<strong>决策（decision）</strong>，其<strong>条件（conditions）</strong>是前一层与其相连的特征</li>
+<li><p>特征的使用将DNN中的基本构建单位从<strong>单个节点</strong>推广到<strong>一组节点</strong>。</p>
+</li>
+<li><p>特征对$(\psi_{k,i},\psi_{k+1,j})$：相邻层的一对特征</p>
+</li>
+<li>符号变化<ul>
+<li>$sc(\psi_{k,l},x_1,x_2)$：对$\psi_{k,l}$中的任意神经元 $n_{k,j}$，$sign(n_{k,j},x_1)\ne sign(n_{k,j},x_2)$</li>
+<li>$nsc(\psi_{k,l},x_1,x_2)$：对$\psi_{k,l}$中的任意神经元 $n_{k,j}$，$sign(n_{k,j},x_1) = sign(n_{k,j},x_2)$</li>
 </ul>
 </li>
-<li>测试用例生成方法<ul>
-<li>没有特殊规定，<font color="red">基于搜索、覆盖率引导的随机测试、符号分析/约束求解都可以</font></li>
-<li>本文实验：DNN使用ReLU激活函数，约束求解方法（Cplex solver）生成测试用例<ul>
-<li><font color="red">即将CT覆盖目标编码为目标的线性约束，使种子输入的$L_{\infty}$-范数扰动距离最小。</font>
+<li>值变化<ul>
+<li>$vc(g,\psi_{k,l},x_1,x_2)$：$g(\psi_{k,l},x_1,x_2)=true$，$g$是一个值函数</li>
+</ul>
+</li>
+</ul>
+<h3 id="覆盖方法"><a href="#覆盖方法" class="headerlink" title="覆盖方法"></a>覆盖方法</h3><ul>
+<li><p>Sign-Sign Coverage (SSC)</p>
+<ul>
+<li><p>对一个特征对$\alpha = (\psi_{k,i},\psi_{k+1,j})$，$\alpha$被两个测试用例$x_1$、$x_2$SS-覆盖，记为$SS(\alpha,x_1,x_1)$。其定义为：</p>
+<ul>
+<li>$sc(\psi_{k,i},x_1,x_2)$ 且$nsc(P_k  \backslash \psi_{k,i},x_1,x_2)$，其中$P_k$为第$k$层所有节点的集合</li>
+<li>$sc(\psi_{k+1,j},x_1,x_2)$</li>
+</ul>
+<font color="red">（即一个条件特征量$\psi_{k,i}$的符号变化独立影响下一层决策特征$\psi_{k+1,j}的$符号变化)</font>
+</li>
+</ul>
+</li>
+<li><p>Value-Sign Coverage (VSC)</p>
+<ul>
+<li>对一个特征对$\alpha = (\psi_{k,i},\psi_{k+1,j})$，值函数$g$，$\alpha$被两个测试用例$x_1$、$x_2$VS-覆盖，记为$VS^g(\alpha,x_1,x_1)$。其定义为：<ul>
+<li>$vc(g,\psi_{k,i},x_1,x_2)$ 且$nsc(P_k ,x_1,x_2)$，其中$P_k$为第$k$层所有节点的集合</li>
+<li>$sc(\psi_{k+1,j},x_1,x_2)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Sign-Value Coverage (SVC)</p>
+<ul>
+<li><p>对一个特征对$\alpha = (\psi_{k,i},\psi_{k+1,j})$，值函数$g$，$\alpha$被两个测试用例$x_1$、$x_2$SV-覆盖，记为$SV^g(\alpha,x_1,x_1)$。其定义为：</p>
+<ul>
+<li>$sc(\psi_{k,i},x_1,x_2)$ 且$nsc(P_k  \backslash \psi_{k,i},x_1,x_2)$，其中$P_k$为第$k$层所有节点的集合</li>
+<li>$vc(g,\psi_{k+1,j},x_1,x_2)$且$nsc(\psi_{k+1,j},x_1,x_2)$</li>
+</ul>
+<font color="red">(捕获符号更改情况的决策特征的重大更改)</font>
+</li>
+</ul>
+</li>
+<li><p>Value-Value Coverage (VVC)</p>
+<ul>
+<li><p>对一个特征对$\alpha = (\psi_{k,i},\psi_{k+1,j})$，值函数$g_1$、$g_2$，$\alpha$被两个测试用例$x_1$、$x_2$SV-覆盖，记为$VV^{g_1,g_2}(\alpha,x_1,x_1)$。其定义为：</p>
+<ul>
+<li>$vc(g_1,\psi_{k,i},x_1,x_2)$ 且$nsc(P_k ,x_1,x_2)$，其中$P_k$为第$k$层所有节点的集合</li>
+<li>$vc(g_2,\psi_{k+1,j},x_1,x_2)$且$nsc(\psi_{k+1,j},x_1,x_2)$</li>
+</ul>
+<font color="red">(条件特征没有符号变化，但决策特征的值发生显著变化)</font>
 
-
-
 </li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
-<li>数据集和模型<ul>
-<li>MNIST和两个预训练好的DNN模型DNN1和DNN2（结构和精度略）</li>
-</ul>
-</li>
-<li>从原测试集随机选择1000个样本作为初始种子，<font color="red">且这1000个都能被原DNN正确分类</font></li>
-<li>随机测试（Random Testing)<ul>
-<li><font color="red">随机生成10000个测试用例（如何随机生成的？）</font>，然后检测健壮性问题</li>
-<li>实验结果：RT已经能够检测到DNN1上的194个样本和DNN2上的178个样本的健壮性问题，总共266个独特的问题，其中106个是DNN1和DNN2上共同的问题。</li>
+<h3 id="覆盖率计算"><a href="#覆盖率计算" class="headerlink" title="覆盖率计算"></a>覆盖率计算</h3><p>令$F= \left\{ SS,VS^{g},SV^{g},VV^{g_{1},g_{2}} \right\}$，给定DNN$N$和覆盖方法$f \in F$，测试特征对集合$O$，测试集$T$的覆盖率：</p>
+<script type="math/tex; mode=display">M_{f}(N,T)= \frac{| \left\{ \alpha \in O| \exists x_{1},x_{2} \in T:f( \alpha ,x_{1},x_{2}) \right\} |}{|O|}</script><p>即被覆盖的测试特征对所占比例。</p>
+<h3 id="与现有覆盖标准的强弱关系"><a href="#与现有覆盖标准的强弱关系" class="headerlink" title="与现有覆盖标准的强弱关系"></a>与现有覆盖标准的强弱关系</h3><p><img src="/2020/08/24/DeepCover/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
+<h3 id="自动测试用例生成"><a href="#自动测试用例生成" class="headerlink" title="自动测试用例生成"></a>自动测试用例生成</h3><ul>
+<li>测试预言<ul>
+<li>$X$为一组被正确标记的测试用例，$x \in X$，若$x’$与$x$足够接近且预测标签一致，则称$x’$通过测试预言</li>
 </ul>
 </li>
-<li>DeepCT测试<ul>
-<li>1000个样本中去掉266个随机测试已经发现问题的样本，剩余的734个样本中随机采样50个进一步分析$d$-局部鲁棒性（$d$设为0.15，使用2-路CT标准）</li>
-<li>实验结果：<ul>
-<li>生成图片数量相当的情况下，DeepCT达到的覆盖率远超随机测试</li>
-<li>随着测试层数和生成的测试用例增加，覆盖率也逐渐增加</li>
+<li><strong>通过线性编程（LP）生成测试用例</strong><ul>
+<li>方法同DeepConcolic</li>
+</ul>
+</li>
+<li><strong>通过启发式搜索生成测试用例</strong><ul>
+<li>基于梯度下降搜索覆盖特定特征对的输入对</li>
 </ul>
 </li>
 </ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h3><ul>
+<li>MNIST、CIFAR-10、ImageNet</li>
+</ul>
+<h3 id="可控制参数及变量"><a href="#可控制参数及变量" class="headerlink" title="可控制参数及变量"></a>可控制参数及变量</h3><ul>
+<li>LP调用时使用的约束：$\parallel x_2 - x_1 \parallel _ \infty$</li>
+<li>$SV^g$中：$ g= \frac{u_{k+1},j \left[ x_{2} \right] }{u_{k+1},j \left[ x_{1} \right] } \geqslant \sigma $ ，$\sigma = 2$</li>
+<li>$VV^{g_1,g_2}$中：$\sigma = 5$</li>
+<li>每个特征包含神经元个数<ul>
+<li>大小用参数$w$来调节：$\psi _{k,i} \leq w \cdot s_k$</li>
+</ul>
 </li>
 </ul>
-<p><img src="/2020/08/20/DeepCT/fig2.png" alt="fig2" style="zoom:60%;"></p>
-<h2 id="可控制参数-变量总结"><a href="#可控制参数-变量总结" class="headerlink" title="可控制参数/变量总结"></a>可控制参数/变量总结</h2><ul>
-<li>$t$：覆盖粒度</li>
-<li>$d$：鲁棒性约束</li>
-<li>$L_{\infty}$约束的参数</li>
-<li>初始种子集合</li>
-<li>$p$：完备性指标</li>
+<h3 id="MNIST上的实验结果"><a href="#MNIST上的实验结果" class="headerlink" title="MNIST上的实验结果"></a>MNIST上的实验结果</h3><ul>
+<li>一个特征即一个神经元</li>
+<li>训练10个DNN（准确率&gt;97%)</li>
 </ul>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_33935895/article/details/105454414">https://blog.csdn.net/qq_33935895/article/details/105454414</a></p>
+<p><img src="/2020/08/24/DeepCover/Fig4.png" alt="Fig4" style="zoom:67%;"></p>
+<ul>
+<li>DNN错误查找结果：<ul>
+<li>测试用例生成算法有效地实现了对所有覆盖标准的高覆盖，</li>
+<li>覆盖方法被认为是有用的，因为找出了很多对抗样本。</li>
+</ul>
+</li>
+<li>DNN安全分析：<ul>
+<li>覆盖率$M_f$和对抗性实例百分比$AE_f$一起提供了评估DNN的定量统计数据。一般来说，给定一个测试集，一个具有高覆盖率水平$M_f$和低对抗百分比$AE_f$的DNN被认为是鲁棒的。</li>
+<li>下图展示了对抗样本的距离和累积对抗样本数的关系。一个更稳健的DNN将在小距离末端(接近0)有更低的形状，因为报告的敌对的例子相对于他们原始的正确输入是更远的。直觉上，这意味着需要付出更多的努力来愚弄一个稳健的DNN，使其从正确的分类变成错误的标签。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/24/DeepCover/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
+<ul>
+<li>逐层的行为：<ul>
+<li>当深入DNN时，神经元对的覆盖会变得更加困难。在这种情况下，为了提高覆盖性能，在生成测试对时需要使用较大的数据集。图5b给出了在不同层中发现的敌对示例的百分比(在所有敌对示例中)。有趣的是，大多数对抗性的例子似乎都是在测试中间层时发现的。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/24/DeepCover/Fig6.png" alt="Fig6" style="zoom:60%;"></p>
+<ul>
+<li><p>高权重的SSC：</p>
+<ul>
+<li>为了减少测试特征对的数量，仅选择带有较高权重的一些神经元作为特征，改变前后二者的区别不大，因此实际使用时可以采用这种方式减少开销。</li>
+</ul>
+<p><img src="/2020/08/24/DeepCover/Fig7.png" alt="Fig7" style="zoom:60%;"></p>
+</li>
+<li><p>调用LP的开销</p>
+<ul>
+<li>对于每个DNN，我们选择一组神经元对，其中每个决策神经元位于不同的层。然后，我们测量变量和约束的数量，以及在解决每个LP调用上花费的时间(以秒计算)。表3中的结果证实了部分激活模式的LP模型确实是轻量级的，并且在遍历一个DNN的更深层时，其复杂度以线性方式增加。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/24/DeepCover/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
+<h3 id="CIFAR10上的实验结果"><a href="#CIFAR10上的实验结果" class="headerlink" title="CIFAR10上的实验结果"></a>CIFAR10上的实验结果</h3><ul>
+<li>在不失一般性的前提下，卷积层节点的激活是通过激活一个子集的先例节点来计算的，每个节点都属于其层中的一个feature map。我们将算法1中的启发式测试用例生成应用于SS覆盖率，并在每个不同的层分别度量决策特征的覆盖率结果。</li>
+<li>总的来说，SS覆盖率高于90%是通过相当一部分的敌对示例实现的。</li>
+<li>一个有趣的观察是,<font color="red">更深层的因果变化的特性能够检测小扰动的输入导致对抗的行为</font>,而这有可能为开发人员提供有用的反馈调试或优化神经网络参数。</li>
+</ul>
+<p><img src="/2020/08/24/DeepCover/Fig9.png" alt="Fig9" style="zoom:60%;"></p>
+<h3 id="ImageNet上的实验结果"><a href="#ImageNet上的实验结果" class="headerlink" title="ImageNet上的实验结果"></a>ImageNet上的实验结果</h3><ul>
+<li><p>VGG16+启发式测试用例生成算法</p>
+</li>
+<li><p>特征：一组神经元</p>
+<ul>
+<li>大小用参数$w$来调节：$\psi _{k,i} \leq w \cdot s_k$，$s_k$为该层神经元总数</li>
+</ul>
+</li>
+<li><p>我们测试了2000个随机特征对的SS覆盖情况，$w \in \{0.1\%、0.5\%、1.0\%\}$。</p>
+<ul>
+<li><p>覆盖结果：10.5%，13.6%和14.6%是对抗样本。对抗样本的平均距离和标准偏差：</p>
+<p><img src="/2020/08/24/DeepCover/Fig10.png" alt="Fig10" style="zoom:60%;"></p>
+</li>
+<li><p>结果表明，特征对与输入扰动之间存在一定的关系。在生成的对抗样本中，<font color="red">更细粒度的特征比粗糙的特征能够捕获更小的扰动。</font></p>
+</li>
+</ul>
+</li>
+<li><p><font color="red">我们注意到访问边界激活值很可能要求对DNNs进行更大的更改。</font>我们设置功能大小使用$w$= 10%,获得的测试集中有22.7%的对抗样本。然而，这些敌对的例子的距离，平均L∞-norm距离3.49，标准差3.88，远远大于SS覆盖的距离</p>
+</li>
+</ul>
 
     </div>
 
@@ -393,9 +489,8 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag"># DNN测试</a>
-              <a href="/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/" rel="tag"># 测试输入生成</a>
               <a href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag"># 测试标准</a>
-              <a href="/tags/%E7%BB%84%E5%90%88%E6%B5%8B%E8%AF%95/" rel="tag"># 组合测试</a>
+              <a href="/tags/MC-DC/" rel="tag"># MC/DC</a>
           </div>
 
         
@@ -404,13 +499,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/08/19/DeepXplore/" rel="prev" title="【论文笔记】DeepXplore">
-      <i class="fa fa-chevron-left"></i> 【论文笔记】DeepXplore
+    <a href="/2020/08/22/DeepImportance/" rel="prev" title="【论文笔记】DeepImportance">
+      <i class="fa fa-chevron-left"></i> 【论文笔记】DeepImportance
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/08/20/Variables-Comparison/" rel="next" title="DNN测试输入生成论文可控制参数及变量总结">
-      DNN测试输入生成论文可控制参数及变量总结 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -470,7 +562,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E6%8B%AC"><span class="nav-number">1.</span> <span class="nav-text">概括</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%9C%BA"><span class="nav-number">2.</span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86"><span class="nav-number">3.</span> <span class="nav-text">组合测试标准</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E5%85%83%E6%BF%80%E6%B4%BB%E9%85%8D%E7%BD%AE%EF%BC%88Neuron-activation-configuration"><span class="nav-number">3.1.</span> <span class="nav-text">神经元激活配置（Neuron-activation configuration)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#t-%E8%B7%AF%E7%BB%84%E5%90%88%E7%A8%80%E7%96%8F%E8%A6%86%E7%9B%96"><span class="nav-number">3.2.</span> <span class="nav-text">$t$-路组合稀疏覆盖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#t-%E8%B7%AF%E7%BB%84%E5%90%88%E7%A8%A0%E5%AF%86%E8%A6%86%E7%9B%96"><span class="nav-number">3.3.</span> <span class="nav-text">$t$-路组合稠密覆盖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#p-t-%E5%AE%8C%E5%A4%87%E6%80%A7"><span class="nav-number">3.4.</span> <span class="nav-text">$(p,t)$完备性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNN%E7%9A%84%E9%B2%81%E6%A3%92%E6%80%A7%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">DNN的鲁棒性测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#d-%E5%B1%80%E9%83%A8%E9%B2%81%E6%A3%92%E6%80%A7"><span class="nav-number">4.1.</span> <span class="nav-text">$d$-局部鲁棒性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">5.</span> <span class="nav-text">实验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%8E%A7%E5%88%B6%E5%8F%82%E6%95%B0-%E5%8F%98%E9%87%8F%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">可控制参数&#x2F;变量总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E6%8B%AC"><span class="nav-number">1.</span> <span class="nav-text">概括</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9FMC-DC%E8%A6%86%E7%9B%96"><span class="nav-number">2.</span> <span class="nav-text">传统MC&#x2F;DC覆盖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DNN%E4%B8%AD%E7%9A%84%E5%86%B3%E7%AD%96%E5%92%8C%E6%9D%A1%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">DNN中的决策和条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E6%96%B9%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">覆盖方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%8E%87%E8%AE%A1%E7%AE%97"><span class="nav-number">3.3.</span> <span class="nav-text">覆盖率计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E7%8E%B0%E6%9C%89%E8%A6%86%E7%9B%96%E6%A0%87%E5%87%86%E7%9A%84%E5%BC%BA%E5%BC%B1%E5%85%B3%E7%B3%BB"><span class="nav-number">3.4.</span> <span class="nav-text">与现有覆盖标准的强弱关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E7%94%9F%E6%88%90"><span class="nav-number">3.5.</span> <span class="nav-text">自动测试用例生成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">4.</span> <span class="nav-text">实验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">4.1.</span> <span class="nav-text">数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E6%8E%A7%E5%88%B6%E5%8F%82%E6%95%B0%E5%8F%8A%E5%8F%98%E9%87%8F"><span class="nav-number">4.2.</span> <span class="nav-text">可控制参数及变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MNIST%E4%B8%8A%E7%9A%84%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">4.3.</span> <span class="nav-text">MNIST上的实验结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CIFAR10%E4%B8%8A%E7%9A%84%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">4.4.</span> <span class="nav-text">CIFAR10上的实验结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ImageNet%E4%B8%8A%E7%9A%84%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">ImageNet上的实验结果</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
