@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ruby.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rubychen0611.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="原文：Guiding Deep Learning System Testing using Surprise Adequacy (ICSE‘19)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】Suprise Adequacy">
+<meta property="og:url" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/index.html">
+<meta property="og:site_name" content="Ruby&#39;s Blog">
+<meta property="og:description" content="原文：Guiding Deep Learning System Testing using Surprise Adequacy (ICSE‘19)">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig5.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig6.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig7.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig8.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig9.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig10.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig11.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig12.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig13.png">
+<meta property="article:published_time" content="2020-08-25T01:27:28.000Z">
+<meta property="article:modified_time" content="2020-08-25T08:38:17.490Z">
+<meta property="article:author" content="Ruby Chen">
+<meta property="article:tag" content="DNN测试">
+<meta property="article:tag" content="测试标准">
+<meta property="article:tag" content="输入验证">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/Fig1.png">
+
+<link rel="canonical" href="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【论文笔记】Suprise Adequacy | Ruby's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/rss2.xml" title="Ruby's Blog" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Ruby's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">十年水流东，十年水流西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-link fa-fw"></i>朋友们</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-comment fa-fw"></i>留言板</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/08/25/Suprise-Adequacy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.jpg">
+      <meta itemprop="name" content="Ruby Chen">
+      <meta itemprop="description" content="自爱兼爱，善感而不多愁。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ruby's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【论文笔记】Suprise Adequacy
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-08-25 09:27:28 / 修改时间：16:38:17" itemprop="dateCreated datePublished" datetime="2020-08-25T09:27:28+08:00">2020-08-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">论文笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论数：</span>
+    
+    <a title="valine" href="/2020/08/25/Suprise-Adequacy/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/25/Suprise-Adequacy/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>原文：Guiding Deep Learning System Testing using Surprise Adequacy (ICSE‘19)  <a id="more"></a></p>
+<p>代码地址：<a target="_blank" rel="noopener" href="https://github.com/coinse/sadl">https://github.com/coinse/sadl</a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一个叫Surprise Adequacy的指标，对一个给定的测试用例，基于可能性或距离来衡量其激活模式相对于DNN训练集的新颖程度。实验部分较详细。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>已有的覆盖方法：</p>
+<ul>
+<li>无法针对<strong>单个</strong>输入提供信息：比如更高神经元覆盖率的输入是否比更低的好？</li>
+<li>评估的重点是显示对抗样本和提出的标准之间的相关性，而不是评估和指导它们<strong>在实际测试DL系统时的使用</strong>。</li>
+</ul>
+<p>直观地说，DL系统的一个好的测试输入集应该是系统多样化的，包括从类似于训练数据的输入、到明显不同和对抗的输入。在单个样本的粒度上，SADL测量输入对于训练系统的数据对DL系统的惊讶程度:</p>
+<ul>
+<li>基于系统看到类似的输入的可能性在训练</li>
+<li>或基于神经元激活向量之间的距离</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>设神经元集合为$N$，训练集为$T$，两种方式衡量测试输入$x$与训练集神经元激活向量$A_N(T)$之间的相似程度</p>
+<h3 id="基于可能性的SA（LSA）"><a href="#基于可能性的SA（LSA）" class="headerlink" title="基于可能性的SA（LSA）"></a>基于可能性的SA（LSA）</h3><p>采用核密度估计（KDE）来获得输入数据的分布密度函数，这里使用高斯核函数</p>
+<p>在这种方法的时候,为了减少计算量,有如下两种规则</p>
+<ul>
+<li><p>只选定特定的某层</p>
+</li>
+<li><p>方差过滤：过滤掉那些激活值的方差小于预先定义的阈值$t$的神经元</p>
+</li>
+</ul>
+<p>密度函数定义：</p>
+<script type="math/tex; mode=display">\widehat{f}(x)= \frac{1}{|A_{N_L}(T)|} \sum _{x_{i} \in T}K_{H}( \alpha _{N_{L}}(x)- \alpha _{N_{L}}(x_{i}))</script><p>公式的直观理解：对于所有的训练集中的用例，每个用例使用高斯核函数计算该用例与新输入x的激活迹的差值。概率密度低说明输入更加稀有，概率密度高说明输入更加相似。</p>
+<p>LSA定义：</p>
+<script type="math/tex; mode=display">LSA(x)=- \log ( \widehat{f}(x))</script><p>实际应用中只使用类别$c$的训练集数据$T_c$计算LSA。</p>
+<h3 id="基于距离的SA（DSA）"><a href="#基于距离的SA（DSA）" class="headerlink" title="基于距离的SA（DSA）"></a>基于距离的SA（DSA）</h3><p><img src="/2020/08/25/Suprise-Adequacy/Fig1.png" alt="Fig1" style="zoom:60%;"></p>
+<ul>
+<li><p>对于输入样本$x$，其预测标签为$c_x$，设$x_a$为与其标签相同且激活向量距离最近的训练样本，$x_b$为激活向量离$x_a$最近且类别不同的训练样本，DSA定义为：</p>
+<script type="math/tex; mode=display">DSA(x)= \frac{dist_{a}}{dist_{b}}</script></li>
+<li><p>DSA越大，说明$x$对于类别$c_x$来说越surprise</p>
+</li>
+<li><p>DSA 只适用于分类任务</p>
+</li>
+</ul>
+<h3 id="意外覆盖率的计算（SC"><a href="#意外覆盖率的计算（SC" class="headerlink" title="意外覆盖率的计算（SC)"></a>意外覆盖率的计算（SC)</h3><p>因为LSA和DSA取值都是连续的，我们用被覆盖的段数除以总段数来表示覆盖率：</p>
+<p>给定上界$U$，将$(0,U]$分成n个SA段的bucket：$B=\{b_1,b_2,…,b_n\}$，一组输入$X$的SC定义如下：</p>
+<script type="math/tex; mode=display">SC(X)= \frac{| \{ b_{i}| \exists x \in X:SA(x) \in \left[ U \cdot \frac{i-1}{n},U \cdot \frac{i}{n} \right] \}|}{n}</script><p>注意：一组具有较高SC的输入应该是一组多样化的输入。然而，具有特别高SA值的输入可能<strong>与问题域无关</strong>(如交通标志的图像将与动物图片分类器的测试无关)。因此，SC只能相对于<strong>预定义的上界</strong>来测量。<font color="red">（提前设置好的上界很重要）</font></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验配置"><a href="#实验配置" class="headerlink" title="实验配置"></a>实验配置</h3><ul>
+<li>数据集和模型</li>
+</ul>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig2.png" alt="Fig2"></p>
+<ul>
+<li><p>对抗样本生成方法</p>
+<ul>
+<li>FGSM</li>
+<li>BIM-A、BIM-B</li>
+<li>JSMA</li>
+<li>C&amp;W</li>
+</ul>
+</li>
+<li><p>合成图像生成方法（Driving数据集）</p>
+<ul>
+<li>Dave2模型：DeepXplore的输入生成（亮度、矩形、污点）和联合优化方法（3个DNN：Dave-2、Dave-dropout、Dave-norminit）</li>
+<li>Chauffeur模型：DeepTest输入生成方法（translation, scale, shear, rotation, contrast, brightness, and blur）</li>
+</ul>
+</li>
+<li><p>参数设置</p>
+<ul>
+<li><p>LSA默认方差阈值：$10^{-5}$</p>
+</li>
+<li><p>kde的带宽使用scott规则设置</p>
+</li>
+<li><p>RQ1</p>
+<ul>
+<li>MNIST选择activation_2层，CIFAR-10选择activation_6层</li>
+</ul>
+</li>
+<li><p>RQ2</p>
+<ul>
+<li>CIFAR10的activation_7和activation_8层的LSA默认方差阈值设置为$10^{-4}$（减少计算消耗）</li>
+</ul>
+</li>
+<li><p>RQ3</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig3.png" alt="Fig3" style="zoom:75%;"></p>
+</li>
+<li><p>RQ4</p>
+<ul>
+<li>MNIST选择activation_3层，CIFAR-10选择activation_5层</li>
+<li>每次重新练运行20次</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ1-SADL是否能够捕获DL系统输入的相对惊讶程度"><a href="#RQ1-SADL是否能够捕获DL系统输入的相对惊讶程度" class="headerlink" title="RQ1 SADL是否能够捕获DL系统输入的相对惊讶程度?"></a>RQ1 SADL是否能够捕获DL系统输入的相对惊讶程度?</h3><ul>
+<li><p>实验方法</p>
+<ul>
+<li>从原始数据集检查是否SA越高的样本越难被分类正确</li>
+<li>检查对抗样本是否SA较高</li>
+<li>最后，我们使用逻辑回归对SA值进行对抗样本分类训练。对于每个敌对攻击策略，我们使用MNIST和CIFAR-10提供的10,000张原始测试图像生成10,000个对抗样本。使用随机选取的1,000张原始测试图像和1,000个对抗样本，我们训练<strong>logistic回归分类器</strong>。<font color="red">(标签是如何确定的？）</font>最后，我们使用剩余的9000幅原始测试图像和9000个敌对例子来评估训练过的分类器。如果SA值正确地捕获DL系统的行为，我们期望基于SA的分类器能够成功地检测出对抗样本。我们使用ROC-AUC进行评估。</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<ul>
+<li><p>红点对应的图像集合(Ascending SA)从最小SA开始，随着SA的上升，越来越多的高SA</p>
+</li>
+<li><p>蓝点对应的图像组在相反的方向生长(即从SA高的图像到SA低的图像)。</p>
+</li>
+<li><p>作为参考，绿点表示在20次重复中随机增长的集合的平均精度。</p>
+</li>
+<li><p>可以看出，包含LSA值较高的图像，即更多令人惊讶的图像，会导致精度较低。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig4.png" alt="Fig4"></p>
+</li>
+<li><p>为了在另一个数据集上进行视觉确认，我们也选择了DeepTest为Chauffeur从三个不同级别的LSA值合成的输入集:图3显示，LSA值越高，图像视觉识别就越困难。无论是从数量上还是从视觉上，观察到的趋势都支持了我们的声明，即SADL捕获输入的意外:即使对于看不见的输入，SA也可以度量给定输入的意外程度，这与DL系统的性能直接相关。</p>
+</li>
+<li><p><img src="/2020/08/25/Suprise-Adequacy/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
+</li>
+<li><p>图4显示了由五种技术中的每一种生成的10,000个对抗样本的DSA值的排序图，以及原始的测试输入：</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig6.png" alt="Fig6" style="zoom:80%;"></p>
+</li>
+<li><p>图5是在MNIST和cifar-10的<strong>不同层</strong>中随机选取2000个对抗样本和原始测试集的LSA值的相似图。对于MNIST和cifar10，数据集提供的测试输入(用蓝色表示)往往是最不令人吃惊的，而大多数对抗样本通过较高的SA值与测试输入明显分开。这支持了我们的说法，即SADL可以捕获敌对示例中DL系统行为的差异。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig7.png" alt="Fig7"></p>
+</li>
+<li><p>最后，表III给出了MNIST和CIFAR-10中使用所有神经元进行基于DSA的分类的ROC-AUC结果。结果表明，图4中DSA值的差距可以用于对敌对的例子进行高精度的分类。</p>
+</li>
+<li><p>对于相对简单的MNIST模型，分类器的ROC-AUC范围在96.97% - 99.38%之间，可以检测出对抗样本。</p>
+</li>
+<li><p>对于更复杂的CIFAR-10模型，基于DSA的分类显示较低的ROC-AUC值，但RQ2的回答表明，来自特定层次的DSA可以产生明显更高的精度。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig8.png" alt="Fig8" style="zoom:80%;"></p>
+</li>
+<li><p><strong>基于三种不同的分析，RQ1的答案是SADL可以捕获输入的相对惊喜。高SA的输入更难正确分类;对抗性实例的SA值较高，可以根据SA进行相应的分类</strong>。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响"><a href="#RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响" class="headerlink" title="RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响?"></a>RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响?</h3><ul>
+<li><p>实验方法：我们通过计算各层的LSA和DSA，然后通过比较各层在SA上训练的对抗性例分类器来评估在SA上下文中的假设。</p>
+</li>
+<li><p>MNIST实验结果</p>
+<ul>
+<li><p>表IV给出了对敌示例分类的ROC-AUC，结果每一行分别对应MNIST中特定层的LSA和DSA上训练的分类器。行按其深度排序，即，activation_3是MNIST中最深也是最后一个隐藏层。每种攻击策略的最高ROC-AUC值以粗体显示。<font color="red">对于MNIST来说，没有明确的证据表明最深的一层是最有效的。</font></p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig9.png" alt="Fig9" style="zoom:80%;"></p>
+<ul>
+<li>图5可以解释ROC-AUC是100%的情况：MNIST activation_1对抗样本和测试集里的样本曲线清晰地分离。而MNIST activation_3的LSA曲线有很多交叉。<font color="red">（这个结果比较反直觉）</font></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CIFAR-10实验结果</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig10.png" alt="Fig10" style="zoom:75%;"></p>
+<ul>
+<li>对于LSA，没有强有力的证据表明最深的层产生最准确的分类器。</li>
+<li>然而，对于DSA，最深层次为五种攻击策略中的三种(BIM-B、JSMA和C&amp;W)生成最准确的分类器，而第二层为BIM-A生成最准确的分类器。更重要的是，<font color="red"><strong>单层</strong>DSA比所有<strong>神经</strong>元DSA值产生的分类结果要准确得多</font>（从表III与表IV和表v的对比可以看出）。</li>
+</ul>
+</li>
+<li><p>总结：DSA对其计算的层的选择很敏感，选择较深的层是有益的。然而，对于LSA，没有明确的证据支持更深层次的假设。不同的实例生成策略的层敏感性不同。</p>
+</li>
+</ul>
+<h3 id="RQ3：SC是否与DL系统的现有覆盖率标准存在相关性"><a href="#RQ3：SC是否与DL系统的现有覆盖率标准存在相关性" class="headerlink" title="RQ3：SC是否与DL系统的现有覆盖率标准存在相关性?"></a>RQ3：SC是否与DL系统的现有覆盖率标准存在相关性?</h3><ul>
+<li><p>实验方法</p>
+<ul>
+<li>我们通过累计添加输入控制输入的多样性，执行DL与这些输入，系统研究和比较各种覆盖标准的观察到的变化。包括SC和四个现有的标准:NC、KMNC、NBC、SNAC。</li>
+<li>对于MNIST和cifar-10，我们从数据集提供的原始测试数据(10000幅图像)开始，每一步添加由FGSM、BIM-A、BIM-B、JSMA和C&amp;W生成的1000个对抗性示例。</li>
+<li>对于Dave-2，我们从原始测试数据(5614张图像)开始，在每一步添加由DeepXplore生成的700张合成图像。</li>
+<li>对于Chauffeur来说，每一步增加1000张合成图像(Set1到Set3)，每一张图像都是通过应用随机数量DeepTest的变换生成的。</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<ul>
+<li><p>表6显示了不同的覆盖率标准如何对日益增加的多样性水平作出反应。列表示步骤，在每一个步骤中会向原始测试集添加更多的输入。如果与前一个步骤相比，<strong>步骤中覆盖率的增加小于0.1个百分点，则该值加下划线</strong>。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig11.png" alt="Fig11" style="zoom:70%;"></p>
+</li>
+<li><p>图6显示了来自CIFAR-10和Chauffeur的结果的可视化。(注意DSC不能为这两个DL系统计算，因为它们不是分类器。)</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig12.png" alt="Fig12" style="zoom:60%;"></p>
+</li>
+<li><p>总的来说，大多数研究的标准会随着每一步的额外输入而增加。<strong>值得注意的例外是NC，它会在许多步骤中停滞不前。</strong>这与DeepGauge的结果一致。</p>
+</li>
+<li><p>添加的输入类型与不同标准的响应之间存在相互作用:SNAC、KMNC和NBC在CIFAR-10中加入BIM-B示例时显著增加，但在添加C&amp;W输入时变化不大。但是，对于Chauffeur，只有SNAC和NBC在增加输入集1时表现出类似的增长，而KMNC的增长更为稳定。</p>
+</li>
+<li><p>总的来说，除了NC之外，我们回答了RQ3, SC与到目前为止引入的其他覆盖率标准相关。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性"><a href="#RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性" class="headerlink" title="RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性?"></a>RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性?</h3><ul>
+<li><p>实验方法：</p>
+<ul>
+<li>我们检查SA是否可以指导额外训练输入的选择。从这些模型的对抗样本和合成输入中，我们从四个不同的SA范围中选择了4组100张图像。已知$U$为RQ3中用于计算SC的上界，我们将SA $[0, U]$的范围划分为四个重叠的子集: 第一个子集包括低25%的SA值($[0,\frac{U}{4}]$)，第二个子集包括低25%的SA值($[0,\frac{2U}{4}]$)，第三个子集包括低75%的SA值($[0,\frac{3U}{4}]$)，最后是整个范围$[0,U]$。这四个子集代表越来越多样化的投入。我们将范围R设为这四个中的一个，从每个R中随机抽取100张图像，并对现有的模型进行5个额外的epoch训练。最后，我们分别测量每个模型在整个敌对和合成输入下的性能(MNIST和cifar-10的精度，Dave-2的MSE)。我们期望用更多样化的子集进行再培训将会带来更高的性能。</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig13.png" alt="Fig13" style="zoom:80%;"></p>
+<ul>
+<li>虽然我们的观察局限于DL系统和这里研究的输入生成技术，我们回答RQ4, SA可以提供指导，更有效的再训练DL系统。</li>
+</ul>
+</li>
+</ul>
+<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
+<li>选择神经元的层（单层/所有层）</li>
+<li>过滤神经元的方差阈值</li>
+<li>SA预定义的上界$U$</li>
+<li>覆盖率计算式bucket个数（划分的段数）</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_33935895/article/details/101155270">https://blog.csdn.net/qq_33935895/article/details/101155270</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag"># DNN测试</a>
+              <a href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag"># 测试标准</a>
+              <a href="/tags/%E8%BE%93%E5%85%A5%E9%AA%8C%E8%AF%81/" rel="tag"># 输入验证</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/24/DeepCover/" rel="prev" title="【论文笔记】DeepCover">
+      <i class="fa fa-chevron-left"></i> 【论文笔记】DeepCover
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%9C%BA"><span class="nav-number">2.</span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%8F%AF%E8%83%BD%E6%80%A7%E7%9A%84SA%EF%BC%88LSA%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">基于可能性的SA（LSA）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E8%B7%9D%E7%A6%BB%E7%9A%84SA%EF%BC%88DSA%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">基于距离的SA（DSA）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%8F%E5%A4%96%E8%A6%86%E7%9B%96%E7%8E%87%E7%9A%84%E8%AE%A1%E7%AE%97%EF%BC%88SC"><span class="nav-number">3.3.</span> <span class="nav-text">意外覆盖率的计算（SC)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">4.</span> <span class="nav-text">实验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E9%85%8D%E7%BD%AE"><span class="nav-number">4.1.</span> <span class="nav-text">实验配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ1-SADL%E6%98%AF%E5%90%A6%E8%83%BD%E5%A4%9F%E6%8D%95%E8%8E%B7DL%E7%B3%BB%E7%BB%9F%E8%BE%93%E5%85%A5%E7%9A%84%E7%9B%B8%E5%AF%B9%E6%83%8A%E8%AE%B6%E7%A8%8B%E5%BA%A6"><span class="nav-number">4.2.</span> <span class="nav-text">RQ1 SADL是否能够捕获DL系统输入的相对惊讶程度?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ2%EF%BC%9A%E7%A5%9E%E7%BB%8F%E5%85%83%E5%B1%82%E7%9A%84%E9%80%89%E6%8B%A9%E6%98%AF%E5%90%A6%E5%AF%B9SA%E5%8F%8D%E6%98%A0DL%E7%B3%BB%E7%BB%9F%E8%A1%8C%E4%B8%BA%E7%9A%84%E5%87%86%E7%A1%AE%E6%80%A7%E6%9C%89%E4%BB%BB%E4%BD%95%E5%BD%B1%E5%93%8D"><span class="nav-number">4.3.</span> <span class="nav-text">RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ3%EF%BC%9ASC%E6%98%AF%E5%90%A6%E4%B8%8EDL%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%8E%B0%E6%9C%89%E8%A6%86%E7%9B%96%E7%8E%87%E6%A0%87%E5%87%86%E5%AD%98%E5%9C%A8%E7%9B%B8%E5%85%B3%E6%80%A7"><span class="nav-number">4.4.</span> <span class="nav-text">RQ3：SC是否与DL系统的现有覆盖率标准存在相关性?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ4%EF%BC%9ASA%E8%83%BD%E5%90%A6%E6%8C%87%E5%AF%BCDL%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%86%8D%E8%AE%AD%E7%BB%83%EF%BC%8C%E4%BB%A5%E6%8F%90%E9%AB%98%E5%AE%83%E4%BB%AC%E5%9C%A8%E5%AF%B9%E6%8A%97%E6%A0%B7%E6%9C%AC%E5%92%8C%E7%94%B1DeepXplore%E7%94%9F%E6%88%90%E7%9A%84%E5%90%88%E6%88%90%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E6%97%B6%E7%9A%84%E5%87%86%E7%A1%AE%E6%80%A7"><span class="nav-number">4.5.</span> <span class="nav-text">RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%8E%A7%E5%88%B6%E5%8F%82%E6%95%B0-%E5%8F%98%E9%87%8F"><span class="nav-number">5.</span> <span class="nav-text">可控制参数&#x2F;变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Ruby Chen"
+      src="/images/head.jpg">
+  <p class="site-author-name" itemprop="name">Ruby Chen</p>
+  <div class="site-description" itemprop="description">自爱兼爱，善感而不多愁。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rubychen0611" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rubychen0611" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rubychen0611@yeah.net" title="E-Mail → mailto:rubychen0611@yeah.net" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://instagram.com/rubychen611" title="Instagram → https:&#x2F;&#x2F;instagram.com&#x2F;rubychen611" rel="noopener" target="_blank"><i class="fab fa-instagram fa-fw"></i>Instagram</a>
+      </span>
+  </div>
+
+
+
+      </div>
+	  
+	  
+  <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+  <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div id="myCanvasContainer" class="widget tagcloud">
+      <canvas width="250" height="250" id="resCanvas" style="width:100%">
+        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Concolic%E6%B5%8B%E8%AF%95/" rel="tag">Concolic测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag">DNN测试</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MC-DC/" rel="tag">MC/DC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%AE%E5%88%86%E6%B5%8B%E8%AF%95/" rel="tag">差分测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95/" rel="tag">模糊测试</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AF%94%E8%B5%9B/" rel="tag">比赛</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag">测试标准</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/" rel="tag">测试输入生成</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A7%BB%E5%8A%A8%E5%BC%80%E5%8F%91/" rel="tag">移动开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%84%E5%90%88%E6%B5%8B%E8%AF%95/" rel="tag">组合测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%BE%93%E5%85%A5%E9%AA%8C%E8%AF%81/" rel="tag">输入验证</a><span class="tag-list-count">1</span></li></ul>
+      </canvas>
+    </div>
+  </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ruby Chen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">30k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">27 分钟</span>
+</div>
+
+<!--添加运行时间-->
+<span id="sitetime"></span>
+<script language=javascript>
+	function siteTime(){
+		window.setTimeout("siteTime()", 1000);
+		var seconds = 1000;
+		var minutes = seconds * 60;
+		var hours = minutes * 60;
+		var days = hours * 24;
+		var years = days * 365;
+		var today = new Date();
+		var todayYear = today.getFullYear();
+		var todayMonth = today.getMonth()+1;
+		var todayDate = today.getDate();
+		var todayHour = today.getHours();
+		var todayMinute = today.getMinutes();
+		var todaySecond = today.getSeconds();
+		/* 
+		Date.UTC() -- 返回date对象距世界标准时间(UTC)1970年1月1日午夜之间的毫秒数(时间戳)
+		year - 作为date对象的年份，为4位年份值
+		month - 0-11之间的整数，做为date对象的月份
+		day - 1-31之间的整数，做为date对象的天数
+		hours - 0(午夜24点)-23之间的整数，做为date对象的小时数
+		minutes - 0-59之间的整数，做为date对象的分钟数
+		seconds - 0-59之间的整数，做为date对象的秒数
+		microseconds - 0-999之间的整数，做为date对象的毫秒数
+        */
+		var t1 = Date.UTC(2020,08,19,20,19,00); 
+		var t2 = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+		var diff = t2-t1;
+		var diffYears = Math.floor(diff/years);
+		var diffDays = Math.floor((diff/days)-diffYears*365);
+		var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+		var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+		var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+		document.getElementById("sitetime").innerHTML=" 本站已安全运行 "+/*diffYears+" 年 "+*/diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+	}
+	siteTime();
+</script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="/lib/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='255,0,0' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz',
+      appKey     : 'gosR0ey4a9G3xmN5tvWEcrBS',
+      placeholder: "留下你的评论吧",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":175,"height":325},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

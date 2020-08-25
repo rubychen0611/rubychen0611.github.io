@@ -184,6 +184,149 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepConcolic</title>
+    <url>/2020/08/19/DeepConcolic/</url>
+    <content><![CDATA[<p>原文：Concolic Testing for Deep Neural Networks （ASE’18) <a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/TrustAI/DeepConcolic">https://github.com/TrustAI/DeepConcolic</a> （利普希茨覆盖测试部分用MATLAB写的）</p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><ul>
+<li>提出了第一种DNN的Concolic测试方法。通过具体执行获得激活模式，通过反转神经元的值，优化得到变换后的输入（类似约束求解器）。使测试集达到高覆盖率。</li>
+<li><p>提出利普希茨常数覆盖标准。</p>
+</li>
+<li><p>与其他方法比较：</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepConcolic/compare.png" alt="compare"></p>
+<font color="red">（DeepTest中的Jaccard距离并不是用来约束图片距离的，只是比较激活神经元的差异）</font>
+
+<h2 id="形式化定义"><a href="#形式化定义" class="headerlink" title="形式化定义"></a>形式化定义</h2><h3 id="激活模式"><a href="#激活模式" class="headerlink" title="激活模式"></a>激活模式</h3><p>$ap[t]_{k,l} \in \{true,false\}$ 表示输入$t$的第$k$层第$l$个神经元是否被$ReLU$函数激活。</p>
+<h3 id="覆盖要求"><a href="#覆盖要求" class="headerlink" title="覆盖要求"></a>覆盖要求</h3><p>略，公式较多但比较好理解，逻辑形式表达覆盖标准。</p>
+<h3 id="覆盖要求的可满足性"><a href="#覆盖要求的可满足性" class="headerlink" title="覆盖要求的可满足性"></a>覆盖要求的可满足性</h3><p>给定一组测试用例$T$和覆盖要求$r$  ，$T \vDash r$表示测试用例满足了覆盖要求。</p>
+<h3 id="覆盖要求的复杂度"><a href="#覆盖要求的复杂度" class="headerlink" title="覆盖要求的复杂度"></a>覆盖要求的复杂度</h3><p>检查$T \vDash r$需要能在多项式时间内完成。</p>
+<h3 id="覆盖率"><a href="#覆盖率" class="headerlink" title="覆盖率"></a>覆盖率</h3><p>给定一个覆盖要求的集合$R$,测试用例集$T$可满足要求的数量所占比例即覆盖率。</p>
+<h2 id="特定覆盖要求介绍"><a href="#特定覆盖要求介绍" class="headerlink" title="特定覆盖要求介绍"></a>特定覆盖要求介绍</h2><p>本节用上面的方法形式化定义了目前学术界已有的一些覆盖标准。</p>
+<h3 id="利普希茨连续条件（Lipschitz-Continuity）"><a href="#利普希茨连续条件（Lipschitz-Continuity）" class="headerlink" title="利普希茨连续条件（Lipschitz Continuity）"></a>利普希茨连续条件（Lipschitz Continuity）</h3><p>对一个神经网络$N$，若存在$c\geq0$，使得对输入样本集合$D_{L1}$中的任意两个样本$x_1$、$x_2$，满足：</p>
+<script type="math/tex; mode=display">\parallel v[x_1]_1-v[x_2]_1 \parallel \leq c \cdot \parallel x_1-x_2 \parallel</script><p>其中$v[x]_1$表示<font color="red">输入层</font>神经元的激活向量（？），$c$为利普希茨常数。满足条件的最小的$c$称为最佳利普希茨常数$c_{best}$。</p>
+<p>利普希茨覆盖：是一组覆盖要求的集合，要求体现了给定输入子空间中的任意两个输入$x_1$、$x_2$满足上述利普希茨连续条件的情况</p>
+<h3 id="神经元覆盖率（NC）"><a href="#神经元覆盖率（NC）" class="headerlink" title="神经元覆盖率（NC）"></a>神经元覆盖率（NC）</h3><p>DeepXplore中定义的神经元覆盖率，形式化表示为一组覆盖标准：</p>
+<p>$\{\exists x.ap[x]_{k,i}=true|2\leq k \leq K-1,1 \leq i \leq s_k\}$</p>
+<p>即对每个神经元提出一个覆盖要求——存在输入x能将其激活。</p>
+<h3 id="MC-DC覆盖率（SS-coverage）"><a href="#MC-DC覆盖率（SS-coverage）" class="headerlink" title="MC/DC覆盖率（SS coverage）"></a>MC/DC覆盖率（SS coverage）</h3><p>DeepCover提出，略</p>
+<h3 id="神经元边缘覆盖率（NBC）"><a href="#神经元边缘覆盖率（NBC）" class="headerlink" title="神经元边缘覆盖率（NBC）"></a>神经元边缘覆盖率（NBC）</h3><p>DeepGauge中提出，略</p>
+<h2 id="本文方法"><a href="#本文方法" class="headerlink" title="本文方法"></a>本文方法</h2><h3 id="算法概览"><a href="#算法概览" class="headerlink" title="算法概览"></a>算法概览</h3><p><img src="/2020/08/19/DeepConcolic/overview.png" alt="overview" style="zoom:80%;"></p>
+<p><img src="/2020/08/19/DeepConcolic/算法.png" alt="算法" style="zoom:60%;"></p>
+<ul>
+<li>输入<ul>
+<li>一个DNN $N$</li>
+<li>一个输入样本$t_0$</li>
+<li>一组覆盖要求$R$</li>
+<li>启发式$\delta$：<font color="red">与选择的覆盖要求有关，使得第7行能尽可能找到一组容易满足的要求</font></li>
+</ul>
+</li>
+<li>输出：<ul>
+<li>一组测试样本$T$，最初只包含$t_0$</li>
+</ul>
+</li>
+<li><p>validity_check函数：检查$t’$是否有效</p>
+</li>
+<li><p>当$R$中所有要求被满足或不能满足$R$中的其他要求时算法停止</p>
+</li>
+</ul>
+<h3 id="要求评估（requirement-evaluation函数，具体执行部分"><a href="#要求评估（requirement-evaluation函数，具体执行部分" class="headerlink" title="要求评估（requirement_evaluation函数，具体执行部分)"></a>要求评估（requirement_evaluation函数，具体执行部分)</h3><ul>
+<li><p>寻找一组$(t,r)$，使得$t$变换成$t’$后最有可能满足要求$r$。</p>
+</li>
+<li><p>定义$arg max_x a:e$ ：满足布尔表达式$e$的所有样本里，使得算数表达式$a$最大的$x$</p>
+</li>
+<li><p>启发式：略，得到使得覆盖要求表达式（即前面的四种覆盖率）值取到最大的样本</p>
+<ul>
+<li>利普希茨连续</li>
+<li>NC</li>
+<li>SSC</li>
+<li>NBC</li>
+</ul>
+</li>
+</ul>
+<h3 id="符号分析（symbolic-analysis函数）"><a href="#符号分析（symbolic-analysis函数）" class="headerlink" title="符号分析（symbolic_analysis函数）"></a>符号分析（symbolic_analysis函数）</h3><p>根据$(t,r)$变换$t$生成$t’$，有三种方法：</p>
+<h4 id="1、利用线性编程进行符号分析"><a href="#1、利用线性编程进行符号分析" class="headerlink" title="1、利用线性编程进行符号分析"></a>1、利用线性编程进行符号分析</h4><p>将DNN实例$N(x)$映射到可以使用线性编程(LP)建模的激活模式$ap[x]$，并根据不同覆盖准则定义新的激活模式$ap’[x]$:</p>
+<ul>
+<li>NC：反转某神经元$n_{k,i}$的值，保持第$k$层之前的层的输出不变，因为该神经元只受之前层的影响。之后层的输出不用管。</li>
+<li>SSC：反转$n_{k+1,j}$和$n_{k,i}$</li>
+<li>NBC：目标使得神经元$n_{k,i}$的激活值超过其上界或低于其下界</li>
+</ul>
+<p>LP模型将对$ap’[x]$进行编码并求解满足要求$r$的输入$t’$</p>
+<h4 id="2、基于全局优化的符号分析"><a href="#2、基于全局优化的符号分析" class="headerlink" title="2、基于全局优化的符号分析"></a>2、基于全局优化的符号分析</h4><p>基于全局优化算法达到上述目标生成$t’$</p>
+<h4 id="3、Lipschitz测试用例生成"><a href="#3、Lipschitz测试用例生成" class="headerlink" title="3、Lipschitz测试用例生成"></a>3、Lipschitz测试用例生成</h4><p>本文提出了一种新颖的交替式罗盘搜索方案（略）</p>
+<h3 id="测试预言（约束）"><a href="#测试预言（约束）" class="headerlink" title="测试预言（约束）"></a>测试预言（约束）</h3><p>给定实数$b$，如果测试用例$t’ \in T$满足：</p>
+<script type="math/tex; mode=display">\parallel t-t' \parallel \leq b</script><p>则称$t’$为有效的。若$t$与$t’$的预测结果一致，则称DNN通过了测试预言。</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
+<li>时间限制：12h</li>
+<li>所有覆盖结果均运行10次以上取平均</li>
+</ul>
+<h3 id="实验1：与DeepXplore对比"><a href="#实验1：与DeepXplore对比" class="headerlink" title="实验1：与DeepXplore对比"></a>实验1：与DeepXplore对比</h3><ul>
+<li><p>数据集：MNIST、CIFAR-10</p>
+</li>
+<li><p>实验方法</p>
+<ul>
+<li>从随机采样的初始种子集合开始</li>
+<li>DeepXplore要求多个模型差分测试：采用目标测试的DNN模型+DeepXplore论文里的2个模型</li>
+<li>比较二者达到的覆盖率</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/19/DeepConcolic/ex1.png" alt="ex1" style="zoom:70%;"></p>
+<ul>
+<li>DeepConcolic能达到比DeepXplore更高的覆盖率</li>
+<li>但DeepXplore更快，几秒内运行结束<font color="red">（没有说DeepConcolic的运行时间）</font></li>
+<li>生成的图像：<font color="red">(几乎完全反相也符合约束？)</font></li>
+</ul>
+<p><img src="/2020/08/19/DeepConcolic/ex1-2.png" alt="ex1-2" style="zoom:67%;"></p>
+</li>
+</ul>
+<h3 id="实验2：比较NC-SCC和NBC"><a href="#实验2：比较NC-SCC和NBC" class="headerlink" title="实验2：比较NC, SCC和NBC"></a>实验2：比较NC, SCC和NBC</h3><ul>
+<li><p>实验方法</p>
+<ul>
+<li>NC：从一张初始种子开始</li>
+<li>SCC和NBC：初始集合包含1000张图片，且仅测试一部分神经元<font color="red">（和NC差别很大）</font></li>
+<li>设置$L _\infty$的距离上界为0.3，$L_0$的距离上界为100个像素</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/19/DeepConcolic/MyBlog\source\_posts\DeepConcolic\ex2-1.png" alt="ex2-1" style="zoom:70%;"></p>
+<p><img src="/2020/08/19/DeepConcolic/ex2-3.png" alt="ex2-3"></p>
+<ul>
+<li><p>使用全局优化进行符号分析的开销太高。因此，具有$L_0$范数的SSC结果被排除在外。<font color="red">(?右图没有蓝色条形)</font></p>
+</li>
+<li><p>总体而言，DeepConcolic实现了高覆盖率，并使用健壮性检查检测到大量的对抗性示例。然而，NBC的覆盖范围是有限的</p>
+</li>
+<li><p>concolic测试可以发现距离极小的对抗样本：如1255≈0.0039（$L_{\infty}$范数），1像素（$L_0$范数）</p>
+</li>
+<li><p>对抗样本的平均距离：(对于同一网络，当距离度量改变时，使用NC发现的对抗性示例的数量可能会有很大变化。在设计DNN的覆盖标准时，需要使用各种距离度量来检查它们。)</p>
+<p><img src="/2020/08/19/DeepConcolic/ex2-2.png" alt="ex2-2" style="zoom:67%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="实验3：利普希茨常数检验结果"><a href="#实验3：利普希茨常数检验结果" class="headerlink" title="实验3：利普希茨常数检验结果"></a>实验3：利普希茨常数检验结果</h3><p><img src="/2020/08/19/DeepConcolic/ex3-1.png" alt="ex3-1" style="zoom:80%;"></p>
+<ul>
+<li>我们通过随机测试生成的方式产生了100万个测试对，但最大Lipschitz转换率只达到了3.23，并且大多数测试对都在[0.01，2]的范围内。另一方面，我们的Concolic方法可以覆盖[0.01，10.38]的Lipschitz范围，其中大多数情况位于[3.5，10]，而随机测试生成很难覆盖这一范围。</li>
+<li>目标：覆盖较大Lipschitz常数范围。如对于自动驾驶汽车等安全关键应用，Lipschitz常数较大的DNN本质上表明它更容易受到对手的扰动。因此，可以覆盖较大Lipschitz常数的测试方法为训练的DNN提供了有用的鲁棒性指标。我们认为，对于DNNs的安全测试，Lipschitz常数覆盖的Concolic测试方法可以补充现有的方法来实现更好的覆盖。</li>
+</ul>
+<h2 id="可控制参数和变量总结"><a href="#可控制参数和变量总结" class="headerlink" title="可控制参数和变量总结"></a>可控制参数和变量总结</h2><ul>
+<li>初始样本集合</li>
+<li>覆盖标准：利普希茨常数覆盖、NC、NBC、SSC</li>
+<li>变换约束条件（$L_\infty$、$L_0$及其参数）</li>
+<li>测试的神经元（全部还是部分）</li>
+</ul>
+]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>Concolic测试</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】DeepCover</title>
     <url>/2020/08/24/DeepCover/</url>
     <content><![CDATA[<p>原文：Testing Deep Neural Networks （TECS’19）<a id="more"></a></p>
@@ -371,149 +514,6 @@
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
         <tag>MC/DC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepConcolic</title>
-    <url>/2020/08/19/DeepConcolic/</url>
-    <content><![CDATA[<p>原文：Concolic Testing for Deep Neural Networks （ASE’18) <a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/TrustAI/DeepConcolic">https://github.com/TrustAI/DeepConcolic</a> （利普希茨覆盖测试部分用MATLAB写的）</p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><ul>
-<li>提出了第一种DNN的Concolic测试方法。通过具体执行获得激活模式，通过反转神经元的值，优化得到变换后的输入（类似约束求解器）。使测试集达到高覆盖率。</li>
-<li><p>提出利普希茨常数覆盖标准。</p>
-</li>
-<li><p>与其他方法比较：</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepConcolic/compare.png" alt="compare"></p>
-<font color="red">（DeepTest中的Jaccard距离并不是用来约束图片距离的，只是比较激活神经元的差异）</font>
-
-<h2 id="形式化定义"><a href="#形式化定义" class="headerlink" title="形式化定义"></a>形式化定义</h2><h3 id="激活模式"><a href="#激活模式" class="headerlink" title="激活模式"></a>激活模式</h3><p>$ap[t]_{k,l} \in \{true,false\}$ 表示输入$t$的第$k$层第$l$个神经元是否被$ReLU$函数激活。</p>
-<h3 id="覆盖要求"><a href="#覆盖要求" class="headerlink" title="覆盖要求"></a>覆盖要求</h3><p>略，公式较多但比较好理解，逻辑形式表达覆盖标准。</p>
-<h3 id="覆盖要求的可满足性"><a href="#覆盖要求的可满足性" class="headerlink" title="覆盖要求的可满足性"></a>覆盖要求的可满足性</h3><p>给定一组测试用例$T$和覆盖要求$r$  ，$T \vDash r$表示测试用例满足了覆盖要求。</p>
-<h3 id="覆盖要求的复杂度"><a href="#覆盖要求的复杂度" class="headerlink" title="覆盖要求的复杂度"></a>覆盖要求的复杂度</h3><p>检查$T \vDash r$需要能在多项式时间内完成。</p>
-<h3 id="覆盖率"><a href="#覆盖率" class="headerlink" title="覆盖率"></a>覆盖率</h3><p>给定一个覆盖要求的集合$R$,测试用例集$T$可满足要求的数量所占比例即覆盖率。</p>
-<h2 id="特定覆盖要求介绍"><a href="#特定覆盖要求介绍" class="headerlink" title="特定覆盖要求介绍"></a>特定覆盖要求介绍</h2><p>本节用上面的方法形式化定义了目前学术界已有的一些覆盖标准。</p>
-<h3 id="利普希茨连续条件（Lipschitz-Continuity）"><a href="#利普希茨连续条件（Lipschitz-Continuity）" class="headerlink" title="利普希茨连续条件（Lipschitz Continuity）"></a>利普希茨连续条件（Lipschitz Continuity）</h3><p>对一个神经网络$N$，若存在$c\geq0$，使得对输入样本集合$D_{L1}$中的任意两个样本$x_1$、$x_2$，满足：</p>
-<script type="math/tex; mode=display">\parallel v[x_1]_1-v[x_2]_1 \parallel \leq c \cdot \parallel x_1-x_2 \parallel</script><p>其中$v[x]_1$表示<font color="red">输入层</font>神经元的激活向量（？），$c$为利普希茨常数。满足条件的最小的$c$称为最佳利普希茨常数$c_{best}$。</p>
-<p>利普希茨覆盖：是一组覆盖要求的集合，要求体现了给定输入子空间中的任意两个输入$x_1$、$x_2$满足上述利普希茨连续条件的情况</p>
-<h3 id="神经元覆盖率（NC）"><a href="#神经元覆盖率（NC）" class="headerlink" title="神经元覆盖率（NC）"></a>神经元覆盖率（NC）</h3><p>DeepXplore中定义的神经元覆盖率，形式化表示为一组覆盖标准：</p>
-<p>$\{\exists x.ap[x]_{k,i}=true|2\leq k \leq K-1,1 \leq i \leq s_k\}$</p>
-<p>即对每个神经元提出一个覆盖要求——存在输入x能将其激活。</p>
-<h3 id="MC-DC覆盖率（SS-coverage）"><a href="#MC-DC覆盖率（SS-coverage）" class="headerlink" title="MC/DC覆盖率（SS coverage）"></a>MC/DC覆盖率（SS coverage）</h3><p>DeepCover提出，略</p>
-<h3 id="神经元边缘覆盖率（NBC）"><a href="#神经元边缘覆盖率（NBC）" class="headerlink" title="神经元边缘覆盖率（NBC）"></a>神经元边缘覆盖率（NBC）</h3><p>DeepGauge中提出，略</p>
-<h2 id="本文方法"><a href="#本文方法" class="headerlink" title="本文方法"></a>本文方法</h2><h3 id="算法概览"><a href="#算法概览" class="headerlink" title="算法概览"></a>算法概览</h3><p><img src="/2020/08/19/DeepConcolic/overview.png" alt="overview" style="zoom:80%;"></p>
-<p><img src="/2020/08/19/DeepConcolic/算法.png" alt="算法" style="zoom:60%;"></p>
-<ul>
-<li>输入<ul>
-<li>一个DNN $N$</li>
-<li>一个输入样本$t_0$</li>
-<li>一组覆盖要求$R$</li>
-<li>启发式$\delta$：<font color="red">与选择的覆盖要求有关，使得第7行能尽可能找到一组容易满足的要求</font></li>
-</ul>
-</li>
-<li>输出：<ul>
-<li>一组测试样本$T$，最初只包含$t_0$</li>
-</ul>
-</li>
-<li><p>validity_check函数：检查$t’$是否有效</p>
-</li>
-<li><p>当$R$中所有要求被满足或不能满足$R$中的其他要求时算法停止</p>
-</li>
-</ul>
-<h3 id="要求评估（requirement-evaluation函数，具体执行部分"><a href="#要求评估（requirement-evaluation函数，具体执行部分" class="headerlink" title="要求评估（requirement_evaluation函数，具体执行部分)"></a>要求评估（requirement_evaluation函数，具体执行部分)</h3><ul>
-<li><p>寻找一组$(t,r)$，使得$t$变换成$t’$后最有可能满足要求$r$。</p>
-</li>
-<li><p>定义$arg max_x a:e$ ：满足布尔表达式$e$的所有样本里，使得算数表达式$a$最大的$x$</p>
-</li>
-<li><p>启发式：略，得到使得覆盖要求表达式（即前面的四种覆盖率）值取到最大的样本</p>
-<ul>
-<li>利普希茨连续</li>
-<li>NC</li>
-<li>SSC</li>
-<li>NBC</li>
-</ul>
-</li>
-</ul>
-<h3 id="符号分析（symbolic-analysis函数）"><a href="#符号分析（symbolic-analysis函数）" class="headerlink" title="符号分析（symbolic_analysis函数）"></a>符号分析（symbolic_analysis函数）</h3><p>根据$(t,r)$变换$t$生成$t’$，有三种方法：</p>
-<h4 id="1、利用线性编程进行符号分析"><a href="#1、利用线性编程进行符号分析" class="headerlink" title="1、利用线性编程进行符号分析"></a>1、利用线性编程进行符号分析</h4><p>将DNN实例$N(x)$映射到可以使用线性编程(LP)建模的激活模式$ap[x]$，并根据不同覆盖准则定义新的激活模式$ap’[x]$:</p>
-<ul>
-<li>NC：反转某神经元$n_{k,i}$的值，保持第$k$层之前的层的输出不变，因为该神经元只受之前层的影响。之后层的输出不用管。</li>
-<li>SSC：反转$n_{k+1,j}$和$n_{k,i}$</li>
-<li>NBC：目标使得神经元$n_{k,i}$的激活值超过其上界或低于其下界</li>
-</ul>
-<p>LP模型将对$ap’[x]$进行编码并求解满足要求$r$的输入$t’$</p>
-<h4 id="2、基于全局优化的符号分析"><a href="#2、基于全局优化的符号分析" class="headerlink" title="2、基于全局优化的符号分析"></a>2、基于全局优化的符号分析</h4><p>基于全局优化算法达到上述目标生成$t’$</p>
-<h4 id="3、Lipschitz测试用例生成"><a href="#3、Lipschitz测试用例生成" class="headerlink" title="3、Lipschitz测试用例生成"></a>3、Lipschitz测试用例生成</h4><p>本文提出了一种新颖的交替式罗盘搜索方案（略）</p>
-<h3 id="测试预言（约束）"><a href="#测试预言（约束）" class="headerlink" title="测试预言（约束）"></a>测试预言（约束）</h3><p>给定实数$b$，如果测试用例$t’ \in T$满足：</p>
-<script type="math/tex; mode=display">\parallel t-t' \parallel \leq b</script><p>则称$t’$为有效的。若$t$与$t’$的预测结果一致，则称DNN通过了测试预言。</p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
-<li>时间限制：12h</li>
-<li>所有覆盖结果均运行10次以上取平均</li>
-</ul>
-<h3 id="实验1：与DeepXplore对比"><a href="#实验1：与DeepXplore对比" class="headerlink" title="实验1：与DeepXplore对比"></a>实验1：与DeepXplore对比</h3><ul>
-<li><p>数据集：MNIST、CIFAR-10</p>
-</li>
-<li><p>实验方法</p>
-<ul>
-<li>从随机采样的初始种子集合开始</li>
-<li>DeepXplore要求多个模型差分测试：采用目标测试的DNN模型+DeepXplore论文里的2个模型</li>
-<li>比较二者达到的覆盖率</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/19/DeepConcolic/ex1.png" alt="ex1" style="zoom:70%;"></p>
-<ul>
-<li>DeepConcolic能达到比DeepXplore更高的覆盖率</li>
-<li>但DeepXplore更快，几秒内运行结束<font color="red">（没有说DeepConcolic的运行时间）</font></li>
-<li>生成的图像：<font color="red">(几乎完全反相也符合约束？)</font></li>
-</ul>
-<p><img src="/2020/08/19/DeepConcolic/ex1-2.png" alt="ex1-2" style="zoom:67%;"></p>
-</li>
-</ul>
-<h3 id="实验2：比较NC-SCC和NBC"><a href="#实验2：比较NC-SCC和NBC" class="headerlink" title="实验2：比较NC, SCC和NBC"></a>实验2：比较NC, SCC和NBC</h3><ul>
-<li><p>实验方法</p>
-<ul>
-<li>NC：从一张初始种子开始</li>
-<li>SCC和NBC：初始集合包含1000张图片，且仅测试一部分神经元<font color="red">（和NC差别很大）</font></li>
-<li>设置$L _\infty$的距离上界为0.3，$L_0$的距离上界为100个像素</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/19/DeepConcolic/MyBlog\source\_posts\DeepConcolic\ex2-1.png" alt="ex2-1" style="zoom:70%;"></p>
-<p><img src="/2020/08/19/DeepConcolic/ex2-3.png" alt="ex2-3"></p>
-<ul>
-<li><p>使用全局优化进行符号分析的开销太高。因此，具有$L_0$范数的SSC结果被排除在外。<font color="red">(?右图没有蓝色条形)</font></p>
-</li>
-<li><p>总体而言，DeepConcolic实现了高覆盖率，并使用健壮性检查检测到大量的对抗性示例。然而，NBC的覆盖范围是有限的</p>
-</li>
-<li><p>concolic测试可以发现距离极小的对抗样本：如1255≈0.0039（$L_{\infty}$范数），1像素（$L_0$范数）</p>
-</li>
-<li><p>对抗样本的平均距离：(对于同一网络，当距离度量改变时，使用NC发现的对抗性示例的数量可能会有很大变化。在设计DNN的覆盖标准时，需要使用各种距离度量来检查它们。)</p>
-<p><img src="/2020/08/19/DeepConcolic/ex2-2.png" alt="ex2-2" style="zoom:67%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="实验3：利普希茨常数检验结果"><a href="#实验3：利普希茨常数检验结果" class="headerlink" title="实验3：利普希茨常数检验结果"></a>实验3：利普希茨常数检验结果</h3><p><img src="/2020/08/19/DeepConcolic/ex3-1.png" alt="ex3-1" style="zoom:80%;"></p>
-<ul>
-<li>我们通过随机测试生成的方式产生了100万个测试对，但最大Lipschitz转换率只达到了3.23，并且大多数测试对都在[0.01，2]的范围内。另一方面，我们的Concolic方法可以覆盖[0.01，10.38]的Lipschitz范围，其中大多数情况位于[3.5，10]，而随机测试生成很难覆盖这一范围。</li>
-<li>目标：覆盖较大Lipschitz常数范围。如对于自动驾驶汽车等安全关键应用，Lipschitz常数较大的DNN本质上表明它更容易受到对手的扰动。因此，可以覆盖较大Lipschitz常数的测试方法为训练的DNN提供了有用的鲁棒性指标。我们认为，对于DNNs的安全测试，Lipschitz常数覆盖的Concolic测试方法可以补充现有的方法来实现更好的覆盖。</li>
-</ul>
-<h2 id="可控制参数和变量总结"><a href="#可控制参数和变量总结" class="headerlink" title="可控制参数和变量总结"></a>可控制参数和变量总结</h2><ul>
-<li>初始样本集合</li>
-<li>覆盖标准：利普希茨常数覆盖、NC、NBC、SSC</li>
-<li>变换约束条件（$L_\infty$、$L_0$及其参数）</li>
-<li>测试的神经元（全部还是部分）</li>
-</ul>
-]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
-        <tag>Concolic测试</tag>
       </tags>
   </entry>
   <entry>
@@ -729,6 +729,145 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepImportance</title>
+    <url>/2020/08/22/DeepImportance/</url>
+    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
+<ul>
+<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
+<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
+</ul>
+</li>
+<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
+<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
+<p>步骤：</p>
+<p>1、分析重要神经元</p>
+<p>2、重要神经元激活值聚类</p>
+<p>3、评价测试集的重要神经元覆盖率</p>
+<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
+<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
+<ul>
+<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
+<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
+<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
+<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>重要性计算算法</p>
+<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
+<ul>
+<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
+<li>6-8行：反向传播计算相关性</li>
+<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
+<li>第11行：返回最重要的m个神经元</li>
+</ul>
+</li>
+<li><p>相关性分析</p>
+<ul>
+<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
+<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
+</ul>
+</li>
+</ul>
+<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
+<li>动机<ul>
+<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
+<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
+</ul>
+</li>
+<li>算法<ul>
+<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
+<li>如何确定$k$值？<ul>
+<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
+<p>重要神经元激活值簇的组合定义为：</p>
+<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
+<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>神经元覆盖率NC：阈值为0.75</li>
+<li>TKNC：$k=3$</li>
+<li>KMNC：$k=1000$</li>
+<li>NBC、SNAC：训练集激活值的最值为上下界</li>
+<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
+<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
+<li>$m \in \{6,8,10,12\}$</li>
+<li>最大运行时间：3h</li>
+<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
+</ul>
+<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
+<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
+<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
+<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
+<li><p>实验方法：</p>
+<ul>
+<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
+</li>
+<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
+<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
+<ul>
+<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
+<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
+<li>生成对抗样本<ul>
+<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
+<ul>
+<li>实验结果：<ul>
+<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
+<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
+<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
+<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
+</ul>
+<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
+<ul>
+<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
+<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
+<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
+</ul>
+<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
+<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
+<li>选择重要性神经元的层</li>
+</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》），DeepCheck也用过类似的方法；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
+]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】DeepTest</title>
     <url>/2020/08/20/DeepTest/</url>
     <content><![CDATA[<p>原文：DeepTest: Automated Testing of Deep-Neural-Network-driven Autonomous Cars  (ICSE’18)  <a id="more"></a></p>
@@ -880,145 +1019,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】DeepImportance</title>
-    <url>/2020/08/22/DeepImportance/</url>
-    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
-<ul>
-<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
-<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
-</ul>
-</li>
-<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
-<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
-</ul>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
-<p>步骤：</p>
-<p>1、分析重要神经元</p>
-<p>2、重要神经元激活值聚类</p>
-<p>3、评价测试集的重要神经元覆盖率</p>
-<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
-<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
-<ul>
-<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
-<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
-<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
-<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>重要性计算算法</p>
-<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
-<ul>
-<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
-<li>6-8行：反向传播计算相关性</li>
-<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
-<li>第11行：返回最重要的m个神经元</li>
-</ul>
-</li>
-<li><p>相关性分析</p>
-<ul>
-<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
-<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
-</ul>
-</li>
-</ul>
-<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
-<li>动机<ul>
-<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
-<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
-</ul>
-</li>
-<li>算法<ul>
-<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
-<li>如何确定$k$值？<ul>
-<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
-<p>重要神经元激活值簇的组合定义为：</p>
-<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
-<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
-<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
-<li>神经元覆盖率NC：阈值为0.75</li>
-<li>TKNC：$k=3$</li>
-<li>KMNC：$k=1000$</li>
-<li>NBC、SNAC：训练集激活值的最值为上下界</li>
-<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
-<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
-<li>$m \in \{6,8,10,12\}$</li>
-<li>最大运行时间：3h</li>
-<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
-</ul>
-<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
-<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
-<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
-<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
-<li><p>实验方法：</p>
-<ul>
-<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
-</li>
-<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
-<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
-<ul>
-<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
-<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
-<li>生成对抗样本<ul>
-<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
-<ul>
-<li>实验结果：<ul>
-<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
-<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
-<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
-<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
-</ul>
-<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
-<ul>
-<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
-<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
-<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
-</ul>
-<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
-<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
-<li>选择重要性神经元的层</li>
-</ul>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》），DeepCheck也用过类似的方法；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
-]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】DeepXplore</title>
     <url>/2020/08/19/DeepXplore/</url>
     <content><![CDATA[<p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
@@ -1154,6 +1154,214 @@
       <tags>
         <tag>比赛</tag>
         <tag>移动开发</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】Suprise Adequacy</title>
+    <url>/2020/08/25/Suprise-Adequacy/</url>
+    <content><![CDATA[<p>原文：Guiding Deep Learning System Testing using Surprise Adequacy (ICSE‘19)  <a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/coinse/sadl">https://github.com/coinse/sadl</a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一个叫Surprise Adequacy的指标，对一个给定的测试用例，基于可能性或距离来衡量其激活模式相对于DNN训练集的新颖程度。实验部分较详细。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>已有的覆盖方法：</p>
+<ul>
+<li>无法针对<strong>单个</strong>输入提供信息：比如更高神经元覆盖率的输入是否比更低的好？</li>
+<li>评估的重点是显示对抗样本和提出的标准之间的相关性，而不是评估和指导它们<strong>在实际测试DL系统时的使用</strong>。</li>
+</ul>
+<p>直观地说，DL系统的一个好的测试输入集应该是系统多样化的，包括从类似于训练数据的输入、到明显不同和对抗的输入。在单个样本的粒度上，SADL测量输入对于训练系统的数据对DL系统的惊讶程度:</p>
+<ul>
+<li>基于系统看到类似的输入的可能性在训练</li>
+<li>或基于神经元激活向量之间的距离</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>设神经元集合为$N$，训练集为$T$，两种方式衡量测试输入$x$与训练集神经元激活向量$A_N(T)$之间的相似程度</p>
+<h3 id="基于可能性的SA（LSA）"><a href="#基于可能性的SA（LSA）" class="headerlink" title="基于可能性的SA（LSA）"></a>基于可能性的SA（LSA）</h3><p>采用核密度估计（KDE）来获得输入数据的分布密度函数，这里使用高斯核函数</p>
+<p>在这种方法的时候,为了减少计算量,有如下两种规则</p>
+<ul>
+<li><p>只选定特定的某层</p>
+</li>
+<li><p>方差过滤：过滤掉那些激活值的方差小于预先定义的阈值$t$的神经元</p>
+</li>
+</ul>
+<p>密度函数定义：</p>
+<script type="math/tex; mode=display">\widehat{f}(x)= \frac{1}{|A_{N_L}(T)|} \sum _{x_{i} \in T}K_{H}( \alpha _{N_{L}}(x)- \alpha _{N_{L}}(x_{i}))</script><p>公式的直观理解：对于所有的训练集中的用例，每个用例使用高斯核函数计算该用例与新输入x的激活迹的差值。概率密度低说明输入更加稀有，概率密度高说明输入更加相似。</p>
+<p>LSA定义：</p>
+<script type="math/tex; mode=display">LSA(x)=- \log ( \widehat{f}(x))</script><p>实际应用中只使用类别$c$的训练集数据$T_c$计算LSA。</p>
+<h3 id="基于距离的SA（DSA）"><a href="#基于距离的SA（DSA）" class="headerlink" title="基于距离的SA（DSA）"></a>基于距离的SA（DSA）</h3><p><img src="/2020/08/25/Suprise-Adequacy/Fig1.png" alt="Fig1" style="zoom:60%;"></p>
+<ul>
+<li><p>对于输入样本$x$，其预测标签为$c_x$，设$x_a$为与其标签相同且激活向量距离最近的训练样本，$x_b$为激活向量离$x_a$最近且类别不同的训练样本，DSA定义为：</p>
+<script type="math/tex; mode=display">DSA(x)= \frac{dist_{a}}{dist_{b}}</script></li>
+<li><p>DSA越大，说明$x$对于类别$c_x$来说越surprise</p>
+</li>
+<li><p>DSA 只适用于分类任务</p>
+</li>
+</ul>
+<h3 id="意外覆盖率的计算（SC"><a href="#意外覆盖率的计算（SC" class="headerlink" title="意外覆盖率的计算（SC)"></a>意外覆盖率的计算（SC)</h3><p>因为LSA和DSA取值都是连续的，我们用被覆盖的段数除以总段数来表示覆盖率：</p>
+<p>给定上界$U$，将$(0,U]$分成n个SA段的bucket：$B=\{b_1,b_2,…,b_n\}$，一组输入$X$的SC定义如下：</p>
+<script type="math/tex; mode=display">SC(X)= \frac{| \{ b_{i}| \exists x \in X:SA(x) \in \left[ U \cdot \frac{i-1}{n},U \cdot \frac{i}{n} \right] \}|}{n}</script><p>注意：一组具有较高SC的输入应该是一组多样化的输入。然而，具有特别高SA值的输入可能<strong>与问题域无关</strong>(如交通标志的图像将与动物图片分类器的测试无关)。因此，SC只能相对于<strong>预定义的上界</strong>来测量。<font color="red">（提前设置好的上界很重要）</font></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验配置"><a href="#实验配置" class="headerlink" title="实验配置"></a>实验配置</h3><ul>
+<li>数据集和模型</li>
+</ul>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig2.png" alt="Fig2"></p>
+<ul>
+<li><p>对抗样本生成方法</p>
+<ul>
+<li>FGSM</li>
+<li>BIM-A、BIM-B</li>
+<li>JSMA</li>
+<li>C&amp;W</li>
+</ul>
+</li>
+<li><p>合成图像生成方法（Driving数据集）</p>
+<ul>
+<li>Dave2模型：DeepXplore的输入生成（亮度、矩形、污点）和联合优化方法（3个DNN：Dave-2、Dave-dropout、Dave-norminit）</li>
+<li>Chauffeur模型：DeepTest输入生成方法（translation, scale, shear, rotation, contrast, brightness, and blur）</li>
+</ul>
+</li>
+<li><p>参数设置</p>
+<ul>
+<li><p>LSA默认方差阈值：$10^{-5}$</p>
+</li>
+<li><p>kde的带宽使用scott规则设置</p>
+</li>
+<li><p>RQ1</p>
+<ul>
+<li>MNIST选择activation_2层，CIFAR-10选择activation_6层</li>
+</ul>
+</li>
+<li><p>RQ2</p>
+<ul>
+<li>CIFAR10的activation_7和activation_8层的LSA默认方差阈值设置为$10^{-4}$（减少计算消耗）</li>
+</ul>
+</li>
+<li><p>RQ3</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig3.png" alt="Fig3" style="zoom:75%;"></p>
+</li>
+<li><p>RQ4</p>
+<ul>
+<li>MNIST选择activation_3层，CIFAR-10选择activation_5层</li>
+<li>每次重新练运行20次</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ1-SADL是否能够捕获DL系统输入的相对惊讶程度"><a href="#RQ1-SADL是否能够捕获DL系统输入的相对惊讶程度" class="headerlink" title="RQ1 SADL是否能够捕获DL系统输入的相对惊讶程度?"></a>RQ1 SADL是否能够捕获DL系统输入的相对惊讶程度?</h3><ul>
+<li><p>实验方法</p>
+<ul>
+<li>从原始数据集检查是否SA越高的样本越难被分类正确</li>
+<li>检查对抗样本是否SA较高</li>
+<li>最后，我们使用逻辑回归对SA值进行对抗样本分类训练。对于每个敌对攻击策略，我们使用MNIST和CIFAR-10提供的10,000张原始测试图像生成10,000个对抗样本。使用随机选取的1,000张原始测试图像和1,000个对抗样本，我们训练<strong>logistic回归分类器</strong>。<font color="red">(标签是如何确定的？）</font>最后，我们使用剩余的9000幅原始测试图像和9000个敌对例子来评估训练过的分类器。如果SA值正确地捕获DL系统的行为，我们期望基于SA的分类器能够成功地检测出对抗样本。我们使用ROC-AUC进行评估。</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<ul>
+<li><p>红点对应的图像集合(Ascending SA)从最小SA开始，随着SA的上升，越来越多的高SA</p>
+</li>
+<li><p>蓝点对应的图像组在相反的方向生长(即从SA高的图像到SA低的图像)。</p>
+</li>
+<li><p>作为参考，绿点表示在20次重复中随机增长的集合的平均精度。</p>
+</li>
+<li><p>可以看出，包含LSA值较高的图像，即更多令人惊讶的图像，会导致精度较低。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig4.png" alt="Fig4"></p>
+</li>
+<li><p>为了在另一个数据集上进行视觉确认，我们也选择了DeepTest为Chauffeur从三个不同级别的LSA值合成的输入集:图3显示，LSA值越高，图像视觉识别就越困难。无论是从数量上还是从视觉上，观察到的趋势都支持了我们的声明，即SADL捕获输入的意外:即使对于看不见的输入，SA也可以度量给定输入的意外程度，这与DL系统的性能直接相关。</p>
+</li>
+<li><p><img src="/2020/08/25/Suprise-Adequacy/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
+</li>
+<li><p>图4显示了由五种技术中的每一种生成的10,000个对抗样本的DSA值的排序图，以及原始的测试输入：</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig6.png" alt="Fig6" style="zoom:80%;"></p>
+</li>
+<li><p>图5是在MNIST和cifar-10的<strong>不同层</strong>中随机选取2000个对抗样本和原始测试集的LSA值的相似图。对于MNIST和cifar10，数据集提供的测试输入(用蓝色表示)往往是最不令人吃惊的，而大多数对抗样本通过较高的SA值与测试输入明显分开。这支持了我们的说法，即SADL可以捕获敌对示例中DL系统行为的差异。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig7.png" alt="Fig7"></p>
+</li>
+<li><p>最后，表III给出了MNIST和CIFAR-10中使用所有神经元进行基于DSA的分类的ROC-AUC结果。结果表明，图4中DSA值的差距可以用于对敌对的例子进行高精度的分类。</p>
+</li>
+<li><p>对于相对简单的MNIST模型，分类器的ROC-AUC范围在96.97% - 99.38%之间，可以检测出对抗样本。</p>
+</li>
+<li><p>对于更复杂的CIFAR-10模型，基于DSA的分类显示较低的ROC-AUC值，但RQ2的回答表明，来自特定层次的DSA可以产生明显更高的精度。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig8.png" alt="Fig8" style="zoom:80%;"></p>
+</li>
+<li><p><strong>基于三种不同的分析，RQ1的答案是SADL可以捕获输入的相对惊喜。高SA的输入更难正确分类;对抗性实例的SA值较高，可以根据SA进行相应的分类</strong>。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响"><a href="#RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响" class="headerlink" title="RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响?"></a>RQ2：神经元层的选择是否对SA反映DL系统行为的准确性有任何影响?</h3><ul>
+<li><p>实验方法：我们通过计算各层的LSA和DSA，然后通过比较各层在SA上训练的对抗性例分类器来评估在SA上下文中的假设。</p>
+</li>
+<li><p>MNIST实验结果</p>
+<ul>
+<li><p>表IV给出了对敌示例分类的ROC-AUC，结果每一行分别对应MNIST中特定层的LSA和DSA上训练的分类器。行按其深度排序，即，activation_3是MNIST中最深也是最后一个隐藏层。每种攻击策略的最高ROC-AUC值以粗体显示。<font color="red">对于MNIST来说，没有明确的证据表明最深的一层是最有效的。</font></p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig9.png" alt="Fig9" style="zoom:80%;"></p>
+<ul>
+<li>图5可以解释ROC-AUC是100%的情况：MNIST activation_1对抗样本和测试集里的样本曲线清晰地分离。而MNIST activation_3的LSA曲线有很多交叉。<font color="red">（这个结果比较反直觉）</font></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CIFAR-10实验结果</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig10.png" alt="Fig10" style="zoom:75%;"></p>
+<ul>
+<li>对于LSA，没有强有力的证据表明最深的层产生最准确的分类器。</li>
+<li>然而，对于DSA，最深层次为五种攻击策略中的三种(BIM-B、JSMA和C&amp;W)生成最准确的分类器，而第二层为BIM-A生成最准确的分类器。更重要的是，<font color="red"><strong>单层</strong>DSA比所有<strong>神经</strong>元DSA值产生的分类结果要准确得多</font>（从表III与表IV和表v的对比可以看出）。</li>
+</ul>
+</li>
+<li><p>总结：DSA对其计算的层的选择很敏感，选择较深的层是有益的。然而，对于LSA，没有明确的证据支持更深层次的假设。不同的实例生成策略的层敏感性不同。</p>
+</li>
+</ul>
+<h3 id="RQ3：SC是否与DL系统的现有覆盖率标准存在相关性"><a href="#RQ3：SC是否与DL系统的现有覆盖率标准存在相关性" class="headerlink" title="RQ3：SC是否与DL系统的现有覆盖率标准存在相关性?"></a>RQ3：SC是否与DL系统的现有覆盖率标准存在相关性?</h3><ul>
+<li><p>实验方法</p>
+<ul>
+<li>我们通过累计添加输入控制输入的多样性，执行DL与这些输入，系统研究和比较各种覆盖标准的观察到的变化。包括SC和四个现有的标准:NC、KMNC、NBC、SNAC。</li>
+<li>对于MNIST和cifar-10，我们从数据集提供的原始测试数据(10000幅图像)开始，每一步添加由FGSM、BIM-A、BIM-B、JSMA和C&amp;W生成的1000个对抗性示例。</li>
+<li>对于Dave-2，我们从原始测试数据(5614张图像)开始，在每一步添加由DeepXplore生成的700张合成图像。</li>
+<li>对于Chauffeur来说，每一步增加1000张合成图像(Set1到Set3)，每一张图像都是通过应用随机数量DeepTest的变换生成的。</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<ul>
+<li><p>表6显示了不同的覆盖率标准如何对日益增加的多样性水平作出反应。列表示步骤，在每一个步骤中会向原始测试集添加更多的输入。如果与前一个步骤相比，<strong>步骤中覆盖率的增加小于0.1个百分点，则该值加下划线</strong>。</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig11.png" alt="Fig11" style="zoom:70%;"></p>
+</li>
+<li><p>图6显示了来自CIFAR-10和Chauffeur的结果的可视化。(注意DSC不能为这两个DL系统计算，因为它们不是分类器。)</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig12.png" alt="Fig12" style="zoom:60%;"></p>
+</li>
+<li><p>总的来说，大多数研究的标准会随着每一步的额外输入而增加。<strong>值得注意的例外是NC，它会在许多步骤中停滞不前。</strong>这与DeepGauge的结果一致。</p>
+</li>
+<li><p>添加的输入类型与不同标准的响应之间存在相互作用:SNAC、KMNC和NBC在CIFAR-10中加入BIM-B示例时显著增加，但在添加C&amp;W输入时变化不大。但是，对于Chauffeur，只有SNAC和NBC在增加输入集1时表现出类似的增长，而KMNC的增长更为稳定。</p>
+</li>
+<li><p>总的来说，除了NC之外，我们回答了RQ3, SC与到目前为止引入的其他覆盖率标准相关。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性"><a href="#RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性" class="headerlink" title="RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性?"></a>RQ4：SA能否指导DL系统的再训练，以提高它们在对抗样本和由DeepXplore生成的合成测试输入时的准确性?</h3><ul>
+<li><p>实验方法：</p>
+<ul>
+<li>我们检查SA是否可以指导额外训练输入的选择。从这些模型的对抗样本和合成输入中，我们从四个不同的SA范围中选择了4组100张图像。已知$U$为RQ3中用于计算SC的上界，我们将SA $[0, U]$的范围划分为四个重叠的子集: 第一个子集包括低25%的SA值($[0,\frac{U}{4}]$)，第二个子集包括低25%的SA值($[0,\frac{2U}{4}]$)，第三个子集包括低75%的SA值($[0,\frac{3U}{4}]$)，最后是整个范围$[0,U]$。这四个子集代表越来越多样化的投入。我们将范围R设为这四个中的一个，从每个R中随机抽取100张图像，并对现有的模型进行5个额外的epoch训练。最后，我们分别测量每个模型在整个敌对和合成输入下的性能(MNIST和cifar-10的精度，Dave-2的MSE)。我们期望用更多样化的子集进行再培训将会带来更高的性能。</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/25/Suprise-Adequacy/Fig13.png" alt="Fig13" style="zoom:80%;"></p>
+<ul>
+<li>虽然我们的观察局限于DL系统和这里研究的输入生成技术，我们回答RQ4, SA可以提供指导，更有效的再训练DL系统。</li>
+</ul>
+</li>
+</ul>
+<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
+<li>选择神经元的层（单层/所有层）</li>
+<li>过滤神经元的方差阈值</li>
+<li>SA预定义的上界$U$</li>
+<li>覆盖率计算式bucket个数（划分的段数）</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.csdn.net/qq_33935895/article/details/101155270">https://blog.csdn.net/qq_33935895/article/details/101155270</a></p>
+]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
+        <tag>输入验证</tag>
       </tags>
   </entry>
   <entry>
