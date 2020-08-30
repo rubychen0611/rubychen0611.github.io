@@ -616,7 +616,7 @@ valine:
   enable: true
   appid: LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz # Your leancloud application appid
   appkey: gosR0ey4a9G3xmN5tvWEcrBS # Your leancloud application appkey
-  notify: false # Mail notifier
+  notify: true # Mail notifier
   verify: false # Verification code
   placeholder: 留下你的评论吧 # Comment box placeholder
   avatar: mm # Gravatar style
