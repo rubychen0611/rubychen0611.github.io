@@ -1,6 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>【论文笔记】DLFuzz</title>
+    <url>/2020/08/20/DLFuzz/</url>
+    <content><![CDATA[<p>原文：DLFuzz: Differential Fuzzing Testing of Deep Learning Systems （ESEC/FSE’18）<a id="more"></a></p>
+<p>代码：<a href="https://github.com/turned2670/DLFuzz">https://github.com/turned2670/DLFuzz</a> </p>
+<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
+<li>输入集合（未标注）</li>
+<li>待测试DNN</li>
+<li>$k$：除原预测标签外，top-k个其他标签</li>
+<li>$m$：欲覆盖的神经元个数</li>
+<li><p>strategies：神经元选择策略</p>
+<ul>
+<li><p>策略1：选择过去测试中常被覆盖的神经元</p>
+</li>
+<li><p>策略2：选择过去测试中极少被覆盖到的神经元</p>
+</li>
+<li><p>策略3：选择权重高的神经元</p>
+</li>
+<li>策略4：选择激活阈值附近的神经元</li>
+</ul>
+</li>
+<li>$\lambda$：平衡两个目标（预测类别差异和覆盖新的神经元）的参数</li>
+<li>predict_weight：代码里在上公式中$\sum c_i$前的权重，默认为0.5（未在论文里出现的参数）</li>
+<li>iter_times: 每个种子的迭代次数</li>
+<li>threshold: 神经元激活阈值</li>
+<li>learning_step：步长，代码里设为0.02</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
+<li><p>梯度约束：<font color="red">论文里说可以加保持符号约束或DeepXplore里的约束，但代码似乎没加任何约束，直接在输入上增加梯度*步长</font></p>
+</li>
+<li><p>生成图像距离约束：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</p>
+</li>
+<li><p>约束：一个输入能提升的神经元覆盖率随着时间的增加而下降，对应的保留种子的阈值也随着运行时间的增加而降低<font color="red">（代码里体现为保留种子时最少需要提升的覆盖率随迭代次数增加而降低）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig1.png" alt="fig1" style="zoom: 80%;"></p>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p>MNIST（LeNet-1, LeNet-4, LeNet-5）和ImageNet（VGG-16, VGG-19, ResNet50）</p>
+<font color="red">与DeepXplore相同</font>
+
+<h3 id="默认参数设置"><a href="#默认参数设置" class="headerlink" title="默认参数设置"></a>默认参数设置</h3><ul>
+<li><p>随机选择20个初始输入<font color="red">（类别是否平衡？20是否过少？）</font></p>
+</li>
+<li><p>$k=4,m=10$，strategy为策略1，iter_times=3 </p>
+</li>
+</ul>
+<h3 id="实验1：DLFuzz与DeepXplore比较"><a href="#实验1：DLFuzz与DeepXplore比较" class="headerlink" title="实验1：DLFuzz与DeepXplore比较"></a>实验1：DLFuzz与DeepXplore比较</h3><ul>
+<li><p>实验方法：对相同的20个初始输入，比较DLFuzz相对DeepXplore神经元覆盖率、l2距离、生成对抗样本的个数、每个对抗样本平均生成时间</p>
+</li>
+<li><p>实验结果：</p>
+<ul>
+<li><p>覆盖率提升<font color="red">（DLFuzz的优化目标选择了10个神经元，DeepXplore只选了一个）</font></p>
+</li>
+<li><p>L2距离很小，生成的扰动更隐秘<font color="red">（DeepXplore未对距离做限制，甚至认为L1距离越大多样性越好）</font></p>
+</li>
+<li><p>生成对抗样本数量更多（DeepXplore对每组DNN每张图片最多只生成一个对抗样本，DLFuzz每个模型每张图片可以生成多个对抗样本）</p>
+</li>
+<li><p>更短的时间消耗（除了ResNet50，因为神经元数量大所以选择神经元的耗时长）</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/20/DLFuzz/fig2.png" alt="fig2" style="zoom:67%;"></p>
+<h3 id="实验2：四种神经元选择策略比较"><a href="#实验2：四种神经元选择策略比较" class="headerlink" title="实验2：四种神经元选择策略比较"></a>实验2：四种神经元选择策略比较</h3><ul>
+<li><p>实验方法：比较四种策略和DeepXplore，随着测试图片生成数量增多，神经元覆盖率的增长趋势</p>
+</li>
+<li><p>实验结果：策略1略好<font color="red">（生成数量是否过少？19张神经元覆盖率就趋于平缓）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig3.png" alt="fig3" style="zoom:60%;"></p>
+</li>
+</ul>
+<h3 id="实验3：用生成图片重新训练"><a href="#实验3：用生成图片重新训练" class="headerlink" title="实验3：用生成图片重新训练"></a>实验3：用生成图片重新训练</h3><ul>
+<li>实验方法：用生成的114个对抗样本重新训练MNIST的三个DNN模型，平均提升准确率1.8%<font color="red">（太少？）</font></li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】DeepCT</title>
     <url>/2020/08/20/DeepCT/</url>
     <content><![CDATA[<p>原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)  <a id="more"></a></p>
@@ -114,109 +214,9 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
         <tag>测试标准</tag>
         <tag>组合测试</tag>
-        <tag>测试输入生成</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DLFuzz</title>
-    <url>/2020/08/20/DLFuzz/</url>
-    <content><![CDATA[<p>原文：DLFuzz: Differential Fuzzing Testing of Deep Learning Systems （ESEC/FSE’18）<a id="more"></a></p>
-<p>代码：<a href="https://github.com/turned2670/DLFuzz">https://github.com/turned2670/DLFuzz</a> </p>
-<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
-<li>输入集合（未标注）</li>
-<li>待测试DNN</li>
-<li>$k$：除原预测标签外，top-k个其他标签</li>
-<li>$m$：欲覆盖的神经元个数</li>
-<li><p>strategies：神经元选择策略</p>
-<ul>
-<li><p>策略1：选择过去测试中常被覆盖的神经元</p>
-</li>
-<li><p>策略2：选择过去测试中极少被覆盖到的神经元</p>
-</li>
-<li><p>策略3：选择权重高的神经元</p>
-</li>
-<li>策略4：选择激活阈值附近的神经元</li>
-</ul>
-</li>
-<li>$\lambda$：平衡两个目标（预测类别差异和覆盖新的神经元）的参数</li>
-<li>predict_weight：代码里在上公式中$\sum c_i$前的权重，默认为0.5（未在论文里出现的参数）</li>
-<li>iter_times: 每个种子的迭代次数</li>
-<li>threshold: 神经元激活阈值</li>
-<li>learning_step：步长，代码里设为0.02</li>
-</ul>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
-<li><p>梯度约束：<font color="red">论文里说可以加保持符号约束或DeepXplore里的约束，但代码似乎没加任何约束，直接在输入上增加梯度*步长</font></p>
-</li>
-<li><p>生成图像距离约束：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</p>
-</li>
-<li><p>约束：一个输入能提升的神经元覆盖率随着时间的增加而下降，对应的保留种子的阈值也随着运行时间的增加而降低<font color="red">（代码里体现为保留种子时最少需要提升的覆盖率随迭代次数增加而降低）</font></p>
-<p><img src="/2020/08/20/DLFuzz/fig1.png" alt="fig1" style="zoom: 80%;"></p>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p>MNIST（LeNet-1, LeNet-4, LeNet-5）和ImageNet（VGG-16, VGG-19, ResNet50）</p>
-<font color="red">与DeepXplore相同</font>
-
-<h3 id="默认参数设置"><a href="#默认参数设置" class="headerlink" title="默认参数设置"></a>默认参数设置</h3><ul>
-<li><p>随机选择20个初始输入<font color="red">（类别是否平衡？20是否过少？）</font></p>
-</li>
-<li><p>$k=4,m=10$，strategy为策略1，iter_times=3 </p>
-</li>
-</ul>
-<h3 id="实验1：DLFuzz与DeepXplore比较"><a href="#实验1：DLFuzz与DeepXplore比较" class="headerlink" title="实验1：DLFuzz与DeepXplore比较"></a>实验1：DLFuzz与DeepXplore比较</h3><ul>
-<li><p>实验方法：对相同的20个初始输入，比较DLFuzz相对DeepXplore神经元覆盖率、l2距离、生成对抗样本的个数、每个对抗样本平均生成时间</p>
-</li>
-<li><p>实验结果：</p>
-<ul>
-<li><p>覆盖率提升<font color="red">（DLFuzz的优化目标选择了10个神经元，DeepXplore只选了一个）</font></p>
-</li>
-<li><p>L2距离很小，生成的扰动更隐秘<font color="red">（DeepXplore未对距离做限制，甚至认为L1距离越大多样性越好）</font></p>
-</li>
-<li><p>生成对抗样本数量更多（DeepXplore对每组DNN每张图片最多只生成一个对抗样本，DLFuzz每个模型每张图片可以生成多个对抗样本）</p>
-</li>
-<li><p>更短的时间消耗（除了ResNet50，因为神经元数量大所以选择神经元的耗时长）</p>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/20/DLFuzz/fig2.png" alt="fig2" style="zoom:67%;"></p>
-<h3 id="实验2：四种神经元选择策略比较"><a href="#实验2：四种神经元选择策略比较" class="headerlink" title="实验2：四种神经元选择策略比较"></a>实验2：四种神经元选择策略比较</h3><ul>
-<li><p>实验方法：比较四种策略和DeepXplore，随着测试图片生成数量增多，神经元覆盖率的增长趋势</p>
-</li>
-<li><p>实验结果：策略1略好<font color="red">（生成数量是否过少？19张神经元覆盖率就趋于平缓）</font></p>
-<p><img src="/2020/08/20/DLFuzz/fig3.png" alt="fig3" style="zoom:60%;"></p>
-</li>
-</ul>
-<h3 id="实验3：用生成图片重新训练"><a href="#实验3：用生成图片重新训练" class="headerlink" title="实验3：用生成图片重新训练"></a>实验3：用生成图片重新训练</h3><ul>
-<li>实验方法：用生成的114个对抗样本重新训练MNIST的三个DNN模型，平均提升准确率1.8%<font color="red">（太少？）</font></li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
-        <tag>模糊测试</tag>
       </tags>
   </entry>
   <entry>
@@ -1078,8 +1078,8 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
         <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
       </tags>
   </entry>
   <entry>
@@ -1212,6 +1212,7 @@
 <li>选择重要性神经元的层</li>
 </ul>
 <h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》）；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
+<p>疑问：有没有必要覆盖尽可能多的重要神经元激活值的组合？</p>
 <script>
         document.querySelectorAll('.github-emoji')
           .forEach(el => {
@@ -1237,6 +1238,184 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DeepXplore</title>
+    <url>/2020/08/19/DeepXplore/</url>
+    <content><![CDATA[<p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/peikexin9/deepxplore">https://github.com/peikexin9/deepxplore</a></p>
+<h2 id="可控制参数或变量"><a href="#可控制参数或变量" class="headerlink" title="可控制参数或变量"></a>可控制参数或变量</h2><ul>
+<li><p>种子输入集合数量 (类别均衡，随机选择，<u>约束：所有DNN模型必须对每个种子的初始预测结果相同</u>)</p>
+</li>
+<li><p>多个DNN</p>
+</li>
+<li><p>$\lambda_1$：平衡其他DNN和被选中DNN预测的差别（$\lambda_1$越大，选中DNN预测为原类别c的概率越低，$\lambda_1$越小，越能维持其他DNN的预测结果）</p>
+<p><img src="/2020/08/19/DeepXplore/1.png" alt="公式1"></p>
+</li>
+<li><p>$\lambda_2$：平衡两个优化目标大小（即预测差异和神经元覆盖率，$\lambda_2$越大，越关注覆盖更多神经元，否则更关注生成预测差异图片）</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/2.png" alt="公式2"></p>
+<ul>
+<li>$s$: 梯度下降步长（$s$过大可能会导致极小值附近震荡，$s$过小导致迭代次数多）</li>
+<li>$t$: 神经元覆盖率阈值（$t$越大，达到覆盖率目标越难）</li>
+<li>$p$: 覆盖率目标</li>
+<li>梯度下降迭代最大次数（代码里）</li>
+<li><font color="red">在每次迭代的梯度$G$上施加的真实领域约束:</font><ul>
+<li>（1）不同亮度模拟光照：$G$被$mean(G)$ 取代</li>
+<li>（2）单个矩形($m*n$大小)模拟意外或故意遮挡：<ul>
+<li>选择矩形左上顶点所在的位置$(i,j)$，将$G_{i:i+m,j:j+n}$施加于原图相应位置。</li>
+<li><font color="red">$m$、$n$的大小和$(i,j)$为自定义的参数，迭代多次都在相同位置</font></li>
+</ul>
+</li>
+<li>（3） 多个随机黑色小矩形模拟镜头污垢<ul>
+<li>位置随机的若干个$m*m$大小的黑色矩形<font color="red">（每次迭代位置不同，$m$值自定义，与数据集图片大小有关）</font></li>
+<li>如果$mean(G_{i:i+m,j:j+m})$，则图片不动，否则变黑（即只允许降低像素值）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><img src="/2020/08/19/DeepXplore/算法.png" alt="算法" style="zoom:80%;"></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/19/DeepXplore/dataset.png" alt="dataset"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>种子输入集合：随机从测试集选择2000个输入（保持<font color="red">类别平衡</font>，满足所有DNN预测结果相同的约束）</li>
+<li>参数$\lambda_1,\lambda_2,s,t$</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/para.png" alt="para" style="zoom:67%;"></p>
+<h3 id="实验1：神经元覆盖率的优势"><a href="#实验1：神经元覆盖率的优势" class="headerlink" title="实验1：神经元覆盖率的优势"></a>实验1：神经元覆盖率的优势</h3><h4 id="实验1-1：神经元覆盖率与代码覆盖率比较"><a href="#实验1-1：神经元覆盖率与代码覆盖率比较" class="headerlink" title="实验1-1：神经元覆盖率与代码覆盖率比较"></a>实验1-1：神经元覆盖率与代码覆盖率比较</h4><ul>
+<li><p>实验方法：随机选择10个测试输入，测量代码覆盖率和神经元覆盖率大小</p>
+</li>
+<li><p>参数设置：设置$t=0.75$（神经元激活阈值，<font color="red">按比例缩放至[0,1]区间，不同DNN阈值区别很大？）前面都设的0，故意设大t凸显结果差异）</font></p>
+</li>
+<li><p>实验结果：少量测试输入即可达到100%代码覆盖率，但神经元覆盖率最多只有34%：</p>
+<p><img src="/2020/08/19/DeepXplore/ex1-1.png" alt="ex1-1" style="zoom:80%;"></p>
+</li>
+</ul>
+<h4 id="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"><a href="#实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用" class="headerlink" title="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"></a>实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</h4><ul>
+<li>实验方法：从MNIST测试集随机选择2000种子输入，分别设置$\lambda_2$为1和0（$\lambda_2=0$时优化目标里不考虑覆盖新的神经元）。测量生成预测差异样本（difference-inducing inputs）的多样性<strong>（平均$L_1$距离：改变前后像素值之差的和，<font color="red">是否适合作为衡量多样性的指标？</font>）</strong></li>
+<li>参数设置：$t=0.25$</li>
+<li>实验结果：神经元覆盖率帮助提升了生成样本的多样性<font color="red">（①神经元覆盖率NC提升并不明显？作者的解释是NC很高的情况下，NC的一点点提升就能带来多样性的大幅提升。②生成数量#Diffs减少了：作者的解释是设置$\lambda_2=1$后更倾向于生成不同输入而不是提高输入数量，作者认为生成数量并不是一个好的衡量生成样本的方式）</font></li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-2.png" alt="ex1-2" style="zoom:75%;"></p>
+<h4 id="实验1-3：不同类别输入对激活神经元的影响"><a href="#实验1-3：不同类别输入对激活神经元的影响" class="headerlink" title="实验1-3：不同类别输入对激活神经元的影响"></a>实验1-3：不同<strong><em>类别</em></strong>输入对激活神经元的影响</h4><ul>
+<li>实验方法：MNIST数据集的LeNet-5模型，运行100对相同类别（如类别8）图片，和100对不同类别（如类别8和类别4）图片，测量平均激活神经元个数和共同激活神经元的个数（overlap）。</li>
+<li>实验结果：相同类别共同激活的平均神经元个数$&gt;$不同类别。神经元覆盖率可以有效地估计DNN测试中激活的不同规则的数量。</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-3.png" alt="ex1-3" style="zoom:80%;"></p>
+<h3 id="实验2：DeepXplore的效果"><a href="#实验2：DeepXplore的效果" class="headerlink" title="实验2：DeepXplore的效果"></a>实验2：DeepXplore的效果</h3><h4 id="实验2-1：DeepXplore在神经元覆盖率上的表现"><a href="#实验2-1：DeepXplore在神经元覆盖率上的表现" class="headerlink" title="实验2-1：DeepXplore在神经元覆盖率上的表现"></a>实验2-1：DeepXplore在神经元覆盖率上的表现</h4><ul>
+<li><p>实验方法：使用三种方法（DeepXplore、对抗样本FGSM、原测试集随机选择）生成相同数量（测试集的1%）的输入，比较神经元覆盖率</p>
+</li>
+<li><p>实验结果：DeepXplore能达到更高的覆盖率，且随着$t$的提升，覆盖率逐渐降低。</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-1.png" alt="ex2-1"></p>
+<h4 id="实验2-2：运行时间"><a href="#实验2-2：运行时间" class="headerlink" title="实验2-2：运行时间"></a>实验2-2：运行时间</h4><ul>
+<li><p>实验方法：不同数据集和模型生成100%覆盖率输入所需时间及相应的生成数量。<font color="red">所有图像分类模型不考虑全连接层的覆盖（作者解释因为全连接层有的神经元非常难覆盖到，但全连接层的覆盖情况应该意义更大？）</font></p>
+</li>
+<li><p>实验结果：DeepXplore生成高覆盖率的输入效率非常高。</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-2.png" alt="ex2-2" style="zoom: 67%;"></p>
+<h4 id="实验2-3：不同参数设置的影响"><a href="#实验2-3：不同参数设置的影响" class="headerlink" title="实验2-3：不同参数设置的影响"></a>实验2-3：不同参数设置的影响</h4><ul>
+<li>实验方法：改变参数$s$、$\lambda_1$、$\lambda_2$，比较<font color="red">找到第一个导致预测差异的输入平均运行时间（这个指标是否足够适合评价参数？）</font></li>
+<li>实验结果</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-3.png" alt="ex2-3" style="zoom:67%;"></p>
+<p><img src="/2020/08/19/DeepXplore/ex2-4.png" alt="ex2-4" style="zoom:60%;"></p>
+<h4 id="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"><a href="#实验2-4：当多个DNN决策边界相似时DeepXplore的效果" class="headerlink" title="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"></a>实验2-4：当多个DNN决策边界相似时DeepXplore的效果</h4><ul>
+<li>实验方法：<ul>
+<li>对照组：MNIST训练集（60000个样本）和LeNet-1模型，10个epoch</li>
+<li>实验组：改变①训练集样本个数，②DNN卷积层模型filter个数，③训练epoch数</li>
+<li>设置初始种子数为100，对比发现生成第一个使得实验组DNN和对照组DNN预测差异样本的平均迭代次数</li>
+</ul>
+</li>
+<li>实验结果：DeepXplore从非常相似的DNN中也能发现错误样本（除了第一行diff为1时），越相似，迭代轮数越多。</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-5.png" alt="ex2-5" style="zoom:67%;"></p>
+<h3 id="实验3：使用DeepXplore提升DNN"><a href="#实验3：使用DeepXplore提升DNN" class="headerlink" title="实验3：使用DeepXplore提升DNN"></a>实验3：使用DeepXplore提升DNN</h3><h4 id="实验3-1：使用生成样本扩大训练集，重新训练DNN"><a href="#实验3-1：使用生成样本扩大训练集，重新训练DNN" class="headerlink" title="实验3-1：使用生成样本扩大训练集，重新训练DNN"></a>实验3-1：使用生成样本扩大训练集，重新训练DNN</h4><ul>
+<li>与对抗样本训练不同的是：不需标注（采取投票形式）</li>
+<li>实验方法：重新训练MNIST数据集的三个模型5个epoch，增加100张DeepXplore生成的错误图片，与对抗样本和随机从测试集选择样本比较准确率。<font color="red">（测试样本是什么？多个DNN从何而来？）</font></li>
+<li>实验结果：DeepXplore平均提升准确率1%-3%</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex3-1.png" alt="ex3-1" style="zoom:85%;"></p>
+<h4 id="实验3-2：检测被污染的训练样本"><a href="#实验3-2：检测被污染的训练样本" class="headerlink" title="实验3-2：检测被污染的训练样本"></a>实验3-2：检测被污染的训练样本</h4><ul>
+<li>实验过程：用两个MNIST LeNet-5模型，一个正常训练，另一个类别9的样本中30%被故意标记成了类别1。使用DeepXplore生成被错误预测成9或1的样本，在训练集中找和错误样本结构相似的样本。能识别出95.6%的污染样本。<font color="red">（写得很简略）</font></li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>测试标准</tag>
+        <tag>差分测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Google Girl Hackathon Season VI赛后感</title>
+    <url>/2020/08/21/Google-Girl-Hackathon/</url>
+    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
+<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
+<hr>
+<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
+<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
+<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
+<p>这是我们的演示视频（更新后的版本）：</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
+<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
+<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
+<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
+<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>杂记随感</category>
+      </categories>
+      <tags>
+        <tag>比赛</tag>
+        <tag>移动开发</tag>
       </tags>
   </entry>
   <entry>
@@ -1404,186 +1583,8 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
         <tag>模糊测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepXplore</title>
-    <url>/2020/08/19/DeepXplore/</url>
-    <content><![CDATA[<p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/peikexin9/deepxplore">https://github.com/peikexin9/deepxplore</a></p>
-<h2 id="可控制参数或变量"><a href="#可控制参数或变量" class="headerlink" title="可控制参数或变量"></a>可控制参数或变量</h2><ul>
-<li><p>种子输入集合数量 (类别均衡，随机选择，<u>约束：所有DNN模型必须对每个种子的初始预测结果相同</u>)</p>
-</li>
-<li><p>多个DNN</p>
-</li>
-<li><p>$\lambda_1$：平衡其他DNN和被选中DNN预测的差别（$\lambda_1$越大，选中DNN预测为原类别c的概率越低，$\lambda_1$越小，越能维持其他DNN的预测结果）</p>
-<p><img src="/2020/08/19/DeepXplore/1.png" alt="公式1"></p>
-</li>
-<li><p>$\lambda_2$：平衡两个优化目标大小（即预测差异和神经元覆盖率，$\lambda_2$越大，越关注覆盖更多神经元，否则更关注生成预测差异图片）</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/2.png" alt="公式2"></p>
-<ul>
-<li>$s$: 梯度下降步长（$s$过大可能会导致极小值附近震荡，$s$过小导致迭代次数多）</li>
-<li>$t$: 神经元覆盖率阈值（$t$越大，达到覆盖率目标越难）</li>
-<li>$p$: 覆盖率目标</li>
-<li>梯度下降迭代最大次数（代码里）</li>
-<li><font color="red">在每次迭代的梯度$G$上施加的真实领域约束:</font><ul>
-<li>（1）不同亮度模拟光照：$G$被$mean(G)$ 取代</li>
-<li>（2）单个矩形($m*n$大小)模拟意外或故意遮挡：<ul>
-<li>选择矩形左上顶点所在的位置$(i,j)$，将$G_{i:i+m,j:j+n}$施加于原图相应位置。</li>
-<li><font color="red">$m$、$n$的大小和$(i,j)$为自定义的参数，迭代多次都在相同位置</font></li>
-</ul>
-</li>
-<li>（3） 多个随机黑色小矩形模拟镜头污垢<ul>
-<li>位置随机的若干个$m*m$大小的黑色矩形<font color="red">（每次迭代位置不同，$m$值自定义，与数据集图片大小有关）</font></li>
-<li>如果$mean(G_{i:i+m,j:j+m})$，则图片不动，否则变黑（即只允许降低像素值）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><img src="/2020/08/19/DeepXplore/算法.png" alt="算法" style="zoom:80%;"></p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/19/DeepXplore/dataset.png" alt="dataset"></p>
-<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
-<li>种子输入集合：随机从测试集选择2000个输入（保持<font color="red">类别平衡</font>，满足所有DNN预测结果相同的约束）</li>
-<li>参数$\lambda_1,\lambda_2,s,t$</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/para.png" alt="para" style="zoom:67%;"></p>
-<h3 id="实验1：神经元覆盖率的优势"><a href="#实验1：神经元覆盖率的优势" class="headerlink" title="实验1：神经元覆盖率的优势"></a>实验1：神经元覆盖率的优势</h3><h4 id="实验1-1：神经元覆盖率与代码覆盖率比较"><a href="#实验1-1：神经元覆盖率与代码覆盖率比较" class="headerlink" title="实验1-1：神经元覆盖率与代码覆盖率比较"></a>实验1-1：神经元覆盖率与代码覆盖率比较</h4><ul>
-<li><p>实验方法：随机选择10个测试输入，测量代码覆盖率和神经元覆盖率大小</p>
-</li>
-<li><p>参数设置：设置$t=0.75$（神经元激活阈值，<font color="red">按比例缩放至[0,1]区间，不同DNN阈值区别很大？）前面都设的0，故意设大t凸显结果差异）</font></p>
-</li>
-<li><p>实验结果：少量测试输入即可达到100%代码覆盖率，但神经元覆盖率最多只有34%：</p>
-<p><img src="/2020/08/19/DeepXplore/ex1-1.png" alt="ex1-1" style="zoom:80%;"></p>
-</li>
-</ul>
-<h4 id="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"><a href="#实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用" class="headerlink" title="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"></a>实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</h4><ul>
-<li>实验方法：从MNIST测试集随机选择2000种子输入，分别设置$\lambda_2$为1和0（$\lambda_2=0$时优化目标里不考虑覆盖新的神经元）。测量生成预测差异样本（difference-inducing inputs）的多样性<strong>（平均$L_1$距离：改变前后像素值之差的和，<font color="red">是否适合作为衡量多样性的指标？</font>）</strong></li>
-<li>参数设置：$t=0.25$</li>
-<li>实验结果：神经元覆盖率帮助提升了生成样本的多样性<font color="red">（①神经元覆盖率NC提升并不明显？作者的解释是NC很高的情况下，NC的一点点提升就能带来多样性的大幅提升。②生成数量#Diffs减少了：作者的解释是设置$\lambda_2=1$后更倾向于生成不同输入而不是提高输入数量，作者认为生成数量并不是一个好的衡量生成样本的方式）</font></li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex1-2.png" alt="ex1-2" style="zoom:75%;"></p>
-<h4 id="实验1-3：不同类别输入对激活神经元的影响"><a href="#实验1-3：不同类别输入对激活神经元的影响" class="headerlink" title="实验1-3：不同类别输入对激活神经元的影响"></a>实验1-3：不同<strong><em>类别</em></strong>输入对激活神经元的影响</h4><ul>
-<li>实验方法：MNIST数据集的LeNet-5模型，运行100对相同类别（如类别8）图片，和100对不同类别（如类别8和类别4）图片，测量平均激活神经元个数和共同激活神经元的个数（overlap）。</li>
-<li>实验结果：相同类别共同激活的平均神经元个数$&gt;$不同类别。神经元覆盖率可以有效地估计DNN测试中激活的不同规则的数量。</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex1-3.png" alt="ex1-3" style="zoom:80%;"></p>
-<h3 id="实验2：DeepXplore的效果"><a href="#实验2：DeepXplore的效果" class="headerlink" title="实验2：DeepXplore的效果"></a>实验2：DeepXplore的效果</h3><h4 id="实验2-1：DeepXplore在神经元覆盖率上的表现"><a href="#实验2-1：DeepXplore在神经元覆盖率上的表现" class="headerlink" title="实验2-1：DeepXplore在神经元覆盖率上的表现"></a>实验2-1：DeepXplore在神经元覆盖率上的表现</h4><ul>
-<li><p>实验方法：使用三种方法（DeepXplore、对抗样本FGSM、原测试集随机选择）生成相同数量（测试集的1%）的输入，比较神经元覆盖率</p>
-</li>
-<li><p>实验结果：DeepXplore能达到更高的覆盖率，且随着$t$的提升，覆盖率逐渐降低。</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-1.png" alt="ex2-1"></p>
-<h4 id="实验2-2：运行时间"><a href="#实验2-2：运行时间" class="headerlink" title="实验2-2：运行时间"></a>实验2-2：运行时间</h4><ul>
-<li><p>实验方法：不同数据集和模型生成100%覆盖率输入所需时间及相应的生成数量。<font color="red">所有图像分类模型不考虑全连接层的覆盖（作者解释因为全连接层有的神经元非常难覆盖到，但全连接层的覆盖情况应该意义更大？）</font></p>
-</li>
-<li><p>实验结果：DeepXplore生成高覆盖率的输入效率非常高。</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-2.png" alt="ex2-2" style="zoom: 67%;"></p>
-<h4 id="实验2-3：不同参数设置的影响"><a href="#实验2-3：不同参数设置的影响" class="headerlink" title="实验2-3：不同参数设置的影响"></a>实验2-3：不同参数设置的影响</h4><ul>
-<li>实验方法：改变参数$s$、$\lambda_1$、$\lambda_2$，比较<font color="red">找到第一个导致预测差异的输入平均运行时间（这个指标是否足够适合评价参数？）</font></li>
-<li>实验结果</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-3.png" alt="ex2-3" style="zoom:67%;"></p>
-<p><img src="/2020/08/19/DeepXplore/ex2-4.png" alt="ex2-4" style="zoom:60%;"></p>
-<h4 id="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"><a href="#实验2-4：当多个DNN决策边界相似时DeepXplore的效果" class="headerlink" title="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"></a>实验2-4：当多个DNN决策边界相似时DeepXplore的效果</h4><ul>
-<li>实验方法：<ul>
-<li>对照组：MNIST训练集（60000个样本）和LeNet-1模型，10个epoch</li>
-<li>实验组：改变①训练集样本个数，②DNN卷积层模型filter个数，③训练epoch数</li>
-<li>设置初始种子数为100，对比发现生成第一个使得实验组DNN和对照组DNN预测差异样本的平均迭代次数</li>
-</ul>
-</li>
-<li>实验结果：DeepXplore从非常相似的DNN中也能发现错误样本（除了第一行diff为1时），越相似，迭代轮数越多。</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-5.png" alt="ex2-5" style="zoom:67%;"></p>
-<h3 id="实验3：使用DeepXplore提升DNN"><a href="#实验3：使用DeepXplore提升DNN" class="headerlink" title="实验3：使用DeepXplore提升DNN"></a>实验3：使用DeepXplore提升DNN</h3><h4 id="实验3-1：使用生成样本扩大训练集，重新训练DNN"><a href="#实验3-1：使用生成样本扩大训练集，重新训练DNN" class="headerlink" title="实验3-1：使用生成样本扩大训练集，重新训练DNN"></a>实验3-1：使用生成样本扩大训练集，重新训练DNN</h4><ul>
-<li>与对抗样本训练不同的是：不需标注（采取投票形式）</li>
-<li>实验方法：重新训练MNIST数据集的三个模型5个epoch，增加100张DeepXplore生成的错误图片，与对抗样本和随机从测试集选择样本比较准确率。<font color="red">（测试样本是什么？多个DNN从何而来？）</font></li>
-<li>实验结果：DeepXplore平均提升准确率1%-3%</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex3-1.png" alt="ex3-1" style="zoom:85%;"></p>
-<h4 id="实验3-2：检测被污染的训练样本"><a href="#实验3-2：检测被污染的训练样本" class="headerlink" title="实验3-2：检测被污染的训练样本"></a>实验3-2：检测被污染的训练样本</h4><ul>
-<li>实验过程：用两个MNIST LeNet-5模型，一个正常训练，另一个类别9的样本中30%被故意标记成了类别1。使用DeepXplore生成被错误预测成9或1的样本，在训练集中找和错误样本结构相似的样本。能识别出95.6%的污染样本。<font color="red">（写得很简略）</font></li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
         <tag>测试输入生成</tag>
-        <tag>差分测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Google Girl Hackathon Season VI赛后感</title>
-    <url>/2020/08/21/Google-Girl-Hackathon/</url>
-    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
-<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
-<hr>
-<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
-<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
-<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
-<p>这是我们的演示视频（更新后的版本）：</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
-
-<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
-<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
-<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
-<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
-<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>杂记随感</category>
-      </categories>
-      <tags>
-        <tag>比赛</tag>
-        <tag>移动开发</tag>
       </tags>
   </entry>
   <entry>
@@ -1813,82 +1814,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】TensorFuzz</title>
-    <url>/2020/08/20/TensorFuzz/</url>
-    <content><![CDATA[<p>原文：TensorFuzz: Debugging Neural Networks with Coverage-Guided Fuzzing （ICML’19) <a id="more"></a></p>
-<p>代码：<a href="https://github.com/brain-research/tensorfuzz">https://github.com/brain-research/tensorfuzz</a></p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="CGF基本流程"><a href="#CGF基本流程" class="headerlink" title="CGF基本流程"></a>CGF基本流程</h3><p><img src="/2020/08/20/TensorFuzz/1.png" alt="1" style="zoom:60%;"></p>
-<h3 id="方法细节"><a href="#方法细节" class="headerlink" title="方法细节"></a>方法细节</h3><ul>
-<li><p>输入选择：选择更新鲜的输入</p>
-</li>
-<li><p>输入变换：①白噪声（参数由用户给出）；②增加$L_{\infty}$约束的白噪声</p>
-</li>
-<li><p>目标函数：用户根据覆盖率和元数据情况自定义</p>
-</li>
-<li><p>覆盖分析器：当我们得到一个新的激活向量时，我们可以查找它的最近邻居，然后检查这个最近的邻居在欧几里得距离中有多远，如果这个距离大于某个量，就向语料中添加输入。</p>
-<ul>
-<li>可只选择部分神经元的值作为激活向量，如只选logits或logits前一层</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"><a href="#实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）" class="headerlink" title="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"></a>实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）</h3><ul>
-<li><p>实验方法：使将检查数值运算添加到元数据并运行模糊测试器（fuzzer）。我们训练了一个完全连接的神经网络来对MNIST数据集里的数字进行分类，故意用了一个很糟糕的交叉熵损失，这样就有可能出现数值误差。模型进行了35000步的训练，mini-batch size为100，验证精度为98%。检查MNIST数据集中不含导致数值误差的样本。</p>
-</li>
-<li><p>实验结果：TensorFuzz 却在10次随机初始化后快速找到了 NaN错误。</p>
-<p><img src="/2020/08/20/TensorFuzz/2.jpg" alt="2" style="zoom:67%;"></p>
-<ul>
-<li>基于梯度的搜索技术可能无助于查找数值误差</li>
-<li>随机搜索对于查找数值误差来说效率极低。</li>
-</ul>
-<h3 id="实验2：CGF-解决模型和量化版本不一致的问题"><a href="#实验2：CGF-解决模型和量化版本不一致的问题" class="headerlink" title="实验2：CGF 解决模型和量化版本不一致的问题"></a>实验2：CGF 解决模型和量化版本不一致的问题</h3><ul>
-<li><p>仅检查已有的数据只能找到很少的错误：作为基线实验，我们训练了一个使用 32 位浮点数的 MNIST 分类器（这一次没有故意引入数值错误）。然后把所有权重和激活值修剪为 16 位。之后，我们对比了 32 位和 16 位模型在 MNIST 测试集上的预测，没有找到任何不一致性。</p>
-</li>
-<li><p>CGF 可以快速在数据周围的小区域中找到很多错误：然后运行 fuzzer，变化限制在种子图像周围的半径为 0.4 的无限范数球中，其中仅使用了 32 位模型作为覆盖的激活值。我们将输入限制在种子图像附近，因为这些输入几乎都有明确的类别语义。模型的两个版本在域外的垃圾数据（没有真实类别）上出现不一致性并没有什么意义。通过这些设置，fuzzer 可以生成 70% 样本的不一致性。因此，CGF 允许我们寻找在测试时出现的真实错误.</p>
-</li>
-</ul>
-<h3 id="实验3：TensorFuzz可以发现流行模型实现中的bug"><a href="#实验3：TensorFuzz可以发现流行模型实现中的bug" class="headerlink" title="实验3：TensorFuzz可以发现流行模型实现中的bug"></a>实验3：TensorFuzz可以发现流行模型实现中的bug</h3><h3 id="实验4：TensorFuzz可以帮助进行保持语义的代码转换"><a href="#实验4：TensorFuzz可以帮助进行保持语义的代码转换" class="headerlink" title="实验4：TensorFuzz可以帮助进行保持语义的代码转换"></a>实验4：TensorFuzz可以帮助进行保持语义的代码转换</h3></li>
-</ul>
-<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
-<li><p>输入选择策略</p>
-</li>
-<li><p>变换参数</p>
-</li>
-<li><p>目标函数</p>
-</li>
-<li><p>激活神经元集合</p>
-</li>
-<li><p>距离阈值L</p>
-</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
-        <tag>模糊测试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】Towards Improved Testing For Deep Learning</title>
     <url>/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/</url>
     <content><![CDATA[<p>原文：Towards Improved Testing For Deep Learning（ICSE-NIER’19）<a id="more"></a></p>
@@ -1967,6 +1892,82 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】TensorFuzz</title>
+    <url>/2020/08/20/TensorFuzz/</url>
+    <content><![CDATA[<p>原文：TensorFuzz: Debugging Neural Networks with Coverage-Guided Fuzzing （ICML’19) <a id="more"></a></p>
+<p>代码：<a href="https://github.com/brain-research/tensorfuzz">https://github.com/brain-research/tensorfuzz</a></p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="CGF基本流程"><a href="#CGF基本流程" class="headerlink" title="CGF基本流程"></a>CGF基本流程</h3><p><img src="/2020/08/20/TensorFuzz/1.png" alt="1" style="zoom:60%;"></p>
+<h3 id="方法细节"><a href="#方法细节" class="headerlink" title="方法细节"></a>方法细节</h3><ul>
+<li><p>输入选择：选择更新鲜的输入</p>
+</li>
+<li><p>输入变换：①白噪声（参数由用户给出）；②增加$L_{\infty}$约束的白噪声</p>
+</li>
+<li><p>目标函数：用户根据覆盖率和元数据情况自定义</p>
+</li>
+<li><p>覆盖分析器：当我们得到一个新的激活向量时，我们可以查找它的最近邻居，然后检查这个最近的邻居在欧几里得距离中有多远，如果这个距离大于某个量，就向语料中添加输入。</p>
+<ul>
+<li>可只选择部分神经元的值作为激活向量，如只选logits或logits前一层</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"><a href="#实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）" class="headerlink" title="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"></a>实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）</h3><ul>
+<li><p>实验方法：使将检查数值运算添加到元数据并运行模糊测试器（fuzzer）。我们训练了一个完全连接的神经网络来对MNIST数据集里的数字进行分类，故意用了一个很糟糕的交叉熵损失，这样就有可能出现数值误差。模型进行了35000步的训练，mini-batch size为100，验证精度为98%。检查MNIST数据集中不含导致数值误差的样本。</p>
+</li>
+<li><p>实验结果：TensorFuzz 却在10次随机初始化后快速找到了 NaN错误。</p>
+<p><img src="/2020/08/20/TensorFuzz/2.jpg" alt="2" style="zoom:67%;"></p>
+<ul>
+<li>基于梯度的搜索技术可能无助于查找数值误差</li>
+<li>随机搜索对于查找数值误差来说效率极低。</li>
+</ul>
+<h3 id="实验2：CGF-解决模型和量化版本不一致的问题"><a href="#实验2：CGF-解决模型和量化版本不一致的问题" class="headerlink" title="实验2：CGF 解决模型和量化版本不一致的问题"></a>实验2：CGF 解决模型和量化版本不一致的问题</h3><ul>
+<li><p>仅检查已有的数据只能找到很少的错误：作为基线实验，我们训练了一个使用 32 位浮点数的 MNIST 分类器（这一次没有故意引入数值错误）。然后把所有权重和激活值修剪为 16 位。之后，我们对比了 32 位和 16 位模型在 MNIST 测试集上的预测，没有找到任何不一致性。</p>
+</li>
+<li><p>CGF 可以快速在数据周围的小区域中找到很多错误：然后运行 fuzzer，变化限制在种子图像周围的半径为 0.4 的无限范数球中，其中仅使用了 32 位模型作为覆盖的激活值。我们将输入限制在种子图像附近，因为这些输入几乎都有明确的类别语义。模型的两个版本在域外的垃圾数据（没有真实类别）上出现不一致性并没有什么意义。通过这些设置，fuzzer 可以生成 70% 样本的不一致性。因此，CGF 允许我们寻找在测试时出现的真实错误.</p>
+</li>
+</ul>
+<h3 id="实验3：TensorFuzz可以发现流行模型实现中的bug"><a href="#实验3：TensorFuzz可以发现流行模型实现中的bug" class="headerlink" title="实验3：TensorFuzz可以发现流行模型实现中的bug"></a>实验3：TensorFuzz可以发现流行模型实现中的bug</h3><h3 id="实验4：TensorFuzz可以帮助进行保持语义的代码转换"><a href="#实验4：TensorFuzz可以帮助进行保持语义的代码转换" class="headerlink" title="实验4：TensorFuzz可以帮助进行保持语义的代码转换"></a>实验4：TensorFuzz可以帮助进行保持语义的代码转换</h3></li>
+</ul>
+<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
+<li><p>输入选择策略</p>
+</li>
+<li><p>变换参数</p>
+</li>
+<li><p>目标函数</p>
+</li>
+<li><p>激活神经元集合</p>
+</li>
+<li><p>距离阈值L</p>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
       </tags>
   </entry>
   <entry>
@@ -2182,6 +2183,480 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《计算模型导引》复习笔记</title>
+    <url>/2020/09/06/%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B%E5%AF%BC%E5%BC%95/</url>
+    <content><![CDATA[<h2 id="第一章-递归函数"><a href="#第一章-递归函数" class="headerlink" title="第一章 递归函数"></a>第一章 递归函数</h2><h3 id="1-1-数论函数（P1）"><a href="#1-1-数论函数（P1）" class="headerlink" title="1.1 数论函数（P1）"></a>1.1 数论函数（P1）<a id="more"></a></h3><ul>
+<li><p>数论函数</p>
+<ul>
+<li><p>k元数论全函数</p>
+</li>
+<li><p>部分数论函数</p>
+</li>
+</ul>
+</li>
+<li><font color="red">本原函数（$\mathcal{IF}$）</font>
+
+<ul>
+<li><p>零函数$Z$</p>
+</li>
+<li><p>后继函数$S$</p>
+</li>
+<li><p>投影函数$P_i^n$</p>
+</li>
+</ul>
+</li>
+<li><p>常用数论函数（P2）</p>
+<ul>
+<li>前驱函数pred</li>
+<li>加法函数add</li>
+<li><strong>算术差函数sub</strong></li>
+<li>绝对差函数diff</li>
+<li>乘法函数mul</li>
+<li>除法函数div</li>
+<li>求余函数rs</li>
+<li>指数函数pow</li>
+<li>平方函数sq</li>
+<li>$E(x)=x-\lfloor \sqrt{x}\rfloor$</li>
+<li>max、min</li>
+<li>最大公约数函数gcd、最小公倍数函数lcm</li>
+<li><strong>素数枚举函数$P$</strong></li>
+<li><strong>$ep(n,x)$：x的素因子分解式中第n个素数的指数</strong></li>
+<li>$eq(x,y)$：相等时等于0，否则为1</li>
+<li><strong>$N$：否定，x=0时为1，否则为0</strong></li>
+<li><strong>$N^2$：x=0时为0，否则为1</strong></li>
+</ul>
+</li>
+<li><p>函数的复合（P4）</p>
+</li>
+<li>有界迭加算子$\sum$</li>
+<li>有界迭乘算子$\prod$</li>
+<li>有界$\mu-$算子</li>
+<li>有界$max-$算子</li>
+<li><font color="red">基本函数类$\mathcal{BF}$</font>（P6）<ul>
+<li>$\mathcal{IF} \subseteq \mathcal{BF}$</li>
+<li>$\mathcal{BF}$对于复合封闭</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-配对函数（P7）"><a href="#1-2-配对函数（P7）" class="headerlink" title="1.2 配对函数（P7）"></a>1.2 配对函数（P7）</h3><ul>
+<li>配对函数、配对函数组</li>
+<li>Godel编码</li>
+<li>若配对函数组$\{pg,K,L\}$使pg穷尽一切自然数，则称该配对函数组是一一对应的<ul>
+<li>康托编码（P9）</li>
+</ul>
+</li>
+<li>多元配对函数（P11）</li>
+<li>Godel $\beta-$函数（P13）<ul>
+<li>定理1.11：有穷数列的编码和解码（中国剩余定理）</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-3-初等函数（P14）"><a href="#1-3-初等函数（P14）" class="headerlink" title="1.3 初等函数（P14）"></a>1.3 初等函数（P14）</h3><ul>
+<li><font color="red">初等函数类$\mathcal{EF}$</font><ul>
+<li>定义<ul>
+<li>$\mathcal{IF} \subseteq \mathcal{EF}$</li>
+<li>$x+y,x−y(绝对差),x×y,⌊x/y⌋∈\mathcal{EF}$<ul>
+<li>加、乘、除可省</li>
+</ul>
+</li>
+<li>$\mathcal{EF}$对于复合，有界迭加算子$∑[⋅]$和有界迭乘算子$∏[⋅]$封闭</li>
+</ul>
+</li>
+<li>性质<ul>
+<li>$\mathcal{EF}$对于有界$\mu-$算子和max-算子封闭</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>数论谓词<ul>
+<li>数论谓词的特征函数：真为0，假为1</li>
+<li>初等数论谓词：若谓词$P$的特征函数属于$\mathcal{EF}$，则称$P$是初等的</li>
+</ul>
+</li>
+<li>数论集合<ul>
+<li>数论集合的特征函数：属于集合为0，不属于为1</li>
+<li>初等数论集合：若数论集合$S$的特征函数属于$\mathcal{EF}$，则称$S$是初等的</li>
+</ul>
+</li>
+<li>重要的初等函数（P19）<ul>
+<li>$x^y$</li>
+<li>$\lfloor \sqrt[y] x \rfloor$</li>
+<li>余数$rs(x,y)$</li>
+<li>$\tau (x)$：x因子的数目</li>
+<li>$prime(x)$：判定x是否为素数（数论谓词）</li>
+<li>$\pi (x)$：不超过x的素数个数</li>
+<li>素数枚举函数$P(n)$=第n个素数</li>
+<li>$ep(n,x)$</li>
+</ul>
+</li>
+<li>控制函数（P24）<ul>
+<li>$\mathcal{EF}$的控制函数G（P22）<ul>
+<li>控制函数不属于$\mathcal{EF}$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-4-原始递归函数（P25）"><a href="#1-4-原始递归函数（P25）" class="headerlink" title="1.4 原始递归函数（P25）"></a>1.4 原始递归函数（P25）</h3><ul>
+<li>原始递归算子<ul>
+<li>带参原始递归算子</li>
+<li>无参原始递归算子</li>
+</ul>
+</li>
+<li><font color="red">原始递归函数类$\mathcal{PRF}$</font><ul>
+<li>定义<ul>
+<li>$\mathcal{IF} \subseteq \mathcal{PRF}$</li>
+<li>$\mathcal{PRF}$对于复合、带参原始递归算子、无参原始递归算子封闭</li>
+</ul>
+</li>
+<li>重要的原始递归函数<ul>
+<li>add、pred、sub、diff、mul、sq（平方）、N、$N^2$、sqrt、E</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>原始复迭算子It​、弱原始复迭算子​Itw​ (P30)</li>
+<li><font color="red">原始复迭函数类$\mathcal{ITF}$</font><ul>
+<li>定义<ul>
+<li>$\mathcal{IF} \subseteq \mathcal{ITF}$</li>
+<li>$\mathcal{ITF}$对于复合、原始复迭算子It[·]、弱原始复迭算子Itw[·]封闭</li>
+</ul>
+</li>
+<li>$\mathcal{ITF=PRF}$</li>
+</ul>
+</li>
+<li>若干形式不同的递归式化归到原始递归式（P34）<ul>
+<li>串值递归</li>
+<li>联立递归</li>
+<li>变参递归</li>
+<li>多重递归</li>
+</ul>
+</li>
+<li>$\mathcal{PRF}$的控制函数<ul>
+<li>Ackermann函数：$Ack(m,n)$（P38）<ul>
+<li>不是原始递归函数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>$\mathcal{EF} \subset \mathcal{PRF}$ (P41)<ul>
+<li>真包含：$\mathcal{EF}$的控制函数G属于$\mathcal{PRF}$</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-5-递归函数（P42）"><a href="#1-5-递归函数（P42）" class="headerlink" title="1.5 递归函数（P42）"></a>1.5 递归函数（P42）</h3><ul>
+<li>正则函数（全函数）、正则$\mu-$算子（区别于有界$\mu-$算子）</li>
+<li><font color="red">一般递归函数类$\mathcal{GRF}$</font><ul>
+<li>定义<ul>
+<li>$\mathcal{IF} \subseteq \mathcal{GRF}$</li>
+<li>$\mathcal{GRF}$对于复合和原始递归算子（带参和无参）封闭</li>
+<li><u>$\mathcal{GRF}$对于正则$\mu-$算子封闭</u></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>$\mu-$算子（部分函数）</li>
+<li><font color="red">部分递归函数类$\mathcal{RF}$</font> （P43）<ul>
+<li>定义<ul>
+<li>$\mathcal{IF} \subseteq \mathcal{RF}$</li>
+<li>$\mathcal{RF}$对于复合和原始递归算子（带参和无参）封闭</li>
+<li><u>$\mathcal{RF}$对于$\mu-$算子封闭</u></li>
+</ul>
+</li>
+<li>显然$\mathcal{GRF} \subset \mathcal{RF}$ ：正则$\mu-$算子是$\mu-$算子的特例</li>
+</ul>
+</li>
+<li>递归数论谓词、$\mu-$谓词、递归集</li>
+<li>$\mathcal{PRF} \subset \mathcal{GRF}$ <ul>
+<li>法1：利用控制函数，证明Ackermann函数是一般递归函数但不是原始递归函数（P45）</li>
+<li>法2：利用通用函数（P47）</li>
+</ul>
+</li>
+<li>$\mathcal{GRF} \subset 全数论函数\mathcal{NTF}$ （P48）<ul>
+<li>存在数论全函数f，f不是一般递归函数 </li>
+</ul>
+</li>
+</ul>
+<h3 id="1-6-结论（P48）"><a href="#1-6-结论（P48）" class="headerlink" title="1.6 结论（P48）"></a>1.6 结论（P48）</h3><script type="math/tex; mode=display">本原函数类\mathcal{IF} \subset 基本函数类\mathcal{BF} \subset 初等函数类\mathcal{EF} \subset 原始递归函数类\mathcal{PRF} = 原始复迭函数类\mathcal{ITF} \subset 一般递归函数类\mathcal{GRF} \subset 部分递归函数类\mathcal{RF}</script><h2 id="第三章-lambda-演算"><a href="#第三章-lambda-演算" class="headerlink" title="第三章 $\lambda-$演算"></a>第三章 $\lambda-$演算</h2><h3 id="3-1-lambda-演算的语法（P72）"><a href="#3-1-lambda-演算的语法（P72）" class="headerlink" title="3.1 $\lambda-$演算的语法（P72）"></a>3.1 $\lambda-$演算的语法（P72）</h3><ul>
+<li>变量：小写字母，表示一个参数（形参）或者一个值（实参）</li>
+<li>抽象：$\lambda x.M$，绑定变量x于该函数抽象的函数体M，简单来说就是表示一个<u>形参</u>为x的函数M。</li>
+<li>作用：$MN$，表示将函数M应用于参数N，简单来说就是给函数M输入<u>实参</u>N。<ul>
+<li>函数作用是左结合的，即：<code>M N P</code>意为<code>(M N) P</code>而非<code>M (N P)</code></li>
+</ul>
+</li>
+<li>自由变元和约束变元（P74）<ul>
+<li>在函数抽象中，形参绑定于函数体，即形参是约束变元，相对应地，不是约束变元的自然就是自由变元</li>
+<li>闭$\lambda-$项：没有自由变元的项，$\Lambda ^ \circ$表示全体闭$\lambda-$项的集合</li>
+<li>约束变元改名后仍等价</li>
+<li>自由变元的替换：$M[x:=N]$，$x$为自由变元</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-2-转换（P76）"><a href="#3-2-转换（P76）" class="headerlink" title="3.2 转换（P76）"></a>3.2 转换（P76）</h3><ul>
+<li>形式理论$\lambda \beta$ (P76)<ul>
+<li>标准组合子$I,K,K^*,S$</li>
+</ul>
+</li>
+<li>形式理论$\lambda \beta + ext$ 和$\lambda \beta \eta$ (P79)</li>
+</ul>
+<h3 id="3-3-归约（P80）"><a href="#3-3-归约（P80）" class="headerlink" title="3.3 归约（P80）"></a>3.3 归约（P80）</h3><ul>
+<li>$\to_R$（一步$R-$归约）、$\twoheadrightarrow_R$ （$R-$归约）、$=_R$（$R-$转换）</li>
+<li>二元关系$\beta$、$\alpha$、$\eta$、$\beta \eta$<ul>
+<li>$M =_\beta N \Leftrightarrow \lambda \beta \vdash M=N$</li>
+</ul>
+</li>
+<li>$\beta-$可约式、$\beta-$范式（$\beta-$nf）、$\beta-$范式的集合（$NF_R$）、$M$有$\beta-$nf</li>
+</ul>
+<h3 id="3-4-Church-Rosser定理（P85）"><a href="#3-4-Church-Rosser定理（P85）" class="headerlink" title="3.4 Church-Rosser定理（P85）"></a>3.4 Church-Rosser定理（P85）</h3><ul>
+<li>CR性质：$P \twoheadrightarrow M \bigwedge P \twoheadrightarrow N \Rightarrow \exists T.(M \twoheadrightarrow T \bigwedge N \twoheadrightarrow T)$<ul>
+<li>对$\twoheadrightarrow_\beta$、$\twoheadrightarrow_\eta$、$\twoheadrightarrow_{\beta \eta}$成立</li>
+</ul>
+</li>
+<li>con($\lambda \beta$)：存在推不出的公式</li>
+</ul>
+<h3 id="3-5-不动点定理（P93）"><a href="#3-5-不动点定理（P93）" class="headerlink" title="3.5 不动点定理（P93）"></a>3.5 不动点定理（P93）</h3><ul>
+<li>不动点定理：对于任何的$F \in \Lambda$，存在$Z \in \Lambda$，使得$FZ =_\beta Z$</li>
+<li>不动点组合子<ul>
+<li>$Y$： 对于任何的$F \in \Lambda$，$F(YF)=_\beta YF$</li>
+<li>$\Theta$：对于任何的$F \in \Lambda ^ \circ$，$\Theta F \twoheadrightarrow_\beta F(\Theta F)$</li>
+</ul>
+</li>
+<li>$([M_1,…,M_n])^n_i \twoheadrightarrow_\beta M_i$</li>
+</ul>
+<h3 id="3-6-递归函数的-lambda-可定义性（P95）"><a href="#3-6-递归函数的-lambda-可定义性（P95）" class="headerlink" title="3.6 递归函数的$\lambda-$可定义性（P95）"></a>3.6 递归函数的$\lambda-$可定义性（P95）</h3><ul>
+<li>Church数项：$\ulcorner n \urcorner \equiv \lambda fx.f^nx$</li>
+<li>$\lambda-$可定义性：$F \ulcorner n_1 \urcorner …  \ulcorner n_k \urcorner =_\beta  \ulcorner f(n_1,…,n_k) \urcorner$</li>
+<li>$D\ulcorner n \urcorner MN$ = if (n = 0) then M else N​ (P97)</li>
+<li><strong>一般/部分递归函数是$\lambda-$可定义的</strong></li>
+</ul>
+<h3 id="3-7-与递归论对应的结果（P100）"><a href="#3-7-与递归论对应的结果（P100）" class="headerlink" title="3.7 与递归论对应的结果（P100）"></a>3.7 与递归论对应的结果（P100）</h3><ul>
+<li>$\lambda-$项的编码：对每个$M \in \Lambda$ ，都有唯一的自然数$\sharp M$与之对应 （$\lambda-$项 $\rightarrow$ $\mathbb{N}$）</li>
+<li>$\lambda-$项的内部编码：$M$的内部编码定义为$\ulcorner M \urcorner \equiv \ulcorner \sharp M \urcorner$ （$\lambda-$项 $\rightarrow$ $\lambda-$项)</li>
+<li>枚举子$E$，对于任何$M \in \Lambda^ \circ$，有$E\ulcorner M \urcorner =_\beta M$</li>
+<li>第二不动点定理：$\forall F. \exists Z. F \ulcorner Z \urcorner =_ \beta Z$</li>
+<li><strong>不可判定性</strong>（P102）<ul>
+<li>若自然数集S的特征函数$\mathcal{X}_s \in \mathcal{GRF}$，则称$S$是可判定的</li>
+<li>若$\lambda-$项集合$\mathcal{A} \subseteq  \Lambda$的编码集合是可判定的，则称$\mathcal{A}$是可判定的</li>
+<li>设$\mathcal{A} \subseteq  \Lambda$非平凡、$\mathcal{A}$对$=_\beta$封闭，则$\mathcal{A}$不可判定</li>
+<li>$=_\beta$关系不可判定</li>
+<li>集合$\mathcal{N}=\{M:M有\beta-nf\}$不可判定</li>
+</ul>
+</li>
+</ul>
+<h2 id="第五章-Turing机"><a href="#第五章-Turing机" class="headerlink" title="第五章 Turing机"></a>第五章 Turing机</h2><h3 id="5-1-Turing机的形式描述（P121）"><a href="#5-1-Turing机的形式描述（P121）" class="headerlink" title="5.1 Turing机的形式描述（P121）"></a>5.1 Turing机的形式描述（P121）</h3><ul>
+<li>Turing机定义：$M=(d,p,s)$，论域$Dom(M)$</li>
+<li>Turing可计算的定义：存在机器M计算函数f</li>
+<li>基本机器：<ul>
+<li>零函数：$\boxed{Z}$</li>
+<li>后继函数：$\boxed{S}$</li>
+<li>投影函数：$\boxed{I}$、$\boxed{K}$、$\boxed{L}$</li>
+<li>常数函数：$\boxed{C^k_l}$</li>
+<li>前驱函数：$\boxed{pred}$</li>
+<li>加法函数：$\boxed{add}$</li>
+<li>乘法函数：$\boxed{multi}$ (习题5.3)</li>
+<li>幂函数$2^x$：习题5.4</li>
+<li>平方根函数：习题5.7</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-2-Turing机的计算能力（P127）"><a href="#5-2-Turing机的计算能力（P127）" class="headerlink" title="5.2 Turing机的计算能力（P127）"></a>5.2 Turing机的计算能力（P127）</h3><ul>
+<li>常用机器（P128）<ul>
+<li>$f(x)=2x$：$\boxed{double}$</li>
+<li>$\boxed{copy_1}$（习题5.2）、$\boxed{copy_2}$、$\boxed{copy_k}$、$\boxed{copy_k}^k$</li>
+<li>$\boxed{compress}$</li>
+<li>$\boxed{erase}$</li>
+<li>$\boxed{shiftr}$、$\boxed{shiftl}$</li>
+</ul>
+</li>
+<li>Turing可计算函数类对于复合算子、原始递归算子、正则$\mu-$算子封闭</li>
+<li>若f是一般/部分递归函数，则f是Turing-可计算的</li>
+</ul>
+<h3 id="5-3-可判定性与停机问题（P138）"><a href="#5-3-可判定性与停机问题（P138）" class="headerlink" title="5.3 可判定性与停机问题（P138）"></a>5.3 可判定性与停机问题（P138）</h3><ul>
+<li>可判定性：设$A \subseteq \mathbb{N}$，$A$是可判定的指$A$的特征函数$\mathcal{X}_A$是Turing-可计算的（可构造出机器）</li>
+<li>Turing机的编码<ul>
+<li>从#M可反向求出M</li>
+</ul>
+</li>
+<li>自停机问题$K=\{\sharp M:M对于输入\overline{\sharp M}停机\}$：不可判定</li>
+<li>停机问题$\hat{K}=\{\sharp M:M对于一切输入皆停机\}$：不可判定</li>
+</ul>
+<h3 id="5-4-通用Turing机（P141）"><a href="#5-4-通用Turing机（P141）" class="headerlink" title="5.4 通用Turing机（P141）"></a>5.4 通用Turing机（P141）</h3><ul>
+<li>带位置编码</li>
+<li>标准输入编码和解码：$\boxed{code}$、$\boxed{decode}$</li>
+<li>计算后继带位置函数STP、TS</li>
+<li>通用图灵机$U$的定义（P146）</li>
+</ul>
+<h3 id="5-5-Church-Turing论题（P147）"><a href="#5-5-Church-Turing论题（P147）" class="headerlink" title="5.5 Church-Turing论题（P147）"></a>5.5 Church-Turing论题（P147）</h3><h2 id="题型"><a href="#题型" class="headerlink" title="题型"></a>题型</h2><ul>
+<li><p>问答题</p>
+<ul>
+<li>什么是配对函数组？什么是配对函数？请构造一例。（P7 定义1.10，如引理1.14构造）</li>
+<li>什么是一般递归函数？（P42 定义1.31）</li>
+<li>什么是部分递归函数？（P43 定义1.33）</li>
+<li><font color="red">什么是$\lambda \beta$系统的CR性质？（P85）</font></li>
+<li>什么是Turing 机？（P122）</li>
+<li>什么是Church-Turing Thesis？你认可它吗？/你拥护吗？（P148）</li>
+<li>为什么算法和Turing 机概念在可以构成“思维机器”的现代观点中占有如此核心的地位？（因为图灵机的概念为现在的思维机器观点提供了抽象模型，是现代计算机的起源。）是否在原则上存在一个算法可达到绝对极限呢？（未知，自由发挥）</li>
+<li>什么是Halting Problem？它可判定吗？（P141）</li>
+<li>什么是Turing 机的通用性(universality)？什么是通⽤Turing 机？(P146)</li>
+</ul>
+</li>
+<li><p>判断函数类（第二大题）</p>
+<ul>
+<li>A：$\mathcal{EF}$<ul>
+<li>Godel的$\beta-$函数</li>
+<li>向下取整</li>
+<li>$\pi,e$的十进制展开中的第n个数字</li>
+<li>$\lambda-$项呈形…</li>
+<li>组合数个数</li>
+<li>数列求和</li>
+</ul>
+</li>
+<li>B：$\mathcal{PRF} - \mathcal{EF}$<ul>
+<li>形如$G(x)=2^{2^{\cdots^x}}$</li>
+<li>Ack(5,n)</li>
+<li>变参递归(不确定？)</li>
+</ul>
+</li>
+<li>C：$\mathcal{GRF} - \mathcal{PRF}$<ul>
+<li>Ackermann函数</li>
+<li>Ack(m,5)</li>
+<li>$\beta_0,\beta_{x+1}$ （不确定？）</li>
+</ul>
+</li>
+<li>D：$\mathcal{RF} - \mathcal{GRF}$<ul>
+<li>处处无定义的函数</li>
+<li>存在无定义的函数</li>
+</ul>
+</li>
+<li><font color="red">E：不可计算的数论函数类 </font><ul>
+<li>停机问题</li>
+<li>$M有\beta-nf$、$M =_\beta N$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>证明集合$S$的可判定性</p>
+<ul>
+<li>证$\mathcal{X}_s \in \mathcal{GRF}$</li>
+</ul>
+</li>
+<li><p>证明初等函数</p>
+<ul>
+<li><p>根据定义用常用函数表示（Q1.2，Q1.3，1.11，1.12）</p>
+</li>
+<li><p>出现根号、负数等：用已知形式表示（转化为整数、分开表示等）</p>
+</li>
+<li><p>取整</p>
+<ul>
+<li>$f(n)=\lfloor e \cdot n \rfloor$ (Q1.8)</li>
+<li>$f(n)=\lfloor (\frac{\sqrt{5}+1}{2})^n\rfloor$ (2019 四，1.19(2) 两种方法）</li>
+<li>$f(n)=\lfloor (\sqrt{6} +\sqrt{5})^{2n} \rfloor$ (2019+ 四)</li>
+<li>$\lfloor n! \cdot cos(1)\rfloor$</li>
+<li>$\lfloor n! \cdot 2^n \cdot \sqrt{e} \rfloor$</li>
+<li>$\lfloor log_{10}n \rfloor$</li>
+<li>$\lfloor (n+1+\frac{1}{n+1})^{n+1} \rfloor$</li>
+</ul>
+</li>
+<li><font color="red">十进制展开式第n位</font>
+
+<blockquote>
+<p>step1. 泰勒展开，分开整数项和小数项，证$\lfloor n!·α\rfloor \in \mathcal{EF}$</p>
+<p>step2. 证$\lfloor n \cdot \alpha \rfloor \in \mathcal{EF}$</p>
+<p>step3. $f(n) = \lfloor 10^n \alpha \rfloor - \lfloor 10^{n-1}\alpha \rfloor \cdot 10  \in \mathcal{EF},(n \geq 1)$</p>
+</blockquote>
+<ul>
+<li>$e$ （2019+ 七，5.18，类似Q1.8）</li>
+<li>$\pi$（1.25，一般递归函数）</li>
+<li>$\frac{e^2+1}{2e}$ (2019 七)</li>
+<li>$sinh(1)=(e-e^{-1})/2$ (2018 七)，$sin(1),cos(1)$</li>
+<li>$\sqrt{e}$</li>
+<li>证明原始递归函数</li>
+</ul>
+</li>
+<li><p>串值递归（Q1.5，Q1.6，1.15）</p>
+</li>
+<li>变参递归（Q1.7）</li>
+</ul>
+</li>
+<li><p>对给定的数论函数$f(x)$，构造$F∈Λ^∘$其$λ−$定义$f(x)$</p>
+<ul>
+<li>判断奇偶函数：$l(x)=N^x(0)$ （2017 三）</li>
+<li>add（2016 三）、$f(x,y)=x+y$ （3.16）</li>
+<li>$f(x)=2x$ ，$f(x)=3x$（Q2.3，3.17）</li>
+<li>$g(x)=2^x$ （Q2.7，3.20）<ul>
+<li>倒推法、Rosser引理$\ulcorner n^m \urcorner = \ulcorner m \urcorner \ulcorner n \urcorner$</li>
+</ul>
+</li>
+<li>$f(x)=\lfloor \frac{x}{2} \rfloor$</li>
+</ul>
+</li>
+<li><p>在已有的公理系统中加入一个额外公理</p>
+<ul>
+<li>$\lambda xy.xy = \lambda xy.yx$ (2017)</li>
+<li>$\lambda x.x = \lambda x.xxx$ (2018)</li>
+<li>$\lambda x.x = \lambda x.xx$ （2016）</li>
+<li>$\lambda xy.x = \lambda xy.y$ （3.13）</li>
+<li>$\lambda xyz.x(yz)=\lambda xyz.(xy)z$</li>
+<li>$I=K$ （2019）</li>
+<li>$I=S$（2019+）</li>
+</ul>
+</li>
+<li><p>构造图灵机</p>
+<ul>
+<li>$f(x)=x^3$ （2019 六）、$f(x)=x^4$（2019+ 六）</li>
+<li>$g(x)=2^x$ （2016 六、习题5.4、Q3.5）</li>
+<li>$f(x)=\lfloor \frac{x}{2} \rfloor$</li>
+<li>满足给定的输入输出（2018、2017 五）</li>
+</ul>
+</li>
+<li><p>求图灵机运行后的输出</p>
+<ul>
+<li>记得写状态、箭头</li>
+</ul>
+</li>
+<li><p>证明停机问题不可判定（2018、 2017 六）</p>
+</li>
+</ul>
+<h2 id="Hint"><a href="#Hint" class="headerlink" title="Hint"></a>Hint</h2><ul>
+<li>减号写点、除号写取整</li>
+<li>$N$, $N^2$ 表示if-else</li>
+<li><p>Godel编码</p>
+<ul>
+<li>P,ep</li>
+</ul>
+</li>
+<li>标准组合子$I,K,K^*,S,U^3_1,…$</li>
+<li>$y^nz=(\lambda fx.f^nx)yz = \ulcorner n \urcorner yz$</li>
+</ul>
+<p><img src="/2020/09/06/%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B%E5%AF%BC%E5%BC%95/1.png" alt="1" style="zoom:60%;"></p>
+<p><img src="/2020/09/06/%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B%E5%AF%BC%E5%BC%95/2.png" alt="2" style="zoom:70%;"></p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>复习笔记</category>
+      </categories>
+      <tags>
+        <tag>计算模型</tag>
       </tags>
   </entry>
   <entry>
