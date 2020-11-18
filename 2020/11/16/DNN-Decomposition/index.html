@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ruby.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rubychen0611.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="On Decomposing a Deep Neural Network into Modules （FSE’20）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】On Decomposing a Deep Neural Network into Modules">
+<meta property="og:url" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/index.html">
+<meta property="og:site_name" content="与我常在">
+<meta property="og:description" content="On Decomposing a Deep Neural Network into Modules （FSE’20）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/5.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/6.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/7.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/8.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/9.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/10.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/11.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/12.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/13.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/14.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/15.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/17.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/18.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/19.png">
+<meta property="article:published_time" content="2020-11-16T03:21:36.000Z">
+<meta property="article:modified_time" content="2020-11-18T13:07:04.440Z">
+<meta property="article:author" content="Ruby Chen">
+<meta property="article:tag" content="DNN分解">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/1.png">
+
+<link rel="canonical" href="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【论文笔记】On Decomposing a Deep Neural Network into Modules | 与我常在</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/rss2.xml" title="与我常在" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">与我常在</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">未经审视的人生不值一过</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-link fa-fw"></i>朋友们</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-comment fa-fw"></i>留言板</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.jpg">
+      <meta itemprop="name" content="Ruby Chen">
+      <meta itemprop="description" content="自爱兼爱，善感而不多愁。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="与我常在">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【论文笔记】On Decomposing a Deep Neural Network into Modules
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-16 11:21:36" itemprop="dateCreated datePublished" datetime="2020-11-16T11:21:36+08:00">2020-11-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-18 21:07:04" itemprop="dateModified" datetime="2020-11-18T21:07:04+08:00">2020-11-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">论文笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论数：</span>
+    
+    <a title="valine" href="/2020/11/16/DNN-Decomposition/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/11/16/DNN-Decomposition/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>On Decomposing a Deep Neural Network into Modules （FSE’20）<a id="more"></a></p>
+<p>会议视频：<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=EH1aUbFj0HQ">https://www.youtube.com/watch?v=EH1aUbFj0HQ</a></p>
+<p>代码：<a target="_blank" rel="noopener" href="https://github.com/rangeetpan/decomposeDNNintoModules">https://github.com/rangeetpan/decomposeDNNintoModules</a></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><ul>
+<li><p>传统软件的模块化分解与重组：可用于软件重用、替换、独立测试、独立开发等</p>
+<p><img src="/2020/11/16/DNN-Decomposition/1.png" alt="1" style="zoom:67%;"></p>
+</li>
+<li><p>为什么DNN也需要模块分解？应用场景举例</p>
+<ul>
+<li><p>场景1：数据集内部分解</p>
+<ul>
+<li>手写数字识别→0，1识别，传统方法需要重新训练，本方法可直接将DNN解构成10个模块，组合成0、1识别模型。</li>
+</ul>
+<p><img src="/2020/11/16/DNN-Decomposition/2.png" alt="2" style="zoom:50%;"></p>
+</li>
+<li><p>场景2：数据集之间</p>
+<ul>
+<li><p>数字识别+字母识别-&gt;16进制数字识别</p>
+<p><img src="/2020/11/16/DNN-Decomposition/3.png" alt="3" style="zoom:50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>场景3：模块替换</p>
+<ul>
+<li><p>数字识别模型中某个数字5识别效果较差，从另一个模型中分解出单独识别5的模块，与A的其他模块组合在一起</p>
+<p><img src="/2020/11/16/DNN-Decomposition/4.png" alt="4" style="zoom:50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="步骤1：关注点识别-Concern-Identification-CI"><a href="#步骤1：关注点识别-Concern-Identification-CI" class="headerlink" title="步骤1：关注点识别 Concern Identification (CI)"></a>步骤1：关注点识别 Concern Identification (CI)</h3><ul>
+<li>关注点识别本质上是识别出整体模型中对特定功能或关注点有贡献的那些部分，解构DNN。</li>
+<li>具体地，依次对模型喂入关注类别的训练样本：<ul>
+<li>对未激活节点：将输入边和输出边的权重都置为零（删除边）</li>
+<li>对激活节点：将输出边权重置为正（<code>算法1没看懂为什么是min</code>）</li>
+<li>删除与输出层其他类别相连的边。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/11/16/DNN-Decomposition/5.png" alt="5" style="zoom:60%;"></p>
+<h3 id="步骤2：纠缠识别-Tangling-Identification（TI）"><a href="#步骤2：纠缠识别-Tangling-Identification（TI）" class="headerlink" title="步骤2：纠缠识别 Tangling Identification（TI）"></a>步骤2：纠缠识别 Tangling Identification（TI）</h3><ul>
+<li><p>第一步之后，解构出的模块只对目标类别的识别起作用，即目前只是一个<strong>单分类器</strong>，无法对非本类的样本进行判断。这就好比从一个程序中删除一个条件及其分支，从而产生直接执行剩余分支功能的子程序，但无条件地这样做。（<code>即所有样本都会被分类成这一个类别</code>）</p>
+</li>
+<li><p>解决方法：<font color="red">加回一些节点和边，帮助区分非目标类别。</font>四种TI方法：</p>
+<ul>
+<li><p>Imbalance (TI-I)</p>
+<p><img src="/2020/11/16/DNN-Decomposition/6.png" alt="6" style="zoom:60%;"></p>
+</li>
+<li><p>Punish Negative Examples (TI-PN)</p>
+<p><img src="/2020/11/16/DNN-Decomposition/7.png" alt="7" style="zoom:60%;"></p>
+</li>
+<li><p>Higher Priority to Negative Examples (TI-HP)</p>
+<p><img src="/2020/11/16/DNN-Decomposition/8.png" alt="8" style="zoom:60%;"></p>
+</li>
+<li><p>Strong Negative Edges (TI-SNE)</p>
+<p><img src="/2020/11/16/DNN-Decomposition/9.png" alt="9" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="步骤3：关注点模块化-Concern-Modularization-CM"><a href="#步骤3：关注点模块化-Concern-Modularization-CM" class="headerlink" title="步骤3：关注点模块化 Concern Modularization (CM)"></a>步骤3：关注点模块化 Concern Modularization (CM)</h3><p>这一步作用是将多个非关注点及其相应的神经元和边，抽象成一个输出层的节点（如下图的非0节点）：</p>
+<p><img src="/2020/11/16/DNN-Decomposition/10.png" alt="10" style="zoom:50%;"></p>
+<ul>
+<li><p>Channeling (CM-C)：将最后一层输出到非关注点的边，通过取权重的平均值，都改向到一个”非“节点上</p>
+<p><img src="/2020/11/16/DNN-Decomposition/11.png" alt="11" style="zoom:60%;"></p>
+</li>
+<li><p>Remove Irrelevant Edges (CM-RIE)：在Channeling之前，去掉倒数第二层仅对非关注点有贡献的边及其相关神经元</p>
+<p><img src="/2020/11/16/DNN-Decomposition/12.png" alt="12" style="zoom:60%;"></p>
+<p><img src="/2020/11/16/DNN-Decomposition/13.png" alt="13" style="zoom:70%;"></p>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设计"><a href="#实验设计" class="headerlink" title="实验设计"></a>实验设计</h3><ul>
+<li>数据集：<ul>
+<li>MNIST</li>
+<li>EMNSIT（手写英文字母）：只用A-J（10个字母）训练</li>
+<li>FMNIST：衣服</li>
+<li>KMNIST：日语字母</li>
+</ul>
+</li>
+<li>模型：<ul>
+<li>4个数据集分别训练带1、2、3、4个隐藏层的全连接神经网络，每个隐藏层49个神经元</li>
+</ul>
+</li>
+<li>测试准则<ul>
+<li>准确率：衡量DNN模型模块化后的准确率，对输入的样本用分解后的每个模块进行预测，将给出positive预测结果且置信度最高并的子模型预测结果作为预测类别（投票）。</li>
+<li>Jaccard系数（JI）：衡量模块之间的相似度，将所有权重和偏置放在一个向量中，比较Jaccard系数。</li>
+</ul>
+</li>
+</ul>
+<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
+<li><p>实验1：分解后的模块有效性如何？</p>
+<p><img src="/2020/11/16/DNN-Decomposition/14.png" alt="14" style="zoom:80%;"></p>
+<ul>
+<li>TI-HP方法：JI最低，但准确率同样很低<ul>
+<li>因为先更新负类样本权重，再更新正类样本权重，负类样本权重被覆盖</li>
+</ul>
+</li>
+<li>TI-PN方法：多个模型上低准确率<ul>
+<li>先更新正类样本权重，再更新负类样本权重，JI较高，因为负类样本权重重合较多</li>
+</ul>
+</li>
+<li>TI-SNE方法：准确率最高</li>
+<li>CM-RIE相比CM-C降低了JI系数，且在准确率上表现较好。</li>
+<li>准确率不变或有提升的模型中：33.79%的边是失效的，说明这些模型与原模型并不是完全一样。</li>
+<li>调整了每层神经元的个数至70个之后，CM-RIE方法效果几乎一致。</li>
+</ul>
+</li>
+<li><p>实验2：模块化后的DNN支持<strong>重用</strong>吗？</p>
+<ul>
+<li><p>数据集内部重用</p>
+<ul>
+<li><p>从原模型模型构造两类别模型（共C(10,2)=45种情况)：用这两类数据重训练的相同结构的模型作为对比。结果显示与重训练的模型准确率差不多。</p>
+<p><img src="/2020/11/16/DNN-Decomposition/15.png" alt="15" style="zoom:67%;"></p>
+<p><img src="/2020/11/16/DNN-Decomposition/17.png" alt="17" style="zoom:50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>数据集之间重用</p>
+<ul>
+<li>绝大多数模型有一定的精度下降</li>
+</ul>
+<p><img src="/2020/11/16/DNN-Decomposition/18.png" alt="18" style="zoom:50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>实验3：模块化后的DNN支持<strong>替换</strong>吗？</p>
+<ul>
+<li><p>同数据集模型替换</p>
+</li>
+<li><p>不同数据集模型替换</p>
+<p><img src="/2020/11/16/DNN-Decomposition/19.png" alt="19" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><ul>
+<li><p>应用场景设想很新颖。</p>
+</li>
+<li><p>文章笔误太多，算法解释得不清楚。</p>
+</li>
+<li><p>直接对模型权重进行操纵的做法很大胆，实验用的模型都是全联接的小型模型，怀疑在其他大型模型上的可行性。</p>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ruby Chen
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/" title="【论文笔记】On Decomposing a Deep Neural Network into Modules">https://rubychen0611.github.io/2020/11/16/DNN-Decomposition/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/DNN%E5%88%86%E8%A7%A3/" rel="tag"># DNN分解</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/12/Effective-Path/" rel="prev" title="【论文笔记】Effective Path">
+      <i class="fa fa-chevron-left"></i> 【论文笔记】Effective Path
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A41%EF%BC%9A%E5%85%B3%E6%B3%A8%E7%82%B9%E8%AF%86%E5%88%AB-Concern-Identification-CI"><span class="nav-number">2.1.</span> <span class="nav-text">步骤1：关注点识别 Concern Identification (CI)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A42%EF%BC%9A%E7%BA%A0%E7%BC%A0%E8%AF%86%E5%88%AB-Tangling-Identification%EF%BC%88TI%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">步骤2：纠缠识别 Tangling Identification（TI）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A43%EF%BC%9A%E5%85%B3%E6%B3%A8%E7%82%B9%E6%A8%A1%E5%9D%97%E5%8C%96-Concern-Modularization-CM"><span class="nav-number">2.3.</span> <span class="nav-text">步骤3：关注点模块化 Concern Modularization (CM)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C"><span class="nav-number">3.</span> <span class="nav-text">实验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.1.</span> <span class="nav-text">实验设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">3.2.</span> <span class="nav-text">实验结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">思考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Ruby Chen"
+      src="/images/head.jpg">
+  <p class="site-author-name" itemprop="name">Ruby Chen</p>
+  <div class="site-description" itemprop="description">自爱兼爱，善感而不多愁。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rubychen0611" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rubychen0611" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rubychen0611@yeah.net" title="E-Mail → mailto:rubychen0611@yeah.net" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://instagram.com/rubychen611" title="Instagram → https:&#x2F;&#x2F;instagram.com&#x2F;rubychen611" rel="noopener" target="_blank"><i class="fab fa-instagram fa-fw"></i>Instagram</a>
+      </span>
+  </div>
+
+
+
+      </div>
+	  
+	  
+  <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+  <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div id="myCanvasContainer" class="widget tagcloud">
+      <canvas width="250" height="250" id="resCanvas" style="width:100%">
+        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Concolic%E6%B5%8B%E8%AF%95/" rel="tag">Concolic测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNN%E5%88%86%E8%A7%A3/" rel="tag">DNN分解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag">DNN测试</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MC-DC/" rel="tag">MC/DC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%94%E6%9C%AC%E5%8D%8E/" rel="tag">叔本华</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AF%B9%E6%8A%97%E9%98%B2%E5%BE%A1/" rel="tag">对抗防御</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%AE%E5%88%86%E6%B5%8B%E8%AF%95/" rel="tag">差分测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95/" rel="tag">模糊测试</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AF%94%E8%B5%9B/" rel="tag">比赛</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag">测试标准</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/" rel="tag">测试输入生成</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A7%BB%E5%8A%A8%E5%BC%80%E5%8F%91/" rel="tag">移动开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A8%8B%E5%BA%8F%E5%88%87%E7%89%87/" rel="tag">程序切片</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AC%A6%E5%8F%B7%E6%89%A7%E8%A1%8C/" rel="tag">符号执行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%84%E5%90%88%E6%B5%8B%E8%AF%95/" rel="tag">组合测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%96%E8%AF%91%E5%99%A8%E6%B5%8B%E8%AF%95/" rel="tag">编译器测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B/" rel="tag">计算模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/" rel="tag">论文笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%BE%93%E5%85%A5%E9%AA%8C%E8%AF%81/" rel="tag">输入验证</a><span class="tag-list-count">1</span></li></ul>
+      </canvas>
+    </div>
+  </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ruby Chen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">54k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">49 分钟</span>
+</div>
+
+<!--添加运行时间-->
+<span id="sitetime"></span>
+<script language=javascript>
+	function siteTime(){
+		window.setTimeout("siteTime()", 1000);
+		var seconds = 1000;
+		var minutes = seconds * 60;
+		var hours = minutes * 60;
+		var days = hours * 24;
+		var years = days * 365;
+		var today = new Date();
+		var todayYear = today.getFullYear();
+		var todayMonth = today.getMonth()+1;
+		var todayDate = today.getDate();
+		var todayHour = today.getHours();
+		var todayMinute = today.getMinutes();
+		var todaySecond = today.getSeconds();
+		/* 
+		Date.UTC() -- 返回date对象距世界标准时间(UTC)1970年1月1日午夜之间的毫秒数(时间戳)
+		year - 作为date对象的年份，为4位年份值
+		month - 0-11之间的整数，做为date对象的月份
+		day - 1-31之间的整数，做为date对象的天数
+		hours - 0(午夜24点)-23之间的整数，做为date对象的小时数
+		minutes - 0-59之间的整数，做为date对象的分钟数
+		seconds - 0-59之间的整数，做为date对象的秒数
+		microseconds - 0-999之间的整数，做为date对象的毫秒数
+        */
+		var t1 = Date.UTC(2020,08,19,20,19,00); 
+		var t2 = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+		var diff = t2-t1;
+		var diffYears = Math.floor(diff/years);
+		var diffDays = Math.floor((diff/days)-diffYears*365);
+		var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+		var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+		var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+		document.getElementById("sitetime").innerHTML=" 本站已安全运行 "+/*diffYears+" 年 "+*/diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+	}
+	siteTime();
+</script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="/lib/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='255,0,0' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz',
+      appKey     : 'gosR0ey4a9G3xmN5tvWEcrBS',
+      placeholder: "留下你的评论吧",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":175,"height":325},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
