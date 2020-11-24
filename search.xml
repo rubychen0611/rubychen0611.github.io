@@ -1,6 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>【论文笔记】DLFuzz</title>
+    <url>/2020/08/20/DLFuzz/</url>
+    <content><![CDATA[<p>原文：DLFuzz: Differential Fuzzing Testing of Deep Learning Systems （ESEC/FSE’18）<a id="more"></a></p>
+<p>代码：<a href="https://github.com/turned2670/DLFuzz">https://github.com/turned2670/DLFuzz</a> </p>
+<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
+<li>输入集合（未标注）</li>
+<li>待测试DNN</li>
+<li>$k$：除原预测标签外，top-k个其他标签</li>
+<li>$m$：欲覆盖的神经元个数</li>
+<li><p>strategies：神经元选择策略</p>
+<ul>
+<li><p>策略1：选择过去测试中常被覆盖的神经元</p>
+</li>
+<li><p>策略2：选择过去测试中极少被覆盖到的神经元</p>
+</li>
+<li><p>策略3：选择权重高的神经元</p>
+</li>
+<li>策略4：选择激活阈值附近的神经元</li>
+</ul>
+</li>
+<li>$\lambda$：平衡两个目标（预测类别差异和覆盖新的神经元）的参数</li>
+<li>predict_weight：代码里在上公式中$\sum c_i$前的权重，默认为0.5（未在论文里出现的参数）</li>
+<li>iter_times: 每个种子的迭代次数</li>
+<li>threshold: 神经元激活阈值</li>
+<li>learning_step：步长，代码里设为0.02</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
+<li><p>梯度约束：<font color="red">论文里说可以加保持符号约束或DeepXplore里的约束，但代码似乎没加任何约束，直接在输入上增加梯度*步长</font></p>
+</li>
+<li><p>生成图像距离约束：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</p>
+</li>
+<li><p>约束：一个输入能提升的神经元覆盖率随着时间的增加而下降，对应的保留种子的阈值也随着运行时间的增加而降低<font color="red">（代码里体现为保留种子时最少需要提升的覆盖率随迭代次数增加而降低）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig1.png" alt="fig1" style="zoom: 80%;"></p>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p>MNIST（LeNet-1, LeNet-4, LeNet-5）和ImageNet（VGG-16, VGG-19, ResNet50）</p>
+<font color="red">与DeepXplore相同</font>
+
+<h3 id="默认参数设置"><a href="#默认参数设置" class="headerlink" title="默认参数设置"></a>默认参数设置</h3><ul>
+<li><p>随机选择20个初始输入<font color="red">（类别是否平衡？20是否过少？）</font></p>
+</li>
+<li><p>$k=4,m=10$，strategy为策略1，iter_times=3 </p>
+</li>
+</ul>
+<h3 id="实验1：DLFuzz与DeepXplore比较"><a href="#实验1：DLFuzz与DeepXplore比较" class="headerlink" title="实验1：DLFuzz与DeepXplore比较"></a>实验1：DLFuzz与DeepXplore比较</h3><ul>
+<li><p>实验方法：对相同的20个初始输入，比较DLFuzz相对DeepXplore神经元覆盖率、l2距离、生成对抗样本的个数、每个对抗样本平均生成时间</p>
+</li>
+<li><p>实验结果：</p>
+<ul>
+<li><p>覆盖率提升<font color="red">（DLFuzz的优化目标选择了10个神经元，DeepXplore只选了一个）</font></p>
+</li>
+<li><p>L2距离很小，生成的扰动更隐秘<font color="red">（DeepXplore未对距离做限制，甚至认为L1距离越大多样性越好）</font></p>
+</li>
+<li><p>生成对抗样本数量更多（DeepXplore对每组DNN每张图片最多只生成一个对抗样本，DLFuzz每个模型每张图片可以生成多个对抗样本）</p>
+</li>
+<li><p>更短的时间消耗（除了ResNet50，因为神经元数量大所以选择神经元的耗时长）</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/20/DLFuzz/fig2.png" alt="fig2" style="zoom:67%;"></p>
+<h3 id="实验2：四种神经元选择策略比较"><a href="#实验2：四种神经元选择策略比较" class="headerlink" title="实验2：四种神经元选择策略比较"></a>实验2：四种神经元选择策略比较</h3><ul>
+<li><p>实验方法：比较四种策略和DeepXplore，随着测试图片生成数量增多，神经元覆盖率的增长趋势</p>
+</li>
+<li><p>实验结果：策略1略好<font color="red">（生成数量是否过少？19张神经元覆盖率就趋于平缓）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig3.png" alt="fig3" style="zoom:60%;"></p>
+</li>
+</ul>
+<h3 id="实验3：用生成图片重新训练"><a href="#实验3：用生成图片重新训练" class="headerlink" title="实验3：用生成图片重新训练"></a>实验3：用生成图片重新训练</h3><ul>
+<li>实验方法：用生成的114个对抗样本重新训练MNIST的三个DNN模型，平均提升准确率1.8%<font color="red">（太少？）</font></li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】On Decomposing a Deep Neural Network into Modules</title>
     <url>/2020/11/16/DNN-Decomposition/</url>
     <content><![CDATA[<p>On Decomposing a Deep Neural Network into Modules （FSE’20）<a id="more"></a></p>
@@ -174,106 +274,6 @@
       </categories>
       <tags>
         <tag>DNN分解</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DLFuzz</title>
-    <url>/2020/08/20/DLFuzz/</url>
-    <content><![CDATA[<p>原文：DLFuzz: Differential Fuzzing Testing of Deep Learning Systems （ESEC/FSE’18）<a id="more"></a></p>
-<p>代码：<a href="https://github.com/turned2670/DLFuzz">https://github.com/turned2670/DLFuzz</a> </p>
-<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
-<li>输入集合（未标注）</li>
-<li>待测试DNN</li>
-<li>$k$：除原预测标签外，top-k个其他标签</li>
-<li>$m$：欲覆盖的神经元个数</li>
-<li><p>strategies：神经元选择策略</p>
-<ul>
-<li><p>策略1：选择过去测试中常被覆盖的神经元</p>
-</li>
-<li><p>策略2：选择过去测试中极少被覆盖到的神经元</p>
-</li>
-<li><p>策略3：选择权重高的神经元</p>
-</li>
-<li>策略4：选择激活阈值附近的神经元</li>
-</ul>
-</li>
-<li>$\lambda$：平衡两个目标（预测类别差异和覆盖新的神经元）的参数</li>
-<li>predict_weight：代码里在上公式中$\sum c_i$前的权重，默认为0.5（未在论文里出现的参数）</li>
-<li>iter_times: 每个种子的迭代次数</li>
-<li>threshold: 神经元激活阈值</li>
-<li>learning_step：步长，代码里设为0.02</li>
-</ul>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
-<li><p>梯度约束：<font color="red">论文里说可以加保持符号约束或DeepXplore里的约束，但代码似乎没加任何约束，直接在输入上增加梯度*步长</font></p>
-</li>
-<li><p>生成图像距离约束：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</p>
-</li>
-<li><p>约束：一个输入能提升的神经元覆盖率随着时间的增加而下降，对应的保留种子的阈值也随着运行时间的增加而降低<font color="red">（代码里体现为保留种子时最少需要提升的覆盖率随迭代次数增加而降低）</font></p>
-<p><img src="/2020/08/20/DLFuzz/fig1.png" alt="fig1" style="zoom: 80%;"></p>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p>MNIST（LeNet-1, LeNet-4, LeNet-5）和ImageNet（VGG-16, VGG-19, ResNet50）</p>
-<font color="red">与DeepXplore相同</font>
-
-<h3 id="默认参数设置"><a href="#默认参数设置" class="headerlink" title="默认参数设置"></a>默认参数设置</h3><ul>
-<li><p>随机选择20个初始输入<font color="red">（类别是否平衡？20是否过少？）</font></p>
-</li>
-<li><p>$k=4,m=10$，strategy为策略1，iter_times=3 </p>
-</li>
-</ul>
-<h3 id="实验1：DLFuzz与DeepXplore比较"><a href="#实验1：DLFuzz与DeepXplore比较" class="headerlink" title="实验1：DLFuzz与DeepXplore比较"></a>实验1：DLFuzz与DeepXplore比较</h3><ul>
-<li><p>实验方法：对相同的20个初始输入，比较DLFuzz相对DeepXplore神经元覆盖率、l2距离、生成对抗样本的个数、每个对抗样本平均生成时间</p>
-</li>
-<li><p>实验结果：</p>
-<ul>
-<li><p>覆盖率提升<font color="red">（DLFuzz的优化目标选择了10个神经元，DeepXplore只选了一个）</font></p>
-</li>
-<li><p>L2距离很小，生成的扰动更隐秘<font color="red">（DeepXplore未对距离做限制，甚至认为L1距离越大多样性越好）</font></p>
-</li>
-<li><p>生成对抗样本数量更多（DeepXplore对每组DNN每张图片最多只生成一个对抗样本，DLFuzz每个模型每张图片可以生成多个对抗样本）</p>
-</li>
-<li><p>更短的时间消耗（除了ResNet50，因为神经元数量大所以选择神经元的耗时长）</p>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/20/DLFuzz/fig2.png" alt="fig2" style="zoom:67%;"></p>
-<h3 id="实验2：四种神经元选择策略比较"><a href="#实验2：四种神经元选择策略比较" class="headerlink" title="实验2：四种神经元选择策略比较"></a>实验2：四种神经元选择策略比较</h3><ul>
-<li><p>实验方法：比较四种策略和DeepXplore，随着测试图片生成数量增多，神经元覆盖率的增长趋势</p>
-</li>
-<li><p>实验结果：策略1略好<font color="red">（生成数量是否过少？19张神经元覆盖率就趋于平缓）</font></p>
-<p><img src="/2020/08/20/DLFuzz/fig3.png" alt="fig3" style="zoom:60%;"></p>
-</li>
-</ul>
-<h3 id="实验3：用生成图片重新训练"><a href="#实验3：用生成图片重新训练" class="headerlink" title="实验3：用生成图片重新训练"></a>实验3：用生成图片重新训练</h3><ul>
-<li>实验方法：用生成的114个对抗样本重新训练MNIST的三个DNN模型，平均提升准确率1.8%<font color="red">（太少？）</font></li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>模糊测试</tag>
-        <tag>测试输入生成</tag>
       </tags>
   </entry>
   <entry>
@@ -685,139 +685,6 @@
         <tag>DNN测试</tag>
         <tag>测试输入生成</tag>
         <tag>Concolic测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepGauge</title>
-    <url>/2020/08/26/DeepGauge/</url>
-    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
-<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
-<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
-<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
-<ul>
-<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
-</li>
-<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
-<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
-<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
-<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
-<ul>
-<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
-</li>
-<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
-<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
-</ul>
-</li>
-<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
-<ul>
-<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
-</li>
-<li><p>SNAC只计算上边界覆盖率：</p>
-<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
-</ul>
-</li>
-</ul>
-<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
-<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
-<ul>
-<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
-<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Top-k Neuron Patterns</strong></p>
-<ul>
-<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
-<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
-<li>数据集和模型</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
-<ul>
-<li><p>对抗样本生成算法</p>
-<ul>
-<li>FGSM、BIM、JSMA、CW</li>
-</ul>
-</li>
-<li><p>实验步骤</p>
-<ul>
-<li><p>对于MNIST：</p>
-<ul>
-<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
-</li>
-<li><p>参数设置</p>
-<ul>
-<li>$\sigma$:方差</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
-</li>
-<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
-</li>
-</ul>
-</li>
-<li><p>对于ImageNet：</p>
-<ul>
-<li>随机选择5000张测试图片</li>
-<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
-<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
-<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
-<li>主功能区和边界区均可能出错</li>
-<li>覆盖率提升意味着错误检测能力提升</li>
-<li>测试数据更多覆盖主功能区域</li>
-<li>低边界区比高边界区更难覆盖</li>
-</ul>
-<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
-<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
-<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
-<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
-<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
-<li>KMNC和TKNC的$k$</li>
-<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
       </tags>
   </entry>
   <entry>
@@ -1256,6 +1123,139 @@
         <tag>DNN测试</tag>
         <tag>模糊测试</tag>
         <tag>测试输入生成</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DeepGauge</title>
+    <url>/2020/08/26/DeepGauge/</url>
+    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
+<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
+<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
+<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
+<ul>
+<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
+</li>
+<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
+<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
+<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
+<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
+<ul>
+<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
+</li>
+<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
+<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
+</ul>
+</li>
+<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
+<ul>
+<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
+</li>
+<li><p>SNAC只计算上边界覆盖率：</p>
+<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
+</ul>
+</li>
+</ul>
+<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
+<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
+<ul>
+<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
+<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Top-k Neuron Patterns</strong></p>
+<ul>
+<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
+<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
+<li>数据集和模型</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
+<ul>
+<li><p>对抗样本生成算法</p>
+<ul>
+<li>FGSM、BIM、JSMA、CW</li>
+</ul>
+</li>
+<li><p>实验步骤</p>
+<ul>
+<li><p>对于MNIST：</p>
+<ul>
+<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
+</li>
+<li><p>参数设置</p>
+<ul>
+<li>$\sigma$:方差</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
+</li>
+<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
+</li>
+</ul>
+</li>
+<li><p>对于ImageNet：</p>
+<ul>
+<li>随机选择5000张测试图片</li>
+<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
+<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
+<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
+<li>主功能区和边界区均可能出错</li>
+<li>覆盖率提升意味着错误检测能力提升</li>
+<li>测试数据更多覆盖主功能区域</li>
+<li>低边界区比高边界区更难覆盖</li>
+</ul>
+<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
+<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
+<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
+<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
+<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
+<li>KMNC和TKNC的$k$</li>
+<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
       </tags>
   </entry>
   <entry>
@@ -1885,11 +1885,11 @@
 </li>
 </ul>
 </li>
-<li>实验结果</li>
+<li>实验结果：NNSlicer能保持准确率降低较少，这是因为我们牺牲其他类别的连接来保障目标类别的准确率能缓慢降低</li>
 </ul>
 <p><img src="/2020/11/10/Dynamic-Slicing-for-DNN/8.png" alt="8" style="zoom:60%;"></p>
 <ul>
-<li><p>一轮微调：用10k个样本重训练一轮</p>
+<li><p>一轮微调：用10k个样本重训练一轮，即使剪枝比例很大，但NNSlicer已能达到较高的准确率</p>
 <p><img src="/2020/11/10/Dynamic-Slicing-for-DNN/9.png" alt="9" style="zoom:60%;"></p>
 </li>
 </ul>
@@ -2794,6 +2794,155 @@
       </categories>
       <tags>
         <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】mMutant</title>
+    <url>/2020/11/02/mMutant/</url>
+    <content><![CDATA[<p>原文：Adversarial Sample Detection for Deep Neural Network through Model Mutation Testing  (ICSE’19)  <a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/dgl-prc/m_testing_adversatial_sample">https://github.com/dgl-prc/m_testing_adversatial_sample</a></p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>目前对抗样本检测方法：</p>
+<ul>
+<li>训练数据扩充+重训练：不能防止未知的对抗样本</li>
+<li>鲁棒优化、对抗训练：增加了训练成本</li>
+<li>测试标准、黑盒测试、白盒测试、concolic测试等：不能提升DNN鲁棒性，也不能为DNN在被对抗攻击时提供鲁棒性保证</li>
+<li>形式化验证DNN的鲁棒性：高成本、只针对少量特定类型DNN和特定性质</li>
+</ul>
+<p>本文：</p>
+<ul>
+<li>通过DNN模型的变异测试和提出了一种运行时检测对抗样本的方法。</li>
+<li>基于的观察：相比正常样本，对抗样本对于模型的变异更加敏感（预测标签更易改变）</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="模型变异方法"><a href="#模型变异方法" class="headerlink" title="模型变异方法"></a>模型变异方法</h3><p>采用DeepMutation中的4个模型级变异方法（无须训练）：</p>
+<ul>
+<li><p>Gaussian Fuzzing（GF）：根据高斯分布扰动权重</p>
+<p><img src="/2020/11/02/mMutant/4.png" alt="4" style="zoom:70%;"></p>
+</li>
+<li><p>Weight Shuffing（WS）：随机排列选中的权重</p>
+<p><img src="/2020/11/02/mMutant/5.png" alt="5" style="zoom:67%;"></p>
+</li>
+<li><p>Neuron Switch（NS）：交换同一层的两个神经元</p>
+<p><img src="/2020/11/02/mMutant/6.png" alt="6" style="zoom:67%;"></p>
+</li>
+<li><p>Neuron Activation Inverse（NAI）：变更神经元的激活状态</p>
+<p><img src="/2020/11/02/mMutant/3.png" alt="3" style="zoom:70%;"></p>
+</li>
+</ul>
+<h3 id="验证假设（Empirical-study）"><a href="#验证假设（Empirical-study）" class="headerlink" title="验证假设（Empirical study）"></a>验证假设（Empirical study）</h3><p>通过实验验证对抗样本和正常样本的标签改变率（Label change rate， LCR）的差异。由于生成的变异模型可能存在质量很低的情况，因此我们扔掉了在验证集上低准确率的模型（如准确率低于90%的）。</p>
+<p>令变异后的模型集合为$F$，变异模型$f_i$对于输入$x$的预测标签$f_i(x)$，LCR的计算方法：</p>
+<p>$\zeta ( x ) = \frac { | \{ f _ { i } | f _ { i } \in F \text { and } f _ { i } ( x ) \neq f ( x ) \} | } { | F | }$</p>
+<p>直觉上，LCR衡量了一个输入$x$对于DNN变异模型的敏感程度。</p>
+<p><strong>在MNIST和CIFAR-10上的实证研究</strong></p>
+<ul>
+<li>使用NAI变异方法生成了500个变异模型（随机选择一些神经元，更改激活状态）</li>
+<li>实验结果：对抗样本的预测标签更易受到扰动<img src="/2020/11/02/mMutant/1.png" alt="1"></li>
+<li>解释：对抗样本常处于决策边界附近，更易受到模型扰动的干扰。</li>
+</ul>
+<h3 id="检测算法"><a href="#检测算法" class="headerlink" title="检测算法"></a>检测算法</h3><ul>
+<li><p>输入：一个DNN模型$f$，一个样本$x$，阈值$\zeta_ h$（可自动计算获得）</p>
+</li>
+<li><p>使用假设检验：</p>
+<p>​    $ H_{0}: \zeta (x) \geqslant \zeta_ h $</p>
+<p>​    $ H_{1}: \zeta (x) \leqslant \zeta_ h $</p>
+<ul>
+<li>三个标准参数$\alpha$、$\beta$、$\delta$，控制错误可能性<ul>
+<li>Type I 错误（H0为真但拒绝H0）的可能性小于$\alpha$</li>
+<li>Type II 错误（H1为真但拒绝H1）的可能性小于$\beta$</li>
+<li>indifferent region：$(r-\delta,r+\delta)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>不断生成mutate后的模型（准确率大于阈值），直到触发停止条件。（模型可保存使用，无需运行时生成）</p>
+</li>
+<li><p>两种方法决定算法是否停止（我们有足够信心拒绝假设）</p>
+<ul>
+<li><p>1、Fixed-size Sampling Test (FSST)：运行固定数量的测试</p>
+</li>
+<li><p>2、Sequential Probability Ratio Test (SPRT)：模型数量不固定，每次更新阈值$\zeta_ h$后自动判断是否停止，一般运行速度更快（拒绝假设后就停止运行）。</p>
+<ul>
+<li>SPRT概率计算方法：$ pr= \frac{p_{1}^{z}(1-p_{1})^{n-z}}{p_{0}^{z}(1-p_{0})^{n-z}} $，其中$p_1=\zeta_ h - \delta$，$p_0=\zeta_ h + \delta$</li>
+</ul>
+<p><img src="/2020/11/02/mMutant/2.png" alt="2" style="zoom:67%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
+<li><p>模型和数据集</p>
+<ul>
+<li>MNIST-LeNet：236个神经元</li>
+<li>CIFAR10-GoogleNet：7914个神经元</li>
+</ul>
+</li>
+<li><p>变异率</p>
+<ul>
+<li>MNIST模型：{0.01,0.03,0.05}</li>
+<li>CIFAR10模型：{0.003,0.005,0.007}</li>
+</ul>
+</li>
+<li><p>保留测试集上准确率高于90%的变异模型。每种变异率生成500个变异模型。</p>
+</li>
+<li><p>对抗样本生成方法</p>
+<ul>
+<li>FGSM</li>
+<li>JSMA</li>
+<li>C&amp;W</li>
+<li>DeepFool</li>
+<li>Black-Box</li>
+</ul>
+</li>
+<li><p>每种攻击方法生成1000张图片（不一定都攻击成功）</p>
+<p><img src="/2020/11/02/mMutant/7.png" alt="7" style="zoom:75%;"></p>
+</li>
+<li><p>评价指标</p>
+<ul>
+<li>标签改变率的距离$d_{lcr}=\zeta_{adv}/\zeta_{nor}$，越大表明对抗样本与正常样本的标签改变率差异越大</li>
+<li>ROC、AUC</li>
+<li>检测准确率：二分类（正常/异常样本）准确率</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ1-正常样本和对抗样本的LCR是否有显著差异？"><a href="#RQ1-正常样本和对抗样本的LCR是否有显著差异？" class="headerlink" title="RQ1 正常样本和对抗样本的LCR是否有显著差异？"></a>RQ1 正常样本和对抗样本的LCR是否有显著差异？</h3><p>结合Table II和IV可见，对抗样本LCR显著高于正常样本。</p>
+<p><img src="/2020/11/02/mMutant/8.png" alt="8" style="zoom:80%;"></p>
+<p><img src="/2020/11/02/mMutant/9.png" alt="9"></p>
+<h3 id="RQ2：LCR是否适合作为检测指标？"><a href="#RQ2：LCR是否适合作为检测指标？" class="headerlink" title="RQ2：LCR是否适合作为检测指标？"></a>RQ2：LCR是否适合作为检测指标？</h3><p>多数情况下LCR比baseline的AUROC更高。</p>
+<p><img src="/2020/11/02/mMutant/10.png" alt="10" style="zoom:80%;"></p>
+<h3 id="RQ3：检测对抗样本的效果如何？"><a href="#RQ3：检测对抗样本的效果如何？" class="headerlink" title="RQ3：检测对抗样本的效果如何？"></a>RQ3：检测对抗样本的效果如何？</h3><p>检测精度和最少mutation次数：</p>
+<ul>
+<li>设置$\zeta_h=\rho \cdot \zeta_{nor}$，其中$\zeta_{nor}$为正常样本lcr的上界</li>
+</ul>
+<p><img src="/2020/11/02/mMutant/11.png" alt="11"></p>
+<h3 id="RQ4：检测算法的开销如何？"><a href="#RQ4：检测算法的开销如何？" class="headerlink" title="RQ4：检测算法的开销如何？"></a>RQ4：检测算法的开销如何？</h3><p>$c_g$：生成变异模型的时间</p>
+<p>$c_f$：前向传播预测的时间</p>
+<p>检测一张图片的时间开销：$C=n(c_g+c_f)$，$n$为生成模型的个数</p>
+<p>检测$m$张图片的时间开销：$C(m)=m\cdot n \cdot c_f + n \cdot c_g$</p>
+<p><img src="/2020/11/02/mMutant/12.png" alt="12" style="zoom:80%;"></p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>变异测试</tag>
       </tags>
   </entry>
   <entry>
