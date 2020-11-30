@@ -277,256 +277,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】DeepCT</title>
-    <url>/2020/08/20/DeepCT/</url>
-    <content><![CDATA[<p>原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)  <a id="more"></a></p>
-<p>代码：没找到</p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出了DNN系统的组合测试方法，根据目标要覆盖的神经元激活模式组合，从种子输入开始，通过search-based testing, 或guided random testing, 或symbolic constraint solving based testing方法生成满足条件的输入，同时最小化L∞距离。以生成覆盖更多的神经元激活模式组合的输入。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><ul>
-<li>为什么层析（tomographic）？<ul>
-<li>DNN学习到的特征随着层数增加越来越复杂、抽象</li>
-</ul>
-</li>
-<li>为什么组合（combinatorial）？<ul>
-<li>每层神经元只与前后两层发生交互。逻辑单元之间可能存在逻辑(无形)的相互作用，其中当前层的神经元共同决定其下一层神经元的逻辑。我们想用CT捕捉和检查每一层神经元之间的这些无形的相互作用。</li>
-</ul>
-</li>
-</ul>
-<h2 id="组合测试标准"><a href="#组合测试标准" class="headerlink" title="组合测试标准"></a>组合测试标准</h2><h3 id="神经元激活配置（Neuron-activation-configuration"><a href="#神经元激活配置（Neuron-activation-configuration" class="headerlink" title="神经元激活配置（Neuron-activation configuration)"></a>神经元激活配置（Neuron-activation configuration)</h3><p>对第$i$层的一组神经元$M=\{n_1,n_2,…,n_k\}$，激活配置为一个元组$c=(b_1,b_2,…,b_k)$，其中$b_i \in \{0,1\}$。若测试集$T$中存在样本$t$能使得激活模式等于$c$，则称$T$可以覆盖$c$。</p>
-<p>$\Theta(t,L_i)$: 第$i$层神经元所有$t$-路覆盖组合</p>
-<p>$\theta \in \Theta(t,L_i)$：是$t$个神经元的集合，拥有$2^t$种激活配置</p>
-<p>$\Theta_{Full}(t,L_i,T) \subseteq \Theta(t,L_i)$：能被$T$完全覆盖的$t$-路覆盖组合</p>
-<h3 id="t-路组合稀疏覆盖"><a href="#t-路组合稀疏覆盖" class="headerlink" title="$t$-路组合稀疏覆盖"></a>$t$-路组合稀疏覆盖</h3><p>$T$的组合稀疏覆盖=覆盖了所有神经元配置的组合数 / 所有组合数</p>
-<p>例子：</p>
-<p><img src="/2020/08/20/DeepCT/fig1.png" alt="fig1" style="zoom:60%;"></p>
-<p>$L_i$层中共有4个神经元${n1,n2,n3,n4}$，<br>2-路组合共有六种：$\{n1,n2\}，\{n1,n3\}，\{n1,n4\}，\{n2,n3\}，\{n2,n4\}，\{n3,n4\}$<br>每个2-路组合有四种神经元激活配置$(0，0)、(0，1)、(1，0)$和$(1，1)$<br>在6个双向组合中，T只覆盖了$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}$和$\{n3，n4\}$的四种神经元激活配置(只有这四个组合出现了四种神经元激活配置)<br>则Li层的2-路组合稀疏覆盖率$= 4 / 6= 66.6\%$</p>
-<p>由于$t$-路组合稀疏覆盖不能考虑每个神经元组合内的覆盖，接下来我们引入t-way组合稠密覆盖。</p>
-<h3 id="t-路组合稠密覆盖"><a href="#t-路组合稠密覆盖" class="headerlink" title="$t$-路组合稠密覆盖"></a>$t$-路组合稠密覆盖</h3><p>$T$的组合稀疏覆盖= 被覆盖了的激活配置数 / 所有组合的所有激活配置数目</p>
-<p>例子：同上图</p>
-<p>由于$L_i$中有六个神经元的双向组合，并且每个组合有四个神经元激活配置,总共有24种激活配置</p>
-<p>测试集T可以覆盖20种配置，未覆盖的神经元激活配置为$\{n1，n3\}=(0，1)，\{n1，n3\}=(1，0)，\{n2，n4\}=(0，1)，\{n2，n4\}=(1，0)$,因此，T的双向组合密集覆盖率为83.3%。</p>
-<h3 id="p-t-完备性"><a href="#p-t-完备性" class="headerlink" title="$(p,t)$完备性"></a>$(p,t)$完备性</h3><p>达到$p$(百分比)覆盖的组合比例</p>
-<p>例子：同上图</p>
-<p>在神经元的双向组合中，$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}，\{n3，n4\}$的覆盖双向构型比为100%，$\{n1，n3\}$和$\{n2，n4\}$的覆盖双向构型比为50%。则$L_i$的(0.5，2)-完备性为100%，$L_i$的(1，2)-完备性为66.6%。即达到100%覆盖的有4个,达到50%以上覆盖的有6个。</p>
-<h2 id="DNN的鲁棒性测试"><a href="#DNN的鲁棒性测试" class="headerlink" title="DNN的鲁棒性测试"></a>DNN的鲁棒性测试</h2><h3 id="d-局部鲁棒性"><a href="#d-局部鲁棒性" class="headerlink" title="$d$-局部鲁棒性"></a>$d$-局部鲁棒性</h3><script type="math/tex; mode=display">\forall x':\parallel x'-x \parallel \leq d \Rightarrow C(x) = C(x')</script><p>约束：$L_{\infty}-norm$</p>
-<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p><img src="/2020/08/20/DeepCT/al.png" alt="al" style="zoom:67%;"></p>
-<ul>
-<li>输入<ul>
-<li>DNN</li>
-<li>$t$:测试粒度，每个组合内神经元个数</li>
-<li>组合测试标准</li>
-<li>初始种子集合</li>
-</ul>
-</li>
-<li>输出<ul>
-<li>正确样本集合</li>
-<li>对抗样本集合</li>
-</ul>
-</li>
-<li>测试用例生成方法<ul>
-<li>没有特殊规定，<font color="red">基于搜索、覆盖率引导的随机测试、符号分析/约束求解都可以</font></li>
-<li>本文实验：DNN使用ReLU激活函数，约束求解方法（Cplex solver）生成测试用例<ul>
-<li><font color="red">即将CT覆盖目标编码为目标的线性约束，使种子输入的$L_{\infty}$-范数扰动距离最小。</font>
-
-
-
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
-<li>数据集和模型<ul>
-<li>MNIST和两个预训练好的DNN模型DNN1和DNN2（结构和精度略）</li>
-</ul>
-</li>
-<li>从原测试集随机选择1000个样本作为初始种子，<font color="red">且这1000个都能被原DNN正确分类</font></li>
-<li>随机测试（Random Testing)<ul>
-<li><font color="red">随机生成10000个测试用例（如何随机生成的？）</font>，然后检测健壮性问题</li>
-<li>实验结果：RT已经能够检测到DNN1上的194个样本和DNN2上的178个样本的健壮性问题，总共266个独特的问题，其中106个是DNN1和DNN2上共同的问题。</li>
-</ul>
-</li>
-<li>DeepCT测试<ul>
-<li>1000个样本中去掉266个随机测试已经发现问题的样本，剩余的734个样本中随机采样50个进一步分析$d$-局部鲁棒性（$d$设为0.15，使用2-路CT标准）</li>
-<li>实验结果：<ul>
-<li>生成图片数量相当的情况下，DeepCT达到的覆盖率远超随机测试</li>
-<li>随着测试层数和生成的测试用例增加，覆盖率也逐渐增加</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/20/DeepCT/fig2.png" alt="fig2" style="zoom:60%;"></p>
-<h2 id="可控制参数-变量总结"><a href="#可控制参数-变量总结" class="headerlink" title="可控制参数/变量总结"></a>可控制参数/变量总结</h2><ul>
-<li>$t$：覆盖粒度</li>
-<li>$d$：鲁棒性约束</li>
-<li>$L_{\infty}$约束的参数</li>
-<li>初始种子集合</li>
-<li>$p$：完备性指标</li>
-</ul>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] <a href="https://blog.csdn.net/qq_33935895/article/details/105454414">https://blog.csdn.net/qq_33935895/article/details/105454414</a></p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
-        <tag>测试标准</tag>
-        <tag>组合测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepCheck</title>
-    <url>/2020/08/20/DeepCheck/</url>
-    <content><![CDATA[<p>原文：Symbolic Execution for Deep Neural Networks （ISSRE’18)  <a id="more"></a></p>
-<p>代码：没找到</p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出DNN上的符号执行测试方法。将DNN转换为程序（激活函数转换成if-else），利用相关性识别出重要像素。约束求解器求解激活模式相同但预测标签不同的输入（改变重要像素的值）。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><h3 id="传统软件测试的符号执行"><a href="#传统软件测试的符号执行" class="headerlink" title="传统软件测试的符号执行"></a>传统软件测试的符号执行</h3><p>软件测试中的符号执行主要目标是: 在给定的探索尽可能多的、不同的程序路径(program path)。对于每一条程序路径，(1) 生成一个具体输入的集合(主要能力)；(2) 检查是否存在各种错误，包括断言违规、未捕获异常、安全漏洞和内存损坏。使用符号执行分析一个程序时，该程序会使用符号值作为输入，而非一般执行程序时使用的具体值。在达到目标代码时，分析器可以得到相应的路径约束，然后通过约束求解器来得到可以触发目标代码的具体值。</p>
-<h3 id="在DNN上使用符号执行的挑战"><a href="#在DNN上使用符号执行的挑战" class="headerlink" title="在DNN上使用符号执行的挑战"></a>在DNN上使用符号执行的挑战</h3><ul>
-<li>DNN没有分支 </li>
-<li>DNN高度非线性，没有约束求解器 </li>
-<li>扩展性差：DNN神经元数量庞大，远远超出了当前符号推理工具的能力。</li>
-</ul>
-<p>我们的方法：</p>
-<ul>
-<li>将ReLU激活函数看作if-else语句，这样DNN就有了分支</li>
-</ul>
-<h2 id="符号执行框架"><a href="#符号执行框架" class="headerlink" title="符号执行框架"></a>符号执行框架</h2><p>翻译DNN：</p>
-<ul>
-<li><p>将ReLU函数转换为分支语句，则一个神经元可以看做代码段：</p>
-<p><img src="/2020/08/20/DeepCheck/Fig2.png" alt="Fig2" style="zoom:60%;"></p>
-</li>
-</ul>
-<h2 id="识别重要像素"><a href="#识别重要像素" class="headerlink" title="识别重要像素"></a>识别重要像素</h2><p>维护一个相关性数组$coef^h_{i,j}$：$h$层第$i$个神经元与输入中第$j$个像素的相关性</p>
-<ul>
-<li><p>初始化：若$i=j$，$coef^0_{i,j}=1$，其他为0 </p>
-</li>
-<li><p>迭代计算coef：</p>
-<p><img src="/2020/08/20/DeepCheck/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
-</li>
-<li><p>最终输出单元的Coef计算结果为：</p>
-<p><img src="/2020/08/20/DeepCheck/Eq1.png" alt="Eq1" style="zoom:80%;"></p>
-<p>从像素$x_j$到输出$y_i$的所有路径（输出非0）上所有权重的总和（依赖于给定输入集合的具体执行）</p>
-</li>
-</ul>
-<p>然后我们计算每个输入变量重要分数，使用三个指标:</p>
-<ul>
-<li>$co$: 相关性分数，即$C_{i,j}$</li>
-<li>$coi$：相关性分数乘以对应的输入变量：$C_{i,j} \times x_j$</li>
-<li>$abs$：相关性分数的绝对值$|C_{i,j}|$</li>
-</ul>
-<h2 id="确定攻击像素"><a href="#确定攻击像素" class="headerlink" title="确定攻击像素"></a>确定攻击像素</h2><p>构造约束求解问题：改变像素的值，使得新图片与原图<strong>激活模式相同</strong>，但<strong>预测标签不同</strong>。使用约束求解器Z3求解。</p>
-<ul>
-<li><p>激活模式相同：($H$为神经网络中所有激活函数的个数，即每个神经元激活模式都保持不变)</p>
-<p>$ PC= \land _{h=1}^{H}(B^{h}+ \sum _{i=1}^{t}C_{i}^{h} \cdot X_{i} \gamma 0) $ , 其中$ \gamma \in \left\{ &gt; , \leq\right\} $ </p>
-</li>
-<li><p>预测标签不同：($l’ \neq l$)</p>
-<script type="math/tex; mode=display">AC= \land _{j=1,j\neq l'}^{n}f_{j}(X)<f_{l^{ \prime }}(X)</script></li>
-<li><p>约束：$ RA= \land _{1}^{t} lo  \leqslant X_i \leqslant hi $  ($lo$和$hi$是输入值标准化后的上下界)</p>
-</li>
-<li><p>最终约束求解器目标：$PC \land AC \land RA$</p>
-</li>
-<li><p>攻击</p>
-<ul>
-<li>1像素攻击</li>
-<li>2像素攻击：对前5%的重要像素的任意两两组合进行约束求解。</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验配置"><a href="#实验配置" class="headerlink" title="实验配置"></a>实验配置</h3><ul>
-<li>数据集和模型<ul>
-<li>MNIST</li>
-<li>模型结构：784×10×10×10×10</li>
-<li>训练集：60000张图片</li>
-<li>准确率：92%</li>
-</ul>
-</li>
-<li>选择训练集里的10张图片（0-9）作为原始图片种子 </li>
-</ul>
-<h3 id="实验1：重要像素识别效果"><a href="#实验1：重要像素识别效果" class="headerlink" title="实验1：重要像素识别效果"></a>实验1：重要像素识别效果</h3><ul>
-<li>Top 5% 和10%重要像素识别结果<ul>
-<li>总的来说，符号执行的使用能够识别重要的像素，这有助于解释神经网络的分类决策。</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/20/DeepCheck/table1.png" alt="table1" style="zoom:60%;"></p>
-<h3 id="实验2：用符号执行进行1或2像素攻击的效果"><a href="#实验2：用符号执行进行1或2像素攻击的效果" class="headerlink" title="实验2：用符号执行进行1或2像素攻击的效果"></a>实验2：用符号执行进行1或2像素攻击的效果</h3><ul>
-<li>对1像素攻击：首先穷举每个像素（共784个）来确认其是否可攻击<font color="red">（改变像素值后激活模式不变，但预测标签改变）</font>，10张图片的可攻击像素如下：</li>
-</ul>
-<p><img src="/2020/08/20/DeepCheck/fig5.png" alt="fig5" style="zoom:67%;"></p>
-<ul>
-<li><p>1-像素攻击：10个数字可攻击像素的个数和最小可攻击像素的ID（即穷举搜索需要尝试的个数）</p>
-<p><img src="/2020/08/20/DeepCheck/table2.png" alt="table2" style="zoom:70%;"></p>
-</li>
-<li><p>2-像素攻击：</p>
-<ul>
-<li>许多2像素攻击由一个可攻击1像素的像素组成。然而，一些新的攻击对不包括任何像素可攻击的像素被发现为1像素攻击。</li>
-</ul>
-<p><img src="/2020/08/20/DeepCheck/table3.png" alt="table3"></p>
-</li>
-</ul>
-<h3 id="实验3：比较识别出的重要像素和攻击使用的像素"><a href="#实验3：比较识别出的重要像素和攻击使用的像素" class="headerlink" title="实验3：比较识别出的重要像素和攻击使用的像素"></a>实验3：比较识别出的重要像素和攻击使用的像素</h3><p><img src="/2020/08/20/DeepCheck/table5.png" alt="table5" style="zoom:60%;"></p>
-<ul>
-<li>表V显示了对于每幅图像，在发现1像素攻击之前，三个指标中的每一个都必须探索的重要像素的最小数量。对于所有指标和所有图像，需要检查的重要像素不超过前三分之一，以找到攻击像素。</li>
-<li>coi识别效果最好。</li>
-<li>总的来说，利用本文重要像素识别算法，对于寻找1像素和2像素攻击具有重要作用。</li>
-</ul>
-<h2 id="可控制参数及变量总结"><a href="#可控制参数及变量总结" class="headerlink" title="可控制参数及变量总结"></a>可控制参数及变量总结</h2><ul>
-<li>重要像素百分比（如5%、10%）</li>
-<li>初始种子集合：10张图片</li>
-<li>重要像素判断指标：$co,coi,abs$</li>
-<li>攻击像素个数</li>
-</ul>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>本文将DNN转换成程序从而获得执行路径的方法或许值得借鉴。</p>
-<p>但开销过大，只能在小型数据集和模型上使用。</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>符号执行</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】DeepConcolic</title>
     <url>/2020/08/19/DeepConcolic/</url>
     <content><![CDATA[<p>原文：Concolic Testing for Deep Neural Networks （ASE’18) <a id="more"></a></p>
@@ -685,6 +435,389 @@
         <tag>DNN测试</tag>
         <tag>测试输入生成</tag>
         <tag>Concolic测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DeepCheck</title>
+    <url>/2020/08/20/DeepCheck/</url>
+    <content><![CDATA[<p>原文：Symbolic Execution for Deep Neural Networks （ISSRE’18)  <a id="more"></a></p>
+<p>代码：没找到</p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出DNN上的符号执行测试方法。将DNN转换为程序（激活函数转换成if-else），利用相关性识别出重要像素。约束求解器求解激活模式相同但预测标签不同的输入（改变重要像素的值）。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><h3 id="传统软件测试的符号执行"><a href="#传统软件测试的符号执行" class="headerlink" title="传统软件测试的符号执行"></a>传统软件测试的符号执行</h3><p>软件测试中的符号执行主要目标是: 在给定的探索尽可能多的、不同的程序路径(program path)。对于每一条程序路径，(1) 生成一个具体输入的集合(主要能力)；(2) 检查是否存在各种错误，包括断言违规、未捕获异常、安全漏洞和内存损坏。使用符号执行分析一个程序时，该程序会使用符号值作为输入，而非一般执行程序时使用的具体值。在达到目标代码时，分析器可以得到相应的路径约束，然后通过约束求解器来得到可以触发目标代码的具体值。</p>
+<h3 id="在DNN上使用符号执行的挑战"><a href="#在DNN上使用符号执行的挑战" class="headerlink" title="在DNN上使用符号执行的挑战"></a>在DNN上使用符号执行的挑战</h3><ul>
+<li>DNN没有分支 </li>
+<li>DNN高度非线性，没有约束求解器 </li>
+<li>扩展性差：DNN神经元数量庞大，远远超出了当前符号推理工具的能力。</li>
+</ul>
+<p>我们的方法：</p>
+<ul>
+<li>将ReLU激活函数看作if-else语句，这样DNN就有了分支</li>
+</ul>
+<h2 id="符号执行框架"><a href="#符号执行框架" class="headerlink" title="符号执行框架"></a>符号执行框架</h2><p>翻译DNN：</p>
+<ul>
+<li><p>将ReLU函数转换为分支语句，则一个神经元可以看做代码段：</p>
+<p><img src="/2020/08/20/DeepCheck/Fig2.png" alt="Fig2" style="zoom:60%;"></p>
+</li>
+</ul>
+<h2 id="识别重要像素"><a href="#识别重要像素" class="headerlink" title="识别重要像素"></a>识别重要像素</h2><p>维护一个相关性数组$coef^h_{i,j}$：$h$层第$i$个神经元与输入中第$j$个像素的相关性</p>
+<ul>
+<li><p>初始化：若$i=j$，$coef^0_{i,j}=1$，其他为0 </p>
+</li>
+<li><p>迭代计算coef：</p>
+<p><img src="/2020/08/20/DeepCheck/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
+</li>
+<li><p>最终输出单元的Coef计算结果为：</p>
+<p><img src="/2020/08/20/DeepCheck/Eq1.png" alt="Eq1" style="zoom:80%;"></p>
+<p>从像素$x_j$到输出$y_i$的所有路径（输出非0）上所有权重的总和（依赖于给定输入集合的具体执行）</p>
+</li>
+</ul>
+<p>然后我们计算每个输入变量重要分数，使用三个指标:</p>
+<ul>
+<li>$co$: 相关性分数，即$C_{i,j}$</li>
+<li>$coi$：相关性分数乘以对应的输入变量：$C_{i,j} \times x_j$</li>
+<li>$abs$：相关性分数的绝对值$|C_{i,j}|$</li>
+</ul>
+<h2 id="确定攻击像素"><a href="#确定攻击像素" class="headerlink" title="确定攻击像素"></a>确定攻击像素</h2><p>构造约束求解问题：改变像素的值，使得新图片与原图<strong>激活模式相同</strong>，但<strong>预测标签不同</strong>。使用约束求解器Z3求解。</p>
+<ul>
+<li><p>激活模式相同：($H$为神经网络中所有激活函数的个数，即每个神经元激活模式都保持不变)</p>
+<p>$ PC= \land _{h=1}^{H}(B^{h}+ \sum _{i=1}^{t}C_{i}^{h} \cdot X_{i} \gamma 0) $ , 其中$ \gamma \in \left\{ &gt; , \leq\right\} $ </p>
+</li>
+<li><p>预测标签不同：($l’ \neq l$)</p>
+<script type="math/tex; mode=display">AC= \land _{j=1,j\neq l'}^{n}f_{j}(X)<f_{l^{ \prime }}(X)</script></li>
+<li><p>约束：$ RA= \land _{1}^{t} lo  \leqslant X_i \leqslant hi $  ($lo$和$hi$是输入值标准化后的上下界)</p>
+</li>
+<li><p>最终约束求解器目标：$PC \land AC \land RA$</p>
+</li>
+<li><p>攻击</p>
+<ul>
+<li>1像素攻击</li>
+<li>2像素攻击：对前5%的重要像素的任意两两组合进行约束求解。</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验配置"><a href="#实验配置" class="headerlink" title="实验配置"></a>实验配置</h3><ul>
+<li>数据集和模型<ul>
+<li>MNIST</li>
+<li>模型结构：784×10×10×10×10</li>
+<li>训练集：60000张图片</li>
+<li>准确率：92%</li>
+</ul>
+</li>
+<li>选择训练集里的10张图片（0-9）作为原始图片种子 </li>
+</ul>
+<h3 id="实验1：重要像素识别效果"><a href="#实验1：重要像素识别效果" class="headerlink" title="实验1：重要像素识别效果"></a>实验1：重要像素识别效果</h3><ul>
+<li>Top 5% 和10%重要像素识别结果<ul>
+<li>总的来说，符号执行的使用能够识别重要的像素，这有助于解释神经网络的分类决策。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/20/DeepCheck/table1.png" alt="table1" style="zoom:60%;"></p>
+<h3 id="实验2：用符号执行进行1或2像素攻击的效果"><a href="#实验2：用符号执行进行1或2像素攻击的效果" class="headerlink" title="实验2：用符号执行进行1或2像素攻击的效果"></a>实验2：用符号执行进行1或2像素攻击的效果</h3><ul>
+<li>对1像素攻击：首先穷举每个像素（共784个）来确认其是否可攻击<font color="red">（改变像素值后激活模式不变，但预测标签改变）</font>，10张图片的可攻击像素如下：</li>
+</ul>
+<p><img src="/2020/08/20/DeepCheck/fig5.png" alt="fig5" style="zoom:67%;"></p>
+<ul>
+<li><p>1-像素攻击：10个数字可攻击像素的个数和最小可攻击像素的ID（即穷举搜索需要尝试的个数）</p>
+<p><img src="/2020/08/20/DeepCheck/table2.png" alt="table2" style="zoom:70%;"></p>
+</li>
+<li><p>2-像素攻击：</p>
+<ul>
+<li>许多2像素攻击由一个可攻击1像素的像素组成。然而，一些新的攻击对不包括任何像素可攻击的像素被发现为1像素攻击。</li>
+</ul>
+<p><img src="/2020/08/20/DeepCheck/table3.png" alt="table3"></p>
+</li>
+</ul>
+<h3 id="实验3：比较识别出的重要像素和攻击使用的像素"><a href="#实验3：比较识别出的重要像素和攻击使用的像素" class="headerlink" title="实验3：比较识别出的重要像素和攻击使用的像素"></a>实验3：比较识别出的重要像素和攻击使用的像素</h3><p><img src="/2020/08/20/DeepCheck/table5.png" alt="table5" style="zoom:60%;"></p>
+<ul>
+<li>表V显示了对于每幅图像，在发现1像素攻击之前，三个指标中的每一个都必须探索的重要像素的最小数量。对于所有指标和所有图像，需要检查的重要像素不超过前三分之一，以找到攻击像素。</li>
+<li>coi识别效果最好。</li>
+<li>总的来说，利用本文重要像素识别算法，对于寻找1像素和2像素攻击具有重要作用。</li>
+</ul>
+<h2 id="可控制参数及变量总结"><a href="#可控制参数及变量总结" class="headerlink" title="可控制参数及变量总结"></a>可控制参数及变量总结</h2><ul>
+<li>重要像素百分比（如5%、10%）</li>
+<li>初始种子集合：10张图片</li>
+<li>重要像素判断指标：$co,coi,abs$</li>
+<li>攻击像素个数</li>
+</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>本文将DNN转换成程序从而获得执行路径的方法或许值得借鉴。</p>
+<p>但开销过大，只能在小型数据集和模型上使用。</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>符号执行</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DeepCT</title>
+    <url>/2020/08/20/DeepCT/</url>
+    <content><![CDATA[<p>原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)  <a id="more"></a></p>
+<p>代码：没找到</p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出了DNN系统的组合测试方法，根据目标要覆盖的神经元激活模式组合，从种子输入开始，通过search-based testing, 或guided random testing, 或symbolic constraint solving based testing方法生成满足条件的输入，同时最小化L∞距离。以生成覆盖更多的神经元激活模式组合的输入。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><ul>
+<li>为什么层析（tomographic）？<ul>
+<li>DNN学习到的特征随着层数增加越来越复杂、抽象</li>
+</ul>
+</li>
+<li>为什么组合（combinatorial）？<ul>
+<li>每层神经元只与前后两层发生交互。逻辑单元之间可能存在逻辑(无形)的相互作用，其中当前层的神经元共同决定其下一层神经元的逻辑。我们想用CT捕捉和检查每一层神经元之间的这些无形的相互作用。</li>
+</ul>
+</li>
+</ul>
+<h2 id="组合测试标准"><a href="#组合测试标准" class="headerlink" title="组合测试标准"></a>组合测试标准</h2><h3 id="神经元激活配置（Neuron-activation-configuration"><a href="#神经元激活配置（Neuron-activation-configuration" class="headerlink" title="神经元激活配置（Neuron-activation configuration)"></a>神经元激活配置（Neuron-activation configuration)</h3><p>对第$i$层的一组神经元$M=\{n_1,n_2,…,n_k\}$，激活配置为一个元组$c=(b_1,b_2,…,b_k)$，其中$b_i \in \{0,1\}$。若测试集$T$中存在样本$t$能使得激活模式等于$c$，则称$T$可以覆盖$c$。</p>
+<p>$\Theta(t,L_i)$: 第$i$层神经元所有$t$-路覆盖组合</p>
+<p>$\theta \in \Theta(t,L_i)$：是$t$个神经元的集合，拥有$2^t$种激活配置</p>
+<p>$\Theta_{Full}(t,L_i,T) \subseteq \Theta(t,L_i)$：能被$T$完全覆盖的$t$-路覆盖组合</p>
+<h3 id="t-路组合稀疏覆盖"><a href="#t-路组合稀疏覆盖" class="headerlink" title="$t$-路组合稀疏覆盖"></a>$t$-路组合稀疏覆盖</h3><p>$T$的组合稀疏覆盖=覆盖了所有神经元配置的组合数 / 所有组合数</p>
+<p>例子：</p>
+<p><img src="/2020/08/20/DeepCT/fig1.png" alt="fig1" style="zoom:60%;"></p>
+<p>$L_i$层中共有4个神经元${n1,n2,n3,n4}$，<br>2-路组合共有六种：$\{n1,n2\}，\{n1,n3\}，\{n1,n4\}，\{n2,n3\}，\{n2,n4\}，\{n3,n4\}$<br>每个2-路组合有四种神经元激活配置$(0，0)、(0，1)、(1，0)$和$(1，1)$<br>在6个双向组合中，T只覆盖了$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}$和$\{n3，n4\}$的四种神经元激活配置(只有这四个组合出现了四种神经元激活配置)<br>则Li层的2-路组合稀疏覆盖率$= 4 / 6= 66.6\%$</p>
+<p>由于$t$-路组合稀疏覆盖不能考虑每个神经元组合内的覆盖，接下来我们引入t-way组合稠密覆盖。</p>
+<h3 id="t-路组合稠密覆盖"><a href="#t-路组合稠密覆盖" class="headerlink" title="$t$-路组合稠密覆盖"></a>$t$-路组合稠密覆盖</h3><p>$T$的组合稀疏覆盖= 被覆盖了的激活配置数 / 所有组合的所有激活配置数目</p>
+<p>例子：同上图</p>
+<p>由于$L_i$中有六个神经元的双向组合，并且每个组合有四个神经元激活配置,总共有24种激活配置</p>
+<p>测试集T可以覆盖20种配置，未覆盖的神经元激活配置为$\{n1，n3\}=(0，1)，\{n1，n3\}=(1，0)，\{n2，n4\}=(0，1)，\{n2，n4\}=(1，0)$,因此，T的双向组合密集覆盖率为83.3%。</p>
+<h3 id="p-t-完备性"><a href="#p-t-完备性" class="headerlink" title="$(p,t)$完备性"></a>$(p,t)$完备性</h3><p>达到$p$(百分比)覆盖的组合比例</p>
+<p>例子：同上图</p>
+<p>在神经元的双向组合中，$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}，\{n3，n4\}$的覆盖双向构型比为100%，$\{n1，n3\}$和$\{n2，n4\}$的覆盖双向构型比为50%。则$L_i$的(0.5，2)-完备性为100%，$L_i$的(1，2)-完备性为66.6%。即达到100%覆盖的有4个,达到50%以上覆盖的有6个。</p>
+<h2 id="DNN的鲁棒性测试"><a href="#DNN的鲁棒性测试" class="headerlink" title="DNN的鲁棒性测试"></a>DNN的鲁棒性测试</h2><h3 id="d-局部鲁棒性"><a href="#d-局部鲁棒性" class="headerlink" title="$d$-局部鲁棒性"></a>$d$-局部鲁棒性</h3><script type="math/tex; mode=display">\forall x':\parallel x'-x \parallel \leq d \Rightarrow C(x) = C(x')</script><p>约束：$L_{\infty}-norm$</p>
+<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p><img src="/2020/08/20/DeepCT/al.png" alt="al" style="zoom:67%;"></p>
+<ul>
+<li>输入<ul>
+<li>DNN</li>
+<li>$t$:测试粒度，每个组合内神经元个数</li>
+<li>组合测试标准</li>
+<li>初始种子集合</li>
+</ul>
+</li>
+<li>输出<ul>
+<li>正确样本集合</li>
+<li>对抗样本集合</li>
+</ul>
+</li>
+<li>测试用例生成方法<ul>
+<li>没有特殊规定，<font color="red">基于搜索、覆盖率引导的随机测试、符号分析/约束求解都可以</font></li>
+<li>本文实验：DNN使用ReLU激活函数，约束求解方法（Cplex solver）生成测试用例<ul>
+<li><font color="red">即将CT覆盖目标编码为目标的线性约束，使种子输入的$L_{\infty}$-范数扰动距离最小。</font>
+
+
+
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
+<li>数据集和模型<ul>
+<li>MNIST和两个预训练好的DNN模型DNN1和DNN2（结构和精度略）</li>
+</ul>
+</li>
+<li>从原测试集随机选择1000个样本作为初始种子，<font color="red">且这1000个都能被原DNN正确分类</font></li>
+<li>随机测试（Random Testing)<ul>
+<li><font color="red">随机生成10000个测试用例（如何随机生成的？）</font>，然后检测健壮性问题</li>
+<li>实验结果：RT已经能够检测到DNN1上的194个样本和DNN2上的178个样本的健壮性问题，总共266个独特的问题，其中106个是DNN1和DNN2上共同的问题。</li>
+</ul>
+</li>
+<li>DeepCT测试<ul>
+<li>1000个样本中去掉266个随机测试已经发现问题的样本，剩余的734个样本中随机采样50个进一步分析$d$-局部鲁棒性（$d$设为0.15，使用2-路CT标准）</li>
+<li>实验结果：<ul>
+<li>生成图片数量相当的情况下，DeepCT达到的覆盖率远超随机测试</li>
+<li>随着测试层数和生成的测试用例增加，覆盖率也逐渐增加</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/20/DeepCT/fig2.png" alt="fig2" style="zoom:60%;"></p>
+<h2 id="可控制参数-变量总结"><a href="#可控制参数-变量总结" class="headerlink" title="可控制参数/变量总结"></a>可控制参数/变量总结</h2><ul>
+<li>$t$：覆盖粒度</li>
+<li>$d$：鲁棒性约束</li>
+<li>$L_{\infty}$约束的参数</li>
+<li>初始种子集合</li>
+<li>$p$：完备性指标</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] <a href="https://blog.csdn.net/qq_33935895/article/details/105454414">https://blog.csdn.net/qq_33935895/article/details/105454414</a></p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>测试标准</tag>
+        <tag>组合测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DeepGauge</title>
+    <url>/2020/08/26/DeepGauge/</url>
+    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
+<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
+<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
+<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
+<ul>
+<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
+</li>
+<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
+<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
+<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
+<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
+<ul>
+<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
+</li>
+<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
+<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
+</ul>
+</li>
+<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
+<ul>
+<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
+</li>
+<li><p>SNAC只计算上边界覆盖率：</p>
+<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
+</ul>
+</li>
+</ul>
+<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
+<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
+<ul>
+<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
+<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Top-k Neuron Patterns</strong></p>
+<ul>
+<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
+<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
+<li>数据集和模型</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
+<ul>
+<li><p>对抗样本生成算法</p>
+<ul>
+<li>FGSM、BIM、JSMA、CW</li>
+</ul>
+</li>
+<li><p>实验步骤</p>
+<ul>
+<li><p>对于MNIST：</p>
+<ul>
+<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
+</li>
+<li><p>参数设置</p>
+<ul>
+<li>$\sigma$:方差</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
+</li>
+<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
+</li>
+</ul>
+</li>
+<li><p>对于ImageNet：</p>
+<ul>
+<li>随机选择5000张测试图片</li>
+<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
+<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
+<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
+<li>主功能区和边界区均可能出错</li>
+<li>覆盖率提升意味着错误检测能力提升</li>
+<li>测试数据更多覆盖主功能区域</li>
+<li>低边界区比高边界区更难覆盖</li>
+</ul>
+<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
+<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
+<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
+<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
+<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
+<li>KMNC和TKNC的$k$</li>
+<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
       </tags>
   </entry>
   <entry>
@@ -893,6 +1026,164 @@
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
         <tag>MC/DC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DeepImportance</title>
+    <url>/2020/08/22/DeepImportance/</url>
+    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
+<ul>
+<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
+<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
+</ul>
+</li>
+<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
+<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
+<p>步骤：</p>
+<p>1、分析重要神经元</p>
+<p>2、重要神经元激活值聚类</p>
+<p>3、评价测试集的重要神经元覆盖率</p>
+<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
+<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
+<ul>
+<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
+<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
+<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
+<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>重要性计算算法</p>
+<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
+<ul>
+<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
+<li>6-8行：反向传播计算相关性</li>
+<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
+<li>第11行：返回最重要的m个神经元</li>
+</ul>
+</li>
+<li><p>相关性分析</p>
+<ul>
+<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
+<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
+</ul>
+</li>
+</ul>
+<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
+<li>动机<ul>
+<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
+<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
+</ul>
+</li>
+<li>算法<ul>
+<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
+<li>如何确定$k$值？<ul>
+<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
+<p>重要神经元激活值簇的组合定义为：</p>
+<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
+<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>神经元覆盖率NC：阈值为0.75</li>
+<li>TKNC：$k=3$</li>
+<li>KMNC：$k=1000$</li>
+<li>NBC、SNAC：训练集激活值的最值为上下界</li>
+<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
+<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
+<li>$m \in \{6,8,10,12\}$</li>
+<li>最大运行时间：3h</li>
+<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
+</ul>
+<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
+<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
+<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
+<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
+<li><p>实验方法：</p>
+<ul>
+<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
+</li>
+<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
+<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
+<ul>
+<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
+<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
+<li>生成对抗样本<ul>
+<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
+<ul>
+<li>实验结果：<ul>
+<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
+<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
+<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
+<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
+</ul>
+<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
+<ul>
+<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
+<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
+<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
+</ul>
+<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
+<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
+<li>选择重要性神经元的层</li>
+</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》）；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
+<p>疑问：有没有必要覆盖尽可能多的重要神经元激活值的组合？</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
       </tags>
   </entry>
   <entry>
@@ -1126,297 +1417,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】DeepGauge</title>
-    <url>/2020/08/26/DeepGauge/</url>
-    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
-<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
-<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
-<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
-<ul>
-<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
-</li>
-<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
-<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
-<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
-<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
-<ul>
-<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
-</li>
-<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
-<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
-</ul>
-</li>
-<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
-<ul>
-<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
-</li>
-<li><p>SNAC只计算上边界覆盖率：</p>
-<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
-</ul>
-</li>
-</ul>
-<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
-<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
-<ul>
-<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
-<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Top-k Neuron Patterns</strong></p>
-<ul>
-<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
-<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
-<li>数据集和模型</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
-<ul>
-<li><p>对抗样本生成算法</p>
-<ul>
-<li>FGSM、BIM、JSMA、CW</li>
-</ul>
-</li>
-<li><p>实验步骤</p>
-<ul>
-<li><p>对于MNIST：</p>
-<ul>
-<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
-</li>
-<li><p>参数设置</p>
-<ul>
-<li>$\sigma$:方差</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
-</li>
-<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
-</li>
-</ul>
-</li>
-<li><p>对于ImageNet：</p>
-<ul>
-<li>随机选择5000张测试图片</li>
-<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
-<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
-<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
-<li>主功能区和边界区均可能出错</li>
-<li>覆盖率提升意味着错误检测能力提升</li>
-<li>测试数据更多覆盖主功能区域</li>
-<li>低边界区比高边界区更难覆盖</li>
-</ul>
-<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
-<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
-<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
-<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
-<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
-<li>KMNC和TKNC的$k$</li>
-<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepImportance</title>
-    <url>/2020/08/22/DeepImportance/</url>
-    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
-<ul>
-<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
-<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
-</ul>
-</li>
-<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
-<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
-</ul>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
-<p>步骤：</p>
-<p>1、分析重要神经元</p>
-<p>2、重要神经元激活值聚类</p>
-<p>3、评价测试集的重要神经元覆盖率</p>
-<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
-<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
-<ul>
-<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
-<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
-<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
-<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>重要性计算算法</p>
-<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
-<ul>
-<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
-<li>6-8行：反向传播计算相关性</li>
-<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
-<li>第11行：返回最重要的m个神经元</li>
-</ul>
-</li>
-<li><p>相关性分析</p>
-<ul>
-<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
-<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
-</ul>
-</li>
-</ul>
-<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
-<li>动机<ul>
-<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
-<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
-</ul>
-</li>
-<li>算法<ul>
-<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
-<li>如何确定$k$值？<ul>
-<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
-<p>重要神经元激活值簇的组合定义为：</p>
-<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
-<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
-<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
-<li>神经元覆盖率NC：阈值为0.75</li>
-<li>TKNC：$k=3$</li>
-<li>KMNC：$k=1000$</li>
-<li>NBC、SNAC：训练集激活值的最值为上下界</li>
-<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
-<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
-<li>$m \in \{6,8,10,12\}$</li>
-<li>最大运行时间：3h</li>
-<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
-</ul>
-<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
-<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
-<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
-<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
-<li><p>实验方法：</p>
-<ul>
-<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
-</li>
-<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
-<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
-<ul>
-<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
-<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
-<li>生成对抗样本<ul>
-<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
-<ul>
-<li>实验结果：<ul>
-<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
-<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
-<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
-<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
-</ul>
-<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
-<ul>
-<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
-<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
-<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
-</ul>
-<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
-<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
-<li>选择重要性神经元的层</li>
-</ul>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》）；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
-<p>疑问：有没有必要覆盖尽可能多的重要神经元激活值的组合？</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】DeepTest</title>
     <url>/2020/08/20/DeepTest/</url>
     <content><![CDATA[<p>原文：DeepTest: Automated Testing of Deep-Neural-Network-driven Autonomous Cars  (ICSE’18)  <a id="more"></a></p>
@@ -1583,138 +1583,6 @@
         <tag>DNN测试</tag>
         <tag>模糊测试</tag>
         <tag>测试输入生成</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepXplore</title>
-    <url>/2020/08/19/DeepXplore/</url>
-    <content><![CDATA[<p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/peikexin9/deepxplore">https://github.com/peikexin9/deepxplore</a></p>
-<h2 id="可控制参数或变量"><a href="#可控制参数或变量" class="headerlink" title="可控制参数或变量"></a>可控制参数或变量</h2><ul>
-<li><p>种子输入集合数量 (类别均衡，随机选择，<u>约束：所有DNN模型必须对每个种子的初始预测结果相同</u>)</p>
-</li>
-<li><p>多个DNN</p>
-</li>
-<li><p>$\lambda_1$：平衡其他DNN和被选中DNN预测的差别（$\lambda_1$越大，选中DNN预测为原类别c的概率越低，$\lambda_1$越小，越能维持其他DNN的预测结果）</p>
-<p><img src="/2020/08/19/DeepXplore/1.png" alt="公式1"></p>
-</li>
-<li><p>$\lambda_2$：平衡两个优化目标大小（即预测差异和神经元覆盖率，$\lambda_2$越大，越关注覆盖更多神经元，否则更关注生成预测差异图片）</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/2.png" alt="公式2"></p>
-<ul>
-<li>$s$: 梯度下降步长（$s$过大可能会导致极小值附近震荡，$s$过小导致迭代次数多）</li>
-<li>$t$: 神经元覆盖率阈值（$t$越大，达到覆盖率目标越难）</li>
-<li>$p$: 覆盖率目标</li>
-<li>梯度下降迭代最大次数（代码里）</li>
-<li><font color="red">在每次迭代的梯度$G$上施加的真实领域约束:</font><ul>
-<li>（1）不同亮度模拟光照：$G$被$mean(G)$ 取代</li>
-<li>（2）单个矩形($m*n$大小)模拟意外或故意遮挡：<ul>
-<li>选择矩形左上顶点所在的位置$(i,j)$，将$G_{i:i+m,j:j+n}$施加于原图相应位置。</li>
-<li><font color="red">$m$、$n$的大小和$(i,j)$为自定义的参数，迭代多次都在相同位置</font></li>
-</ul>
-</li>
-<li>（3） 多个随机黑色小矩形模拟镜头污垢<ul>
-<li>位置随机的若干个$m*m$大小的黑色矩形<font color="red">（每次迭代位置不同，$m$值自定义，与数据集图片大小有关）</font></li>
-<li>如果$mean(G_{i:i+m,j:j+m})$，则图片不动，否则变黑（即只允许降低像素值）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><img src="/2020/08/19/DeepXplore/算法.png" alt="算法" style="zoom:80%;"></p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/19/DeepXplore/dataset.png" alt="dataset"></p>
-<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
-<li>种子输入集合：随机从测试集选择2000个输入（保持<font color="red">类别平衡</font>，满足所有DNN预测结果相同的约束）</li>
-<li>参数$\lambda_1,\lambda_2,s,t$</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/para.png" alt="para" style="zoom:67%;"></p>
-<h3 id="实验1：神经元覆盖率的优势"><a href="#实验1：神经元覆盖率的优势" class="headerlink" title="实验1：神经元覆盖率的优势"></a>实验1：神经元覆盖率的优势</h3><h4 id="实验1-1：神经元覆盖率与代码覆盖率比较"><a href="#实验1-1：神经元覆盖率与代码覆盖率比较" class="headerlink" title="实验1-1：神经元覆盖率与代码覆盖率比较"></a>实验1-1：神经元覆盖率与代码覆盖率比较</h4><ul>
-<li><p>实验方法：随机选择10个测试输入，测量代码覆盖率和神经元覆盖率大小</p>
-</li>
-<li><p>参数设置：设置$t=0.75$（神经元激活阈值，<font color="red">按比例缩放至[0,1]区间，不同DNN阈值区别很大？）前面都设的0，故意设大t凸显结果差异）</font></p>
-</li>
-<li><p>实验结果：少量测试输入即可达到100%代码覆盖率，但神经元覆盖率最多只有34%：</p>
-<p><img src="/2020/08/19/DeepXplore/ex1-1.png" alt="ex1-1" style="zoom:80%;"></p>
-</li>
-</ul>
-<h4 id="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"><a href="#实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用" class="headerlink" title="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"></a>实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</h4><ul>
-<li>实验方法：从MNIST测试集随机选择2000种子输入，分别设置$\lambda_2$为1和0（$\lambda_2=0$时优化目标里不考虑覆盖新的神经元）。测量生成预测差异样本（difference-inducing inputs）的多样性<strong>（平均$L_1$距离：改变前后像素值之差的和，<font color="red">是否适合作为衡量多样性的指标？</font>）</strong></li>
-<li>参数设置：$t=0.25$</li>
-<li>实验结果：神经元覆盖率帮助提升了生成样本的多样性<font color="red">（①神经元覆盖率NC提升并不明显？作者的解释是NC很高的情况下，NC的一点点提升就能带来多样性的大幅提升。②生成数量#Diffs减少了：作者的解释是设置$\lambda_2=1$后更倾向于生成不同输入而不是提高输入数量，作者认为生成数量并不是一个好的衡量生成样本的方式）</font></li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex1-2.png" alt="ex1-2" style="zoom:75%;"></p>
-<h4 id="实验1-3：不同类别输入对激活神经元的影响"><a href="#实验1-3：不同类别输入对激活神经元的影响" class="headerlink" title="实验1-3：不同类别输入对激活神经元的影响"></a>实验1-3：不同<strong><em>类别</em></strong>输入对激活神经元的影响</h4><ul>
-<li>实验方法：MNIST数据集的LeNet-5模型，运行100对相同类别（如类别8）图片，和100对不同类别（如类别8和类别4）图片，测量平均激活神经元个数和共同激活神经元的个数（overlap）。</li>
-<li>实验结果：相同类别共同激活的平均神经元个数$&gt;$不同类别。神经元覆盖率可以有效地估计DNN测试中激活的不同规则的数量。</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex1-3.png" alt="ex1-3" style="zoom:80%;"></p>
-<h3 id="实验2：DeepXplore的效果"><a href="#实验2：DeepXplore的效果" class="headerlink" title="实验2：DeepXplore的效果"></a>实验2：DeepXplore的效果</h3><h4 id="实验2-1：DeepXplore在神经元覆盖率上的表现"><a href="#实验2-1：DeepXplore在神经元覆盖率上的表现" class="headerlink" title="实验2-1：DeepXplore在神经元覆盖率上的表现"></a>实验2-1：DeepXplore在神经元覆盖率上的表现</h4><ul>
-<li><p>实验方法：使用三种方法（DeepXplore、对抗样本FGSM、原测试集随机选择）生成相同数量（测试集的1%）的输入，比较神经元覆盖率</p>
-</li>
-<li><p>实验结果：DeepXplore能达到更高的覆盖率，且随着$t$的提升，覆盖率逐渐降低。</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-1.png" alt="ex2-1"></p>
-<h4 id="实验2-2：运行时间"><a href="#实验2-2：运行时间" class="headerlink" title="实验2-2：运行时间"></a>实验2-2：运行时间</h4><ul>
-<li><p>实验方法：不同数据集和模型生成100%覆盖率输入所需时间及相应的生成数量。<font color="red">所有图像分类模型不考虑全连接层的覆盖（作者解释因为全连接层有的神经元非常难覆盖到，但全连接层的覆盖情况应该意义更大？）</font></p>
-</li>
-<li><p>实验结果：DeepXplore生成高覆盖率的输入效率非常高。</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-2.png" alt="ex2-2" style="zoom: 67%;"></p>
-<h4 id="实验2-3：不同参数设置的影响"><a href="#实验2-3：不同参数设置的影响" class="headerlink" title="实验2-3：不同参数设置的影响"></a>实验2-3：不同参数设置的影响</h4><ul>
-<li>实验方法：改变参数$s$、$\lambda_1$、$\lambda_2$，比较<font color="red">找到第一个导致预测差异的输入平均运行时间（这个指标是否足够适合评价参数？）</font></li>
-<li>实验结果</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-3.png" alt="ex2-3" style="zoom:67%;"></p>
-<p><img src="/2020/08/19/DeepXplore/ex2-4.png" alt="ex2-4" style="zoom:60%;"></p>
-<h4 id="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"><a href="#实验2-4：当多个DNN决策边界相似时DeepXplore的效果" class="headerlink" title="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"></a>实验2-4：当多个DNN决策边界相似时DeepXplore的效果</h4><ul>
-<li>实验方法：<ul>
-<li>对照组：MNIST训练集（60000个样本）和LeNet-1模型，10个epoch</li>
-<li>实验组：改变①训练集样本个数，②DNN卷积层模型filter个数，③训练epoch数</li>
-<li>设置初始种子数为100，对比发现生成第一个使得实验组DNN和对照组DNN预测差异样本的平均迭代次数</li>
-</ul>
-</li>
-<li>实验结果：DeepXplore从非常相似的DNN中也能发现错误样本（除了第一行diff为1时），越相似，迭代轮数越多。</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-5.png" alt="ex2-5" style="zoom:67%;"></p>
-<h3 id="实验3：使用DeepXplore提升DNN"><a href="#实验3：使用DeepXplore提升DNN" class="headerlink" title="实验3：使用DeepXplore提升DNN"></a>实验3：使用DeepXplore提升DNN</h3><h4 id="实验3-1：使用生成样本扩大训练集，重新训练DNN"><a href="#实验3-1：使用生成样本扩大训练集，重新训练DNN" class="headerlink" title="实验3-1：使用生成样本扩大训练集，重新训练DNN"></a>实验3-1：使用生成样本扩大训练集，重新训练DNN</h4><ul>
-<li>与对抗样本训练不同的是：不需标注（采取投票形式）</li>
-<li>实验方法：重新训练MNIST数据集的三个模型5个epoch，增加100张DeepXplore生成的错误图片，与对抗样本和随机从测试集选择样本比较准确率。<font color="red">（测试样本是什么？多个DNN从何而来？）</font></li>
-<li>实验结果：DeepXplore平均提升准确率1%-3%</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex3-1.png" alt="ex3-1" style="zoom:85%;"></p>
-<h4 id="实验3-2：检测被污染的训练样本"><a href="#实验3-2：检测被污染的训练样本" class="headerlink" title="实验3-2：检测被污染的训练样本"></a>实验3-2：检测被污染的训练样本</h4><ul>
-<li>实验过程：用两个MNIST LeNet-5模型，一个正常训练，另一个类别9的样本中30%被故意标记成了类别1。使用DeepXplore生成被错误预测成9或1的样本，在训练集中找和错误样本结构相似的样本。能识别出95.6%的污染样本。<font color="red">（写得很简略）</font></li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
-        <tag>测试标准</tag>
-        <tag>差分测试</tag>
       </tags>
   </entry>
   <entry>
@@ -1940,6 +1808,138 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepXplore</title>
+    <url>/2020/08/19/DeepXplore/</url>
+    <content><![CDATA[<p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/peikexin9/deepxplore">https://github.com/peikexin9/deepxplore</a></p>
+<h2 id="可控制参数或变量"><a href="#可控制参数或变量" class="headerlink" title="可控制参数或变量"></a>可控制参数或变量</h2><ul>
+<li><p>种子输入集合数量 (类别均衡，随机选择，<u>约束：所有DNN模型必须对每个种子的初始预测结果相同</u>)</p>
+</li>
+<li><p>多个DNN</p>
+</li>
+<li><p>$\lambda_1$：平衡其他DNN和被选中DNN预测的差别（$\lambda_1$越大，选中DNN预测为原类别c的概率越低，$\lambda_1$越小，越能维持其他DNN的预测结果）</p>
+<p><img src="/2020/08/19/DeepXplore/1.png" alt="公式1"></p>
+</li>
+<li><p>$\lambda_2$：平衡两个优化目标大小（即预测差异和神经元覆盖率，$\lambda_2$越大，越关注覆盖更多神经元，否则更关注生成预测差异图片）</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/2.png" alt="公式2"></p>
+<ul>
+<li>$s$: 梯度下降步长（$s$过大可能会导致极小值附近震荡，$s$过小导致迭代次数多）</li>
+<li>$t$: 神经元覆盖率阈值（$t$越大，达到覆盖率目标越难）</li>
+<li>$p$: 覆盖率目标</li>
+<li>梯度下降迭代最大次数（代码里）</li>
+<li><font color="red">在每次迭代的梯度$G$上施加的真实领域约束:</font><ul>
+<li>（1）不同亮度模拟光照：$G$被$mean(G)$ 取代</li>
+<li>（2）单个矩形($m*n$大小)模拟意外或故意遮挡：<ul>
+<li>选择矩形左上顶点所在的位置$(i,j)$，将$G_{i:i+m,j:j+n}$施加于原图相应位置。</li>
+<li><font color="red">$m$、$n$的大小和$(i,j)$为自定义的参数，迭代多次都在相同位置</font></li>
+</ul>
+</li>
+<li>（3） 多个随机黑色小矩形模拟镜头污垢<ul>
+<li>位置随机的若干个$m*m$大小的黑色矩形<font color="red">（每次迭代位置不同，$m$值自定义，与数据集图片大小有关）</font></li>
+<li>如果$mean(G_{i:i+m,j:j+m})$，则图片不动，否则变黑（即只允许降低像素值）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><img src="/2020/08/19/DeepXplore/算法.png" alt="算法" style="zoom:80%;"></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/19/DeepXplore/dataset.png" alt="dataset"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>种子输入集合：随机从测试集选择2000个输入（保持<font color="red">类别平衡</font>，满足所有DNN预测结果相同的约束）</li>
+<li>参数$\lambda_1,\lambda_2,s,t$</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/para.png" alt="para" style="zoom:67%;"></p>
+<h3 id="实验1：神经元覆盖率的优势"><a href="#实验1：神经元覆盖率的优势" class="headerlink" title="实验1：神经元覆盖率的优势"></a>实验1：神经元覆盖率的优势</h3><h4 id="实验1-1：神经元覆盖率与代码覆盖率比较"><a href="#实验1-1：神经元覆盖率与代码覆盖率比较" class="headerlink" title="实验1-1：神经元覆盖率与代码覆盖率比较"></a>实验1-1：神经元覆盖率与代码覆盖率比较</h4><ul>
+<li><p>实验方法：随机选择10个测试输入，测量代码覆盖率和神经元覆盖率大小</p>
+</li>
+<li><p>参数设置：设置$t=0.75$（神经元激活阈值，<font color="red">按比例缩放至[0,1]区间，不同DNN阈值区别很大？）前面都设的0，故意设大t凸显结果差异）</font></p>
+</li>
+<li><p>实验结果：少量测试输入即可达到100%代码覆盖率，但神经元覆盖率最多只有34%：</p>
+<p><img src="/2020/08/19/DeepXplore/ex1-1.png" alt="ex1-1" style="zoom:80%;"></p>
+</li>
+</ul>
+<h4 id="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"><a href="#实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用" class="headerlink" title="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"></a>实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</h4><ul>
+<li>实验方法：从MNIST测试集随机选择2000种子输入，分别设置$\lambda_2$为1和0（$\lambda_2=0$时优化目标里不考虑覆盖新的神经元）。测量生成预测差异样本（difference-inducing inputs）的多样性<strong>（平均$L_1$距离：改变前后像素值之差的和，<font color="red">是否适合作为衡量多样性的指标？</font>）</strong></li>
+<li>参数设置：$t=0.25$</li>
+<li>实验结果：神经元覆盖率帮助提升了生成样本的多样性<font color="red">（①神经元覆盖率NC提升并不明显？作者的解释是NC很高的情况下，NC的一点点提升就能带来多样性的大幅提升。②生成数量#Diffs减少了：作者的解释是设置$\lambda_2=1$后更倾向于生成不同输入而不是提高输入数量，作者认为生成数量并不是一个好的衡量生成样本的方式）</font></li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-2.png" alt="ex1-2" style="zoom:75%;"></p>
+<h4 id="实验1-3：不同类别输入对激活神经元的影响"><a href="#实验1-3：不同类别输入对激活神经元的影响" class="headerlink" title="实验1-3：不同类别输入对激活神经元的影响"></a>实验1-3：不同<strong><em>类别</em></strong>输入对激活神经元的影响</h4><ul>
+<li>实验方法：MNIST数据集的LeNet-5模型，运行100对相同类别（如类别8）图片，和100对不同类别（如类别8和类别4）图片，测量平均激活神经元个数和共同激活神经元的个数（overlap）。</li>
+<li>实验结果：相同类别共同激活的平均神经元个数$&gt;$不同类别。神经元覆盖率可以有效地估计DNN测试中激活的不同规则的数量。</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-3.png" alt="ex1-3" style="zoom:80%;"></p>
+<h3 id="实验2：DeepXplore的效果"><a href="#实验2：DeepXplore的效果" class="headerlink" title="实验2：DeepXplore的效果"></a>实验2：DeepXplore的效果</h3><h4 id="实验2-1：DeepXplore在神经元覆盖率上的表现"><a href="#实验2-1：DeepXplore在神经元覆盖率上的表现" class="headerlink" title="实验2-1：DeepXplore在神经元覆盖率上的表现"></a>实验2-1：DeepXplore在神经元覆盖率上的表现</h4><ul>
+<li><p>实验方法：使用三种方法（DeepXplore、对抗样本FGSM、原测试集随机选择）生成相同数量（测试集的1%）的输入，比较神经元覆盖率</p>
+</li>
+<li><p>实验结果：DeepXplore能达到更高的覆盖率，且随着$t$的提升，覆盖率逐渐降低。</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-1.png" alt="ex2-1"></p>
+<h4 id="实验2-2：运行时间"><a href="#实验2-2：运行时间" class="headerlink" title="实验2-2：运行时间"></a>实验2-2：运行时间</h4><ul>
+<li><p>实验方法：不同数据集和模型生成100%覆盖率输入所需时间及相应的生成数量。<font color="red">所有图像分类模型不考虑全连接层的覆盖（作者解释因为全连接层有的神经元非常难覆盖到，但全连接层的覆盖情况应该意义更大？）</font></p>
+</li>
+<li><p>实验结果：DeepXplore生成高覆盖率的输入效率非常高。</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-2.png" alt="ex2-2" style="zoom: 67%;"></p>
+<h4 id="实验2-3：不同参数设置的影响"><a href="#实验2-3：不同参数设置的影响" class="headerlink" title="实验2-3：不同参数设置的影响"></a>实验2-3：不同参数设置的影响</h4><ul>
+<li>实验方法：改变参数$s$、$\lambda_1$、$\lambda_2$，比较<font color="red">找到第一个导致预测差异的输入平均运行时间（这个指标是否足够适合评价参数？）</font></li>
+<li>实验结果</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-3.png" alt="ex2-3" style="zoom:67%;"></p>
+<p><img src="/2020/08/19/DeepXplore/ex2-4.png" alt="ex2-4" style="zoom:60%;"></p>
+<h4 id="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"><a href="#实验2-4：当多个DNN决策边界相似时DeepXplore的效果" class="headerlink" title="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"></a>实验2-4：当多个DNN决策边界相似时DeepXplore的效果</h4><ul>
+<li>实验方法：<ul>
+<li>对照组：MNIST训练集（60000个样本）和LeNet-1模型，10个epoch</li>
+<li>实验组：改变①训练集样本个数，②DNN卷积层模型filter个数，③训练epoch数</li>
+<li>设置初始种子数为100，对比发现生成第一个使得实验组DNN和对照组DNN预测差异样本的平均迭代次数</li>
+</ul>
+</li>
+<li>实验结果：DeepXplore从非常相似的DNN中也能发现错误样本（除了第一行diff为1时），越相似，迭代轮数越多。</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-5.png" alt="ex2-5" style="zoom:67%;"></p>
+<h3 id="实验3：使用DeepXplore提升DNN"><a href="#实验3：使用DeepXplore提升DNN" class="headerlink" title="实验3：使用DeepXplore提升DNN"></a>实验3：使用DeepXplore提升DNN</h3><h4 id="实验3-1：使用生成样本扩大训练集，重新训练DNN"><a href="#实验3-1：使用生成样本扩大训练集，重新训练DNN" class="headerlink" title="实验3-1：使用生成样本扩大训练集，重新训练DNN"></a>实验3-1：使用生成样本扩大训练集，重新训练DNN</h4><ul>
+<li>与对抗样本训练不同的是：不需标注（采取投票形式）</li>
+<li>实验方法：重新训练MNIST数据集的三个模型5个epoch，增加100张DeepXplore生成的错误图片，与对抗样本和随机从测试集选择样本比较准确率。<font color="red">（测试样本是什么？多个DNN从何而来？）</font></li>
+<li>实验结果：DeepXplore平均提升准确率1%-3%</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex3-1.png" alt="ex3-1" style="zoom:85%;"></p>
+<h4 id="实验3-2：检测被污染的训练样本"><a href="#实验3-2：检测被污染的训练样本" class="headerlink" title="实验3-2：检测被污染的训练样本"></a>实验3-2：检测被污染的训练样本</h4><ul>
+<li>实验过程：用两个MNIST LeNet-5模型，一个正常训练，另一个类别9的样本中30%被故意标记成了类别1。使用DeepXplore生成被错误预测成9或1的样本，在训练集中找和错误样本结构相似的样本。能识别出95.6%的污染样本。<font color="red">（写得很简略）</font></li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>测试标准</tag>
+        <tag>差分测试</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】Compiler Validation via Equivalence Modulo Inputs</title>
     <url>/2020/10/08/EMI/</url>
     <content><![CDATA[<p>原文：Compiler Validation via Equivalence Modulo Inputs （PLDI’14) <a id="more"></a></p>
@@ -1989,121 +1989,6 @@
       <tags>
         <tag>论文笔记</tag>
         <tag>编译器测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】Effective Path</title>
-    <url>/2020/11/12/Effective-Path/</url>
-    <content><![CDATA[<p>原文：Adversarial Defense Through Network Profiling Based Path Extraction （CVPR’19)  <a id="more"></a></p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><ul>
-<li><p>基本思想：找到Effective Path——一组重要连接和神经元的集合，使得模型得到最终的预测类别结果。可类比普通程序的执行路径。</p>
-</li>
-<li><p>前人方法（CDRP）</p>
-<ul>
-<li>需要重训练</li>
-<li>维度过高</li>
-</ul>
-</li>
-<li>提取路径信息的方法受到了传统程序分析中控制流和基本块的启发</li>
-</ul>
-<h3 id="单张图片提取"><a href="#单张图片提取" class="headerlink" title="单张图片提取"></a>单张图片提取</h3><p>欲提取有效路径$\mathcal{P=(N,S,W)}$，其中$\mathcal{N、S、W}$分别为重要神经元、连接、权重的集合。</p>
-<ul>
-<li><p>提取过程（由后向前）</p>
-<ul>
-<li><p>最后一层：只包括输出类别的神经元$n^L_p$</p>
-</li>
-<li><p>重要权重：最小权重集合，使得只计算该部分输出时，结果大于神经元$n^L_p$原本输出的$\theta$倍。由此得到前一层的重要神经元集合$N^{L-1}$。</p>
-<ul>
-<li>最小组合选取方法：对输入和权重的乘积进行排序，选最小且满足条件的组合</li>
-</ul>
-<p><img src="/2020/11/12/Effective-Path/1.png" alt="1" style="zoom:80%;"></p>
-</li>
-<li><p>对前一层的每个重要神经元：重复上述方法</p>
-</li>
-<li><p>卷积层特殊处理：</p>
-<p><img src="/2020/11/12/Effective-Path/2.png" alt="2" style="zoom:80%;"></p>
-<ul>
-<li>根据感受野转换成全连接层</li>
-<li>计算最小权重组合时无需对所有神经元排序，只需排感受野内的</li>
-<li>由于卷积，多个连接可能共享相同的权重</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="多张图片提取"><a href="#多张图片提取" class="headerlink" title="多张图片提取"></a>多张图片提取</h3><ul>
-<li>单张图片的路径相当于是神经元或连接的一个二元掩膜，指示了其是否在预测过程中产生了影响。多张图片的有效路径即其中所有单张图片路径组成的集合。使用每个类别预测正确的图片可得到per-class effective path，使用所有训练集预测正确的图片可得到overall effective path。</li>
-<li>路径的稀疏性：<ul>
-<li>设置$\theta=0.5$时，LeNet5、AlexNet、ResNet50、InceptionV4、VGG16上，Overall effective path在所有路径和权重中的占比分别为13.8%, 20.5%, 22.2%, 41.7%,17.2%，说明提取出的有效路径非常稀疏。</li>
-</ul>
-</li>
-</ul>
-<h2 id="路径的特殊化现象"><a href="#路径的特殊化现象" class="headerlink" title="路径的特殊化现象"></a>路径的特殊化现象</h2><p>不同类别的有效路径将网络拆分成不同的组件，可用于理解网络以及研究更改网络结构所带来的影响。</p>
-<ul>
-<li><p>路径特殊化现象：不同类别的有效路径相差很大</p>
-<ul>
-<li><p>计算Jacarrd系数（图2）：不同类别之间的相似度几乎都小于0.5，说明一半左右是共同激活的路径，一半是不同的</p>
-</li>
-<li><p>逐个合并ImageNet1000个类别的有效路径，密度一开始迅速上升然后在50个类别时开始趋于平缓（图3），与ImagNet有100个左右的基础类别这一事实相符合。</p>
-<p><img src="/2020/11/12/Effective-Path/3.png" alt="3" style="zoom:80%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="对抗样本防御"><a href="#对抗样本防御" class="headerlink" title="对抗样本防御"></a>对抗样本防御</h2><ul>
-<li><p>6种对抗攻击方法</p>
-<p><img src="/2020/11/12/Effective-Path/4.png" alt="4" style="zoom:70%;"></p>
-</li>
-<li><p>对抗样本检测方法：计算<strong>路径相似度</strong></p>
-<ul>
-<li><p>计算待测图像的有效路径与该预测类别的有效路径之间的相似程度，因为单张图片的有效路径密度远低于类别的有效路径，所以Jaccard系数基本上取决于二者的交集占该图片有效路径的比例大小</p>
-<ul>
-<li>LeNet实验结果（图(a)）：正常样本相似度基本都是1.0左右，对抗样本相似度较低</li>
-<li>AlexNet实验结果：<ul>
-<li>Rank-1类别path：划分成不同层的相似度，对抗样本相似度同样较低（图c）。正常样本与对抗样本相似度之差（图d）显示中间层下降最多。</li>
-<li>Rank-2类别path：正常样本相似度反而最低（图d），因为对抗样本的rank2类别往往是正常样本的rank1类别，所以对抗样本路径相似度更高。</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/11/12/Effective-Path/5.png" alt="5"></p>
-</li>
-<li><p>防御模型</p>
-<ul>
-<li><p>使用rank1和rank2类别的有效路径来检测对抗样本</p>
-</li>
-<li><p>线性模型：每层rank1类别有效路径相似度$-$每层rank2类别有效路径相似度：$ \tilde{J}_{P}= \sum _{l=1}^{L} \omega ^{l}J_{P}^{l}- \sum _{l=1}^{L} \omega ^{l^{ \prime }}J_{P}^{l^\prime} $，若小于某阈值则判断为对抗样本</p>
-</li>
-<li><p>其他模型：random forest, AdaBoost, and gradient boosting</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>对抗防御</tag>
       </tags>
   </entry>
   <entry>
@@ -2455,6 +2340,96 @@
       </tags>
   </entry>
   <entry>
+    <title>用python从零实现一个神经网络</title>
+    <url>/2020/11/30/My-Neural-Network/</url>
+    <content><![CDATA[<p>不用tensorflow、pytorch等任何现有深度学习框架以及各种封装好的机器学习库，仅使用python语言及矩阵运算的库，从零开始实现一个全联接的神经网络。<a id="more"></a></p>
+<h2 id="任务描述"><a href="#任务描述" class="headerlink" title="任务描述"></a>任务描述</h2><p>我们以一个回归任务为例，实现一个多层神经网络来拟合一个非线性函数$ y= \sin (x_{1})- \cos (x_{2}),x_{1} \in \left[ -5,5 \right] ,x_{2} \in \left[ -5,5 \right] $，函数图像如下图所示，输入层包含2个神经元，输出层包含1个神经元，隐藏层的数目和神经元数自定义，隐藏层采用ReLU作为激活函数，输出层用恒等函数做为激活函数，损失函数为均方误差（MSE）。</p>
+<p>实际上我们实现的神经网络可以自定义输入输出大小、隐藏层结构、激活函数、损失函数等，因此用在其他任务上也是完全可以的。</p>
+<p><img src="/2020/11/30/My-Neural-Network/1.png" alt="1" style="zoom:50%;"></p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>训练神经网络之前，我们需要先完成一些准备工作，包括生成训练和验证的数据集、定义用到的激活函数和损失函数。</p>
+<h3 id="数据集生成"><a href="#数据集生成" class="headerlink" title="数据集生成"></a>数据集生成</h3><p>在轴$x_1$和$x_2$的$[-5,5]$区间上每隔0.1均匀地对样本点进行采样，然后计算目标函数的值，生成100*100=10000个训练数据，转换成为numpy​矩阵，作为训练数据集：</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="comment"># 生成训练数据集</span></span><br><span class="line">x_train = []</span><br><span class="line">y_train = []</span><br><span class="line"><span class="keyword">for</span> x1 <span class="keyword">in</span> np.arange(<span class="number">-5</span>, <span class="number">5</span>, <span class="number">0.1</span>):</span><br><span class="line">    <span class="keyword">for</span> x2 <span class="keyword">in</span> np.arange(<span class="number">-5</span>, <span class="number">5</span>, <span class="number">0.1</span>):</span><br><span class="line">        x_train.append([x1, x2])</span><br><span class="line">        y_train.append(np.sin(x1)-np.cos(x2))</span><br><span class="line">x_train = np.array(x_train)</span><br><span class="line">y_train = np.array(y_train)</span><br></pre></td></tr></tbody></table></figure>
+<p>另外随机采样并生成大小为1000的验证数据集：</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="comment"># 生成验证数据集</span></span><br><span class="line">x_val = []</span><br><span class="line">y_val = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000</span>):</span><br><span class="line">    x1 = random.uniform(<span class="number">-5</span>, <span class="number">5</span>)</span><br><span class="line">    x2 = random.uniform(<span class="number">-5</span>, <span class="number">5</span>)</span><br><span class="line">    x_val.append([x1, x2])</span><br><span class="line">    y_val.append(np.sin(x1)-np.cos(x2))</span><br><span class="line">x_val = np.array(x_val)</span><br><span class="line">y_val = np.array(y_val)</span><br><span class="line"> </span><br></pre></td></tr></tbody></table></figure>
+<h3 id="激活函数和损失函数"><a href="#激活函数和损失函数" class="headerlink" title="激活函数和损失函数"></a>激活函数和损失函数</h3><p>定义本次任务用到的数学函数，包括激活函数和损失函数：</p>
+<ul>
+<li><p>激活函数</p>
+<p>定义ActivationFunction类作为激活函数的基类，包括calculate（计算）和derivative（求导）两个抽象方法。本次任务中用到了ReLU和Pureline两种激活函数，若想使用其他激活函数可以仿照下面的形式定义（注意接受的参数x都是一个numpy矩阵）。</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> abc <span class="keyword">import</span> ABCMeta, abstractmethod</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ActivationFunction</span>:</span></span><br><span class="line">    <span class="string">'''激活函数基类'''</span></span><br><span class="line">    __metaclass__ = ABCMeta</span><br><span class="line"></span><br><span class="line"><span class="meta">    @abstractmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">calculate</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @abstractmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">derivative</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ReLU</span>(<span class="params">ActivationFunction</span>):</span></span><br><span class="line">    <span class="string">'''relu激活函数'''</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">calculate</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">return</span> np.maximum(x, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">derivative</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">return</span> np.where(x &gt; <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pureline</span>(<span class="params">ActivationFunction</span>):</span></span><br><span class="line">    <span class="string">'''恒等激活函数'''</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">calculate</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">derivative</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        <span class="keyword">return</span> np.ones(shape=x.shape)</span><br></pre></td></tr></tbody></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>MSE损失函数</p>
+<p>假设样本个数为$n$，计算公式：$MSE=\frac{1}{n} \sum_{i=1}^{n}(y_{true}[i]-y_{pred}[i])^2$</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">mse_loss</span>(<span class="params">y_true, y_pred</span>):</span></span><br><span class="line">    <span class="string">'''MSE损失函数'''</span></span><br><span class="line">    <span class="keyword">return</span> ((y_true - y_pred) ** <span class="number">2</span>).mean()</span><br></pre></td></tr></tbody></table></figure>
+</li>
+</ul>
+<h2 id="模型训练"><a href="#模型训练" class="headerlink" title="模型训练"></a>模型训练</h2><h4 id="数据结构定义和初始化"><a href="#数据结构定义和初始化" class="headerlink" title="数据结构定义和初始化"></a>数据结构定义和初始化</h4><p>首先定义类NeuralNetwork表示神经网络类，初始化时用户向类构造函数传入参数input_size（输入层维度）、output_size（输出层维度）、hidden_size（隐藏层维度，用一个数组表示，如[5,3]表示两个隐藏层，分别包含5个和3个神经元），从而可以达到任意调整神经网络结构的目的。</p>
+<p>接着定义两个数组self.w和self.b表示神经网络的权重和偏移量，每层的权重是一个numpy矩阵，用np.random.normal函数进行高斯分布初始化（设置均值为0，方差为0.1）；同时定义一个数组self.activations表示每层的激活函数，这里隐藏层激活函数为ReLU，输出层激活函数为Pureline：</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="comment"># 随机初始化权重和偏移量</span></span><br><span class="line">self.len = len(hidden_size) + <span class="number">1</span>    <span class="comment"># 层数(除输入层)</span></span><br><span class="line">loc = <span class="number">0.0</span></span><br><span class="line">scale = <span class="number">0.1</span></span><br><span class="line"><span class="comment"># 隐藏层</span></span><br><span class="line">self.w = [np.random.normal(loc, scale, size=(input_size, hidden_size[<span class="number">0</span>]))]</span><br><span class="line">self.b = [np.random.normal(loc, scale, size=(hidden_size[<span class="number">0</span>],))]</span><br><span class="line">self.activations = [ReLU]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(hidden_size)<span class="number">-1</span>):</span><br><span class="line">    self.w.append(np.random.normal(loc, scale, size=(hidden_size[i], hidden_size[i+<span class="number">1</span>])))</span><br><span class="line">    self.b.append(np.random.normal(loc, scale, size=(hidden_size[i+<span class="number">1</span>],)))</span><br><span class="line">    self.activations.append(ReLU)</span><br><span class="line"><span class="comment"># 输出层</span></span><br><span class="line">self.w.append(np.random.normal(loc, scale, size=(hidden_size[<span class="number">-1</span>], output_size)))</span><br><span class="line">self.b.append(np.random.normal(loc, scale, size=(output_size,)))</span><br><span class="line">self.activations.append(Pureline)</span><br></pre></td></tr></tbody></table></figure>
+<p>然后定义五个数组用于保存训练时的中间结果，均初始化为全0：</p>
+<ul>
+<li>self.z：每个神经元激活前的输出。</li>
+<li>self.a：每个神经元激活后的输出。</li>
+<li>self.delta：神经单元误差$\delta$，即loss对每个神经元激活前输出$z$的梯度（用于反向传播更新权重）。</li>
+<li>self.delta_w：权重w的累积更新值，用于处理完每个batch后更新权重。</li>
+<li>self.delta_b：权重b的累积更新值。</li>
+</ul>
+<h4 id="前向计算中间结果"><a href="#前向计算中间结果" class="headerlink" title="前向计算中间结果"></a>前向计算中间结果</h4><p>每轮训练首先调用一个自定义的shuffle方法打乱训练样本集合。然后开始训练，设置训练轮数为30，batch_size为10，初始学习率为0.01。对每个输入样本，通过前向传播计算得到每层的输出self.z和self.a，如假设第$i$层（$i&gt;1$)的输入为$a[i-1]$，权重和偏移为$w[i]$和$b[i]$，则有:</p>
+<p>$z[i]=a[i-1]\times w[i] + b[i]$，</p>
+<p>$a[i]=activations[i].calculate(z[i])$</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">shuffle</span>(<span class="params">x, y</span>):</span></span><br><span class="line">    <span class="string">'''随机打乱数据'''</span></span><br><span class="line">    xy= np.c_[x,y]</span><br><span class="line">    np.random.shuffle(xy)</span><br><span class="line">    x = xy[:, :<span class="number">-1</span>]</span><br><span class="line">    y = xy[:, <span class="number">-1</span>]</span><br><span class="line">    <span class="keyword">return</span> x, y</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span>(<span class="params">self, x_train, y_train, x_val, y_val, epochs=<span class="number">30</span>, batch_size=<span class="number">10</span>, lr=<span class="number">0.01</span></span>):</span></span><br><span class="line">    <span class="string">'''训练模型'''</span></span><br><span class="line"></span><br><span class="line">    self.validate(<span class="number">0</span>, x_train, y_train, x_val, y_val)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):</span><br><span class="line">        x_train_shuffle, y_train_shuffle = shuffle(x_train, y_train)</span><br><span class="line">        batch_count = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> x, y_true <span class="keyword">in</span> zip(x_train_shuffle, y_train_shuffle):</span><br><span class="line">            <span class="comment"># 前向传播得到每层输出</span></span><br><span class="line">            layer_output = x</span><br><span class="line">            <span class="keyword">for</span> layer <span class="keyword">in</span> range(<span class="number">0</span>, self.len):</span><br><span class="line">                self.z[layer] = np.matmul(layer_output, self.w[layer]) + self.b[layer]</span><br><span class="line">                layer_output = self.activations[layer].calculate(self.z[layer])</span><br><span class="line">                self.a[layer] = layer_output</span><br></pre></td></tr></tbody></table></figure>
+<h4 id="反向传播计算梯度"><a href="#反向传播计算梯度" class="headerlink" title="反向传播计算梯度"></a>反向传播计算梯度</h4><p>接下来计算输出层（第-1层）的神经单元误差$\delta$，对于每个样本，假如输出层维度为$m$，损失函数$C=\frac{1}{m}\sum_{i=1}^{m}(y_{true}[i]-a[-1][i])^2$（本次任务中$m=1$），则$\delta[-1] = \frac{\partial C}{\partial z[-1]} = \frac{\partial C}{\partial a[-1]} \cdot \frac{\partial a[-1]}{\partial z[-1]}=  \frac{1}{m} \cdot 2 \cdot (a[-1] - y_{true}) \cdot \theta’(z[-1])$，其中$\theta$为输出层的激活函数。</p>
+<p>然后可以通过递推式反向计算出前面每层的神经单元误差，第$i$层的神经单元误差$\delta[i]=w[i+1] \times \delta[i+1] \times \theta’(z[i])$ ，其中$\theta$表示第$i$层的激活函数。</p>
+<p>通过神经单元误差$\delta$我们可以计算出损失函数对w和b的导数，对第$i$层：$\frac{\partial C}{\partial w[i]} = a[i-1]^T \cdot \delta[i]$，$\frac{\partial C}{\partial b[i]}= \delta[i]$。并将导数累加结果记录在self.delta_w、self.delta_b数组中。</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="comment"># 计算最后一层的神经单元误差δ</span></span><br><span class="line">self.delta[<span class="number">-1</span>] = <span class="number">2</span> * (self.a[<span class="number">-1</span>] - y_true) * self.activations[<span class="number">-1</span>].derivative(self.z[<span class="number">-1</span>]) / len(self.delta[<span class="number">-1</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 反向递推计算每层神经单元误差δ</span></span><br><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> range(self.len<span class="number">-2</span>, <span class="number">-1</span>, <span class="number">-1</span>):</span><br><span class="line">    self.delta[layer] = np.matmul(self.w[layer + <span class="number">1</span>], self.delta[layer + <span class="number">1</span>]) * self.activations[layer].derivative(self.z[layer])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 累加导数</span></span><br><span class="line">last_layer_output = x</span><br><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> range(self.len):</span><br><span class="line">    self.delta_w[layer] += np.matmul(np.transpose([last_layer_output]), [self.delta[layer]])</span><br><span class="line">    self.delta_b[layer] += self.delta[layer]</span><br><span class="line">    last_layer_output = self.a[layer]</span><br></pre></td></tr></tbody></table></figure>
+<h4 id="更新权重"><a href="#更新权重" class="headerlink" title="更新权重"></a>更新权重</h4><p>每个batch结束后，更新w和b。对第i层：</p>
+<p>$w[i] \leftarrow w[i]- lr \cdot \Delta w[i]$</p>
+<p>$b[i] \leftarrow b[i]- lr \cdot \Delta b[i]$</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="comment"># 每个batch结束后更新w、b</span></span><br><span class="line">batch_count += <span class="number">1</span></span><br><span class="line"><span class="keyword">if</span> batch_count == batch_size:</span><br><span class="line">    <span class="keyword">for</span> layer <span class="keyword">in</span> range(self.len):</span><br><span class="line">        self.w[layer] -= lr * self.delta_w[layer]</span><br><span class="line">        self.b[layer] -= lr * self.delta_b[layer]</span><br><span class="line">        self.delta_w[layer].fill(<span class="number">0</span>)</span><br><span class="line">        self.delta_b[layer].fill(<span class="number">0</span>)</span><br><span class="line">batch_count = <span class="number">0</span></span><br></pre></td></tr></tbody></table></figure>
+<h3 id="学习率衰减"><a href="#学习率衰减" class="headerlink" title="学习率衰减"></a>学习率衰减</h3><p>这里采用了简单的学习率衰减方案，每过三轮学习率衰减为0.9倍。大家可以尝试其他衰减方案。</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (epoch + <span class="number">1</span>) % <span class="number">3</span> == <span class="number">0</span>:</span><br><span class="line">    lr *= <span class="number">0.9</span></span><br></pre></td></tr></tbody></table></figure>
+<h2 id="验证和可视化"><a href="#验证和可视化" class="headerlink" title="验证和可视化"></a>验证和可视化</h2><p>每轮训练完成后调用validate方法验证模型在训练数据集和验证数据集上的损失，并绘制图像。</p>
+<figure class="highlight python"><table><tbody><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">feedforward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">    <span class="string">'''前向传播计算预测结果'''</span></span><br><span class="line">    layer_output = x</span><br><span class="line">    <span class="keyword">for</span> layer <span class="keyword">in</span> range(<span class="number">0</span>, self.len):</span><br><span class="line">        layer_output = self.activations[layer].calculate((np.matmul(layer_output, self.w[layer]) + self.b[layer]))</span><br><span class="line">    <span class="keyword">return</span> layer_output.squeeze()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">validate</span>(<span class="params">self, epoch, x_train, y_train, x_val, y_val</span>):</span></span><br><span class="line">    <span class="string">'''计算训练集和验证集上的损失，生成可视化图像'''</span></span><br><span class="line">    y_pred_train = self.feedforward(x_train)</span><br><span class="line">    train_loss = mse_loss(y_train, y_pred_train)</span><br><span class="line">    y_pred_val = self.feedforward(x_val)</span><br><span class="line">    val_loss = mse_loss(y_val, y_pred_val)</span><br><span class="line">    self.visualize(epoch, y_pred_train, train_loss, val_loss)</span><br><span class="line">    print(<span class="string">"Epoch %d, train loss: %.4f, validation loss: %.4f"</span> % (epoch, train_loss, val_loss))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">visualize</span>(<span class="params">self, epoch, y_pred, train_loss, val_loss</span>):</span></span><br><span class="line">   <span class="string">'''可视化训练结果'''</span></span><br><span class="line">    fig = plt.figure()</span><br><span class="line">    ax = fig.gca(projection=<span class="string">'3d'</span>)</span><br><span class="line">    X = np.arange(<span class="number">-5</span>, <span class="number">5</span>, <span class="number">0.1</span>)</span><br><span class="line">    Y = np.arange(<span class="number">-5</span>, <span class="number">5</span>, <span class="number">0.1</span>)</span><br><span class="line">    X, Y = np.meshgrid(X, Y)</span><br><span class="line">    Z = y_pred.reshape((<span class="number">100</span>,<span class="number">100</span>))</span><br><span class="line">    surf = ax.plot_surface(X, Y, Z, rstride=<span class="number">1</span>, cstride=<span class="number">1</span>, cmap=cm.jet, linewidth=<span class="number">0</span>, antialiased=<span class="literal">False</span>)</span><br><span class="line">    ax.set_zlim(<span class="number">-5</span>, <span class="number">5</span>)</span><br><span class="line">    ax.zaxis.set_major_locator(LinearLocator(<span class="number">10</span>))</span><br><span class="line">    ax.zaxis.set_major_formatter(FormatStrFormatter(<span class="string">'%.02f'</span>))</span><br><span class="line">    ax.set_title(<span class="string">'epoch=%d, train loss=%.4f, validation loss=%.4f'</span>% (epoch, train_loss, val_loss))</span><br><span class="line">    fig.colorbar(surf, shrink=<span class="number">0.5</span>, aspect=<span class="number">5</span>)</span><br><span class="line">    plt.savefig(<span class="string">'figure/%04d.png'</span> % epoch)</span><br><span class="line">    plt.show()</span><br></pre></td></tr></tbody></table></figure>
+<h2 id="拟合效果"><a href="#拟合效果" class="headerlink" title="拟合效果"></a>拟合效果</h2><h3 id="增加隐藏层宽度对拟合效果的影响"><a href="#增加隐藏层宽度对拟合效果的影响" class="headerlink" title="增加隐藏层宽度对拟合效果的影响"></a>增加隐藏层宽度对拟合效果的影响</h3><p>设置神经网络只有一个隐藏层，考察隐藏层分别包含10、20、50、100个神经元时，训练集loss随训练轮数增加的变化情况（如下图）。（设置学习率为恒定值0.001，训练轮数为30轮）</p>
+<p><img src="/2020/11/30/My-Neural-Network/3.png" alt="image-20201129230937618" style="zoom:70%;"></p>
+<p>可见随着训练轮数增长，各个模型的训练集loss首先快速下降，接着缓慢下降。单隐藏层神经元个数越多，训练完成后的loss越低，说明增加神经元宽度能提升模型对目标函数的拟合能力。</p>
+<h3 id="增加隐藏层深度对拟合效果的影响"><a href="#增加隐藏层深度对拟合效果的影响" class="headerlink" title="增加隐藏层深度对拟合效果的影响"></a>增加隐藏层深度对拟合效果的影响</h3><p>考察神经网络分别包含1、2、3、4个隐藏层，且每个隐藏层包含20个神经元时，训练集loss随训练轮数增加的变化情况（如下图）。（设置学习率为恒定值0.001，训练轮数为30轮）。</p>
+<p><img src="/2020/11/30/My-Neural-Network/4.png" alt="image-20201129232317776" style="zoom:70%;"></p>
+<p>由图可见，神经网络层数越多，30轮训练结束后训练集的loss越低，说明层数越多，模型对目标函数的拟合能力越强。</p>
+<h3 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h3><p>经过以上实验，我们验证了增加隐藏层的宽度和深度能减小拟合的误差。最后为了让拟合误差尽量小，经过多次尝试后，我们最终选择设置隐藏层个数为5，分别包含100、80、50、30、10个神经元，学习率衰减方案为每经过3轮训练，lr衰减为0.9倍。最终训练集loss为0.00015，验证集loss为0.00016。第0轮（训练前）、第1轮、第5轮、第30轮训练后的拟合结果可视化后如下图所示：</p>
+<p><img src="/2020/11/30/My-Neural-Network/5.jpg" alt="图片1"></p>
+<p>动图效果：</p>
+<p><img src="/2020/11/30/My-Neural-Network/2.gif" alt="2" style="zoom:80%;"></p>
+<p>完整代码见：<a href="https://github.com/rubychen0611/MyNeuralNetwork">https://github.com/rubychen0611/MyNeuralNetwork</a></p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>技术笔记</category>
+      </categories>
+      <tags>
+        <tag>神经网络</tag>
+        <tag>深度学习</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】Towards Improved Testing For Deep Learning</title>
     <url>/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/</url>
     <content><![CDATA[<p>原文：Towards Improved Testing For Deep Learning（ICSE-NIER’19）<a id="more"></a></p>
@@ -2533,6 +2508,121 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】Effective Path</title>
+    <url>/2020/11/12/Effective-Path/</url>
+    <content><![CDATA[<p>原文：Adversarial Defense Through Network Profiling Based Path Extraction （CVPR’19)  <a id="more"></a></p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><ul>
+<li><p>基本思想：找到Effective Path——一组重要连接和神经元的集合，使得模型得到最终的预测类别结果。可类比普通程序的执行路径。</p>
+</li>
+<li><p>前人方法（CDRP）</p>
+<ul>
+<li>需要重训练</li>
+<li>维度过高</li>
+</ul>
+</li>
+<li>提取路径信息的方法受到了传统程序分析中控制流和基本块的启发</li>
+</ul>
+<h3 id="单张图片提取"><a href="#单张图片提取" class="headerlink" title="单张图片提取"></a>单张图片提取</h3><p>欲提取有效路径$\mathcal{P=(N,S,W)}$，其中$\mathcal{N、S、W}$分别为重要神经元、连接、权重的集合。</p>
+<ul>
+<li><p>提取过程（由后向前）</p>
+<ul>
+<li><p>最后一层：只包括输出类别的神经元$n^L_p$</p>
+</li>
+<li><p>重要权重：最小权重集合，使得只计算该部分输出时，结果大于神经元$n^L_p$原本输出的$\theta$倍。由此得到前一层的重要神经元集合$N^{L-1}$。</p>
+<ul>
+<li>最小组合选取方法：对输入和权重的乘积进行排序，选最小且满足条件的组合</li>
+</ul>
+<p><img src="/2020/11/12/Effective-Path/1.png" alt="1" style="zoom:80%;"></p>
+</li>
+<li><p>对前一层的每个重要神经元：重复上述方法</p>
+</li>
+<li><p>卷积层特殊处理：</p>
+<p><img src="/2020/11/12/Effective-Path/2.png" alt="2" style="zoom:80%;"></p>
+<ul>
+<li>根据感受野转换成全连接层</li>
+<li>计算最小权重组合时无需对所有神经元排序，只需排感受野内的</li>
+<li>由于卷积，多个连接可能共享相同的权重</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="多张图片提取"><a href="#多张图片提取" class="headerlink" title="多张图片提取"></a>多张图片提取</h3><ul>
+<li>单张图片的路径相当于是神经元或连接的一个二元掩膜，指示了其是否在预测过程中产生了影响。多张图片的有效路径即其中所有单张图片路径组成的集合。使用每个类别预测正确的图片可得到per-class effective path，使用所有训练集预测正确的图片可得到overall effective path。</li>
+<li>路径的稀疏性：<ul>
+<li>设置$\theta=0.5$时，LeNet5、AlexNet、ResNet50、InceptionV4、VGG16上，Overall effective path在所有路径和权重中的占比分别为13.8%, 20.5%, 22.2%, 41.7%,17.2%，说明提取出的有效路径非常稀疏。</li>
+</ul>
+</li>
+</ul>
+<h2 id="路径的特殊化现象"><a href="#路径的特殊化现象" class="headerlink" title="路径的特殊化现象"></a>路径的特殊化现象</h2><p>不同类别的有效路径将网络拆分成不同的组件，可用于理解网络以及研究更改网络结构所带来的影响。</p>
+<ul>
+<li><p>路径特殊化现象：不同类别的有效路径相差很大</p>
+<ul>
+<li><p>计算Jacarrd系数（图2）：不同类别之间的相似度几乎都小于0.5，说明一半左右是共同激活的路径，一半是不同的</p>
+</li>
+<li><p>逐个合并ImageNet1000个类别的有效路径，密度一开始迅速上升然后在50个类别时开始趋于平缓（图3），与ImagNet有100个左右的基础类别这一事实相符合。</p>
+<p><img src="/2020/11/12/Effective-Path/3.png" alt="3" style="zoom:80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="对抗样本防御"><a href="#对抗样本防御" class="headerlink" title="对抗样本防御"></a>对抗样本防御</h2><ul>
+<li><p>6种对抗攻击方法</p>
+<p><img src="/2020/11/12/Effective-Path/4.png" alt="4" style="zoom:70%;"></p>
+</li>
+<li><p>对抗样本检测方法：计算<strong>路径相似度</strong></p>
+<ul>
+<li><p>计算待测图像的有效路径与该预测类别的有效路径之间的相似程度，因为单张图片的有效路径密度远低于类别的有效路径，所以Jaccard系数基本上取决于二者的交集占该图片有效路径的比例大小</p>
+<ul>
+<li>LeNet实验结果（图(a)）：正常样本相似度基本都是1.0左右，对抗样本相似度较低</li>
+<li>AlexNet实验结果：<ul>
+<li>Rank-1类别path：划分成不同层的相似度，对抗样本相似度同样较低（图c）。正常样本与对抗样本相似度之差（图d）显示中间层下降最多。</li>
+<li>Rank-2类别path：正常样本相似度反而最低（图d），因为对抗样本的rank2类别往往是正常样本的rank1类别，所以对抗样本路径相似度更高。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/11/12/Effective-Path/5.png" alt="5"></p>
+</li>
+<li><p>防御模型</p>
+<ul>
+<li><p>使用rank1和rank2类别的有效路径来检测对抗样本</p>
+</li>
+<li><p>线性模型：每层rank1类别有效路径相似度$-$每层rank2类别有效路径相似度：$ \tilde{J}_{P}= \sum _{l=1}^{L} \omega ^{l}J_{P}^{l}- \sum _{l=1}^{L} \omega ^{l^{ \prime }}J_{P}^{l^\prime} $，若小于某阈值则判断为对抗样本</p>
+</li>
+<li><p>其他模型：random forest, AdaBoost, and gradient boosting</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>对抗防御</tag>
       </tags>
   </entry>
   <entry>
