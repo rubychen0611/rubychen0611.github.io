@@ -688,6 +688,139 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepGauge</title>
+    <url>/2020/08/26/DeepGauge/</url>
+    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
+<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
+<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
+<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
+<ul>
+<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
+</li>
+<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
+<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
+<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
+<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
+<ul>
+<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
+</li>
+<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
+<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
+</ul>
+</li>
+<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
+<ul>
+<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
+</li>
+<li><p>SNAC只计算上边界覆盖率：</p>
+<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
+</ul>
+</li>
+</ul>
+<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
+<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
+<ul>
+<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
+<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Top-k Neuron Patterns</strong></p>
+<ul>
+<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
+<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
+<li>数据集和模型</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
+<ul>
+<li><p>对抗样本生成算法</p>
+<ul>
+<li>FGSM、BIM、JSMA、CW</li>
+</ul>
+</li>
+<li><p>实验步骤</p>
+<ul>
+<li><p>对于MNIST：</p>
+<ul>
+<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
+</li>
+<li><p>参数设置</p>
+<ul>
+<li>$\sigma$:方差</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
+</li>
+<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
+</li>
+</ul>
+</li>
+<li><p>对于ImageNet：</p>
+<ul>
+<li>随机选择5000张测试图片</li>
+<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
+<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
+<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
+<li>主功能区和边界区均可能出错</li>
+<li>覆盖率提升意味着错误检测能力提升</li>
+<li>测试数据更多覆盖主功能区域</li>
+<li>低边界区比高边界区更难覆盖</li>
+</ul>
+<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
+<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
+<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
+<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
+<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
+<li>KMNC和TKNC的$k$</li>
+<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】DeepCover</title>
     <url>/2020/08/24/DeepCover/</url>
     <content><![CDATA[<p>原文：Testing Deep Neural Networks （TECS’19）<a id="more"></a></p>
@@ -893,139 +1026,6 @@
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
         <tag>MC/DC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepGauge</title>
-    <url>/2020/08/26/DeepGauge/</url>
-    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
-<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
-<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
-<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
-<ul>
-<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
-</li>
-<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
-<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
-<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
-<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
-<ul>
-<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
-</li>
-<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
-<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
-</ul>
-</li>
-<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
-<ul>
-<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
-</li>
-<li><p>SNAC只计算上边界覆盖率：</p>
-<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
-</ul>
-</li>
-</ul>
-<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
-<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
-<ul>
-<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
-<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Top-k Neuron Patterns</strong></p>
-<ul>
-<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
-<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
-<li>数据集和模型</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
-<ul>
-<li><p>对抗样本生成算法</p>
-<ul>
-<li>FGSM、BIM、JSMA、CW</li>
-</ul>
-</li>
-<li><p>实验步骤</p>
-<ul>
-<li><p>对于MNIST：</p>
-<ul>
-<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
-</li>
-<li><p>参数设置</p>
-<ul>
-<li>$\sigma$:方差</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
-</li>
-<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
-</li>
-</ul>
-</li>
-<li><p>对于ImageNet：</p>
-<ul>
-<li>随机选择5000张测试图片</li>
-<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
-<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
-<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
-<li>主功能区和边界区均可能出错</li>
-<li>覆盖率提升意味着错误检测能力提升</li>
-<li>测试数据更多覆盖主功能区域</li>
-<li>低边界区比高边界区更难覆盖</li>
-</ul>
-<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
-<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
-<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
-<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
-<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
-<li>KMNC和TKNC的$k$</li>
-<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
       </tags>
   </entry>
   <entry>
@@ -2107,6 +2107,52 @@
       </tags>
   </entry>
   <entry>
+    <title>Google Girl Hackathon Season VI赛后感</title>
+    <url>/2020/08/21/Google-Girl-Hackathon/</url>
+    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
+<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
+<hr>
+<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
+<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
+<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
+<p>这是我们的演示视频（更新后的版本）：</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
+<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
+<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
+<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
+<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>杂记随感</category>
+      </categories>
+      <tags>
+        <tag>比赛</tag>
+        <tag>移动开发</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>用python从零实现一个神经网络</title>
     <url>/2020/11/30/My-Neural-Network/</url>
     <content><![CDATA[<p>不用tensorflow、pytorch等任何现有深度学习框架以及各种封装好的机器学习库，仅使用python语言及矩阵运算的库，从零开始实现一个全联接的神经网络。<a id="more"></a></p>
@@ -2194,52 +2240,6 @@
       <tags>
         <tag>神经网络</tag>
         <tag>深度学习</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Google Girl Hackathon Season VI赛后感</title>
-    <url>/2020/08/21/Google-Girl-Hackathon/</url>
-    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
-<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
-<hr>
-<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
-<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
-<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
-<p>这是我们的演示视频（更新后的版本）：</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
-
-<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
-<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
-<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
-<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
-<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>杂记随感</category>
-      </categories>
-      <tags>
-        <tag>比赛</tag>
-        <tag>移动开发</tag>
       </tags>
   </entry>
   <entry>
@@ -2545,87 +2545,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】Towards Improved Testing For Deep Learning</title>
-    <url>/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/</url>
-    <content><![CDATA[<p>原文：Towards Improved Testing For Deep Learning（ICSE-NIER’19）<a id="more"></a></p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出了一种2-路覆盖标准：每个神经元单独对下一层神经元值的条件影响以及上一层中神经元值的组合对下一层神经元值的影响。</p>
-<h2 id="当前领域的提升空间"><a href="#当前领域的提升空间" class="headerlink" title="当前领域的提升空间"></a>当前领域的提升空间</h2><h3 id="目前覆盖方法的局限性"><a href="#目前覆盖方法的局限性" class="headerlink" title="目前覆盖方法的局限性"></a>目前覆盖方法的局限性</h3><ul>
-<li>DeepXplore：神经元覆盖率粗糙、不充分</li>
-<li>DeepCover：DeepCover的覆盖标准考虑了DNN相邻层中的条件判定依赖性。该方法除了时在相对较小的网络上测试之外，它的前提条件还要求DNN是前馈全连接的神经网络。而且它不能推广到诸如RNN、LSTM、attention网络等的架构。DeepCover不考虑神经元在其所在层的环境，即同一层中神经元输出的组合。</li>
-<li>DeepCT：DeepCT的组合测试是启发于覆盖标准：根据每层激活的神经元比值描述测试输入所使用的逻辑比值。它没有考虑DNN中的层级之间的关系，并且也没有被证实可以扩展到具有不同类型层的、能用于真实世界的DNN</li>
-</ul>
-<h3 id="目前测试输入生成方法的局限性"><a href="#目前测试输入生成方法的局限性" class="headerlink" title="目前测试输入生成方法的局限性"></a>目前测试输入生成方法的局限性</h3><p>测试输入可以通过指导方式生成或选择得到，它通常有两个主要目标：最大化未覆盖故障的数量，并最大化覆盖范围。 目前测试输入生成方法存在一些主要缺点：</p>
-<ul>
-<li>修改现有测试输入直到找到满足标准的测试输入的迭代过程单次执行耗时长。</li>
-<li>与总的测试和生成的输入数量相比，那些能够导致覆盖范围和/或发现的角落案例增加的测试输入数量相当低。</li>
-</ul>
-<h3 id="Oracle选择方面的局限性"><a href="#Oracle选择方面的局限性" class="headerlink" title="Oracle选择方面的局限性"></a>Oracle选择方面的局限性</h3><ul>
-<li>最直接的方法是收集尽可能多的实际数据并手动标记以检查其是否正确。但是，这样的过程需要大量的手动工作。</li>
-<li>在某些工作中，会使用同一任务的多个实现作为oracle，并将其中的的差异行为标记为角落案例行为。然而，我们观察到这种方法会错误地将某些角落情况分类为正确的行为，此外，此方法仅在具有多个高精度且相似的实现的应用程序中有效。</li>
-</ul>
-<h2 id="本文方法"><a href="#本文方法" class="headerlink" title="本文方法"></a>本文方法</h2><p>在本文中，作者基于对内部决策逻辑的覆盖提出了一个包含两个因子的覆盖标准:  DNN中的每个三元组$(n_{i,k-1}, n_{j,k-1}, n_{q,k})$的组合覆盖情况</p>
-<font color="red">（覆盖率居然没有形式化定义？？）</font>
-
-<p>解释：</p>
-<ul>
-<li>每个神经元单独对下一层神经元值的条件影响<ul>
-<li>受MC/DC启发</li>
-</ul>
-</li>
-<li>上一层中神经元值的组合对下一层神经元值的影响<ul>
-<li>受组合测试启发</li>
-</ul>
-</li>
-</ul>
-<p>对于一个初始测试输入的结果，我们通过联合优化来实现指导测试输入的生成。任何没有达到100%覆盖率的三元组被随机选择，以确定哪些激活值的组合没有被覆盖。比如若对一个DNN三元组激活实例：$n_{i,k-1}$激活, $n_{j,k-1}$不激活，$n_{q,k}$激活，优化目标为：（直接将三者相加）</p>
-<p>$ F_{n,t}=f_{n_{i,k-1}}(t)+f_{n_{j,k-1}}(t)+f_{n_{q,k}}(t) $ </p>
-<p>通过这种迭代修改输入的方式最大化目标函数，以达到期望的三元组某种激活状态，从而覆盖三元组不同的激活状态，达到100%覆盖。</p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
-<li>数据集和模型：MNIST上的三个DNN——LeNet-1，LeNet-4和LeNet-5</li>
-<li>覆盖指标：<ul>
-<li>10个随机测试输入获得的覆盖率（理想情况下应该很低）</li>
-<li>边角案例数与总测试输入数的比率</li>
-</ul>
-</li>
-<li><p>借鉴DeepXplore，我们使用<strong>多种实现</strong>作为oracle，只有一种图像处理——<strong>亮度</strong>。</p>
-</li>
-<li><p>实验结果</p>
-<ul>
-<li><p>结果显示，前面工作在相同的指标下获得了更高的覆盖率和对比值，而使用作者提出的标准时覆盖率直线下降，体现出作者提出的标准较于先前工作粒度更细。</p>
-<p><img src="/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/Fig1.png" alt="Fig1" style="zoom:60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.csdn.net/ChapterZ/article/details/96116870">https://blog.csdn.net/ChapterZ/article/details/96116870</a></p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>DNN测试输入生成论文可控制参数及变量总结</title>
     <url>/2020/08/20/Variables-Comparison/</url>
     <content><![CDATA[<h2 id="共同参数或变量总结"><a href="#共同参数或变量总结" class="headerlink" title="共同参数或变量总结"></a>共同参数或变量总结<a id="more"></a></h2><h3 id="初始输入种子集合相关变量"><a href="#初始输入种子集合相关变量" class="headerlink" title="初始输入种子集合相关变量"></a>初始输入种子集合相关变量</h3><ul>
@@ -2838,6 +2757,87 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】Towards Improved Testing For Deep Learning</title>
+    <url>/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/</url>
+    <content><![CDATA[<p>原文：Towards Improved Testing For Deep Learning（ICSE-NIER’19）<a id="more"></a></p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出了一种2-路覆盖标准：每个神经元单独对下一层神经元值的条件影响以及上一层中神经元值的组合对下一层神经元值的影响。</p>
+<h2 id="当前领域的提升空间"><a href="#当前领域的提升空间" class="headerlink" title="当前领域的提升空间"></a>当前领域的提升空间</h2><h3 id="目前覆盖方法的局限性"><a href="#目前覆盖方法的局限性" class="headerlink" title="目前覆盖方法的局限性"></a>目前覆盖方法的局限性</h3><ul>
+<li>DeepXplore：神经元覆盖率粗糙、不充分</li>
+<li>DeepCover：DeepCover的覆盖标准考虑了DNN相邻层中的条件判定依赖性。该方法除了时在相对较小的网络上测试之外，它的前提条件还要求DNN是前馈全连接的神经网络。而且它不能推广到诸如RNN、LSTM、attention网络等的架构。DeepCover不考虑神经元在其所在层的环境，即同一层中神经元输出的组合。</li>
+<li>DeepCT：DeepCT的组合测试是启发于覆盖标准：根据每层激活的神经元比值描述测试输入所使用的逻辑比值。它没有考虑DNN中的层级之间的关系，并且也没有被证实可以扩展到具有不同类型层的、能用于真实世界的DNN</li>
+</ul>
+<h3 id="目前测试输入生成方法的局限性"><a href="#目前测试输入生成方法的局限性" class="headerlink" title="目前测试输入生成方法的局限性"></a>目前测试输入生成方法的局限性</h3><p>测试输入可以通过指导方式生成或选择得到，它通常有两个主要目标：最大化未覆盖故障的数量，并最大化覆盖范围。 目前测试输入生成方法存在一些主要缺点：</p>
+<ul>
+<li>修改现有测试输入直到找到满足标准的测试输入的迭代过程单次执行耗时长。</li>
+<li>与总的测试和生成的输入数量相比，那些能够导致覆盖范围和/或发现的角落案例增加的测试输入数量相当低。</li>
+</ul>
+<h3 id="Oracle选择方面的局限性"><a href="#Oracle选择方面的局限性" class="headerlink" title="Oracle选择方面的局限性"></a>Oracle选择方面的局限性</h3><ul>
+<li>最直接的方法是收集尽可能多的实际数据并手动标记以检查其是否正确。但是，这样的过程需要大量的手动工作。</li>
+<li>在某些工作中，会使用同一任务的多个实现作为oracle，并将其中的的差异行为标记为角落案例行为。然而，我们观察到这种方法会错误地将某些角落情况分类为正确的行为，此外，此方法仅在具有多个高精度且相似的实现的应用程序中有效。</li>
+</ul>
+<h2 id="本文方法"><a href="#本文方法" class="headerlink" title="本文方法"></a>本文方法</h2><p>在本文中，作者基于对内部决策逻辑的覆盖提出了一个包含两个因子的覆盖标准:  DNN中的每个三元组$(n_{i,k-1}, n_{j,k-1}, n_{q,k})$的组合覆盖情况</p>
+<font color="red">（覆盖率居然没有形式化定义？？）</font>
+
+<p>解释：</p>
+<ul>
+<li>每个神经元单独对下一层神经元值的条件影响<ul>
+<li>受MC/DC启发</li>
+</ul>
+</li>
+<li>上一层中神经元值的组合对下一层神经元值的影响<ul>
+<li>受组合测试启发</li>
+</ul>
+</li>
+</ul>
+<p>对于一个初始测试输入的结果，我们通过联合优化来实现指导测试输入的生成。任何没有达到100%覆盖率的三元组被随机选择，以确定哪些激活值的组合没有被覆盖。比如若对一个DNN三元组激活实例：$n_{i,k-1}$激活, $n_{j,k-1}$不激活，$n_{q,k}$激活，优化目标为：（直接将三者相加）</p>
+<p>$ F_{n,t}=f_{n_{i,k-1}}(t)+f_{n_{j,k-1}}(t)+f_{n_{q,k}}(t) $ </p>
+<p>通过这种迭代修改输入的方式最大化目标函数，以达到期望的三元组某种激活状态，从而覆盖三元组不同的激活状态，达到100%覆盖。</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
+<li>数据集和模型：MNIST上的三个DNN——LeNet-1，LeNet-4和LeNet-5</li>
+<li>覆盖指标：<ul>
+<li>10个随机测试输入获得的覆盖率（理想情况下应该很低）</li>
+<li>边角案例数与总测试输入数的比率</li>
+</ul>
+</li>
+<li><p>借鉴DeepXplore，我们使用<strong>多种实现</strong>作为oracle，只有一种图像处理——<strong>亮度</strong>。</p>
+</li>
+<li><p>实验结果</p>
+<ul>
+<li><p>结果显示，前面工作在相同的指标下获得了更高的覆盖率和对比值，而使用作者提出的标准时覆盖率直线下降，体现出作者提出的标准较于先前工作粒度更细。</p>
+<p><img src="/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/Fig1.png" alt="Fig1" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.csdn.net/ChapterZ/article/details/96116870">https://blog.csdn.net/ChapterZ/article/details/96116870</a></p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
       </tags>
   </entry>
   <entry>
