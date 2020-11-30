@@ -1,6 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>【论文笔记】DLFuzz</title>
+    <url>/2020/08/20/DLFuzz/</url>
+    <content><![CDATA[<p>原文：DLFuzz: Differential Fuzzing Testing of Deep Learning Systems （ESEC/FSE’18）<a id="more"></a></p>
+<p>代码：<a href="https://github.com/turned2670/DLFuzz">https://github.com/turned2670/DLFuzz</a> </p>
+<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
+<li>输入集合（未标注）</li>
+<li>待测试DNN</li>
+<li>$k$：除原预测标签外，top-k个其他标签</li>
+<li>$m$：欲覆盖的神经元个数</li>
+<li><p>strategies：神经元选择策略</p>
+<ul>
+<li><p>策略1：选择过去测试中常被覆盖的神经元</p>
+</li>
+<li><p>策略2：选择过去测试中极少被覆盖到的神经元</p>
+</li>
+<li><p>策略3：选择权重高的神经元</p>
+</li>
+<li>策略4：选择激活阈值附近的神经元</li>
+</ul>
+</li>
+<li>$\lambda$：平衡两个目标（预测类别差异和覆盖新的神经元）的参数</li>
+<li>predict_weight：代码里在上公式中$\sum c_i$前的权重，默认为0.5（未在论文里出现的参数）</li>
+<li>iter_times: 每个种子的迭代次数</li>
+<li>threshold: 神经元激活阈值</li>
+<li>learning_step：步长，代码里设为0.02</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
+<li><p>梯度约束：<font color="red">论文里说可以加保持符号约束或DeepXplore里的约束，但代码似乎没加任何约束，直接在输入上增加梯度*步长</font></p>
+</li>
+<li><p>生成图像距离约束：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</p>
+</li>
+<li><p>约束：一个输入能提升的神经元覆盖率随着时间的增加而下降，对应的保留种子的阈值也随着运行时间的增加而降低<font color="red">（代码里体现为保留种子时最少需要提升的覆盖率随迭代次数增加而降低）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig1.png" alt="fig1" style="zoom: 80%;"></p>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p>MNIST（LeNet-1, LeNet-4, LeNet-5）和ImageNet（VGG-16, VGG-19, ResNet50）</p>
+<font color="red">与DeepXplore相同</font>
+
+<h3 id="默认参数设置"><a href="#默认参数设置" class="headerlink" title="默认参数设置"></a>默认参数设置</h3><ul>
+<li><p>随机选择20个初始输入<font color="red">（类别是否平衡？20是否过少？）</font></p>
+</li>
+<li><p>$k=4,m=10$，strategy为策略1，iter_times=3 </p>
+</li>
+</ul>
+<h3 id="实验1：DLFuzz与DeepXplore比较"><a href="#实验1：DLFuzz与DeepXplore比较" class="headerlink" title="实验1：DLFuzz与DeepXplore比较"></a>实验1：DLFuzz与DeepXplore比较</h3><ul>
+<li><p>实验方法：对相同的20个初始输入，比较DLFuzz相对DeepXplore神经元覆盖率、l2距离、生成对抗样本的个数、每个对抗样本平均生成时间</p>
+</li>
+<li><p>实验结果：</p>
+<ul>
+<li><p>覆盖率提升<font color="red">（DLFuzz的优化目标选择了10个神经元，DeepXplore只选了一个）</font></p>
+</li>
+<li><p>L2距离很小，生成的扰动更隐秘<font color="red">（DeepXplore未对距离做限制，甚至认为L1距离越大多样性越好）</font></p>
+</li>
+<li><p>生成对抗样本数量更多（DeepXplore对每组DNN每张图片最多只生成一个对抗样本，DLFuzz每个模型每张图片可以生成多个对抗样本）</p>
+</li>
+<li><p>更短的时间消耗（除了ResNet50，因为神经元数量大所以选择神经元的耗时长）</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/20/DLFuzz/fig2.png" alt="fig2" style="zoom:67%;"></p>
+<h3 id="实验2：四种神经元选择策略比较"><a href="#实验2：四种神经元选择策略比较" class="headerlink" title="实验2：四种神经元选择策略比较"></a>实验2：四种神经元选择策略比较</h3><ul>
+<li><p>实验方法：比较四种策略和DeepXplore，随着测试图片生成数量增多，神经元覆盖率的增长趋势</p>
+</li>
+<li><p>实验结果：策略1略好<font color="red">（生成数量是否过少？19张神经元覆盖率就趋于平缓）</font></p>
+<p><img src="/2020/08/20/DLFuzz/fig3.png" alt="fig3" style="zoom:60%;"></p>
+</li>
+</ul>
+<h3 id="实验3：用生成图片重新训练"><a href="#实验3：用生成图片重新训练" class="headerlink" title="实验3：用生成图片重新训练"></a>实验3：用生成图片重新训练</h3><ul>
+<li>实验方法：用生成的114个对抗样本重新训练MNIST的三个DNN模型，平均提升准确率1.8%<font color="red">（太少？）</font></li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】On Decomposing a Deep Neural Network into Modules</title>
     <url>/2020/11/16/DNN-Decomposition/</url>
     <content><![CDATA[<p>On Decomposing a Deep Neural Network into Modules （FSE’20）<a id="more"></a></p>
@@ -174,106 +274,6 @@
       </categories>
       <tags>
         <tag>DNN分解</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DLFuzz</title>
-    <url>/2020/08/20/DLFuzz/</url>
-    <content><![CDATA[<p>原文：DLFuzz: Differential Fuzzing Testing of Deep Learning Systems （ESEC/FSE’18）<a id="more"></a></p>
-<p>代码：<a href="https://github.com/turned2670/DLFuzz">https://github.com/turned2670/DLFuzz</a> </p>
-<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
-<li>输入集合（未标注）</li>
-<li>待测试DNN</li>
-<li>$k$：除原预测标签外，top-k个其他标签</li>
-<li>$m$：欲覆盖的神经元个数</li>
-<li><p>strategies：神经元选择策略</p>
-<ul>
-<li><p>策略1：选择过去测试中常被覆盖的神经元</p>
-</li>
-<li><p>策略2：选择过去测试中极少被覆盖到的神经元</p>
-</li>
-<li><p>策略3：选择权重高的神经元</p>
-</li>
-<li>策略4：选择激活阈值附近的神经元</li>
-</ul>
-</li>
-<li>$\lambda$：平衡两个目标（预测类别差异和覆盖新的神经元）的参数</li>
-<li>predict_weight：代码里在上公式中$\sum c_i$前的权重，默认为0.5（未在论文里出现的参数）</li>
-<li>iter_times: 每个种子的迭代次数</li>
-<li>threshold: 神经元激活阈值</li>
-<li>learning_step：步长，代码里设为0.02</li>
-</ul>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
-<li><p>梯度约束：<font color="red">论文里说可以加保持符号约束或DeepXplore里的约束，但代码似乎没加任何约束，直接在输入上增加梯度*步长</font></p>
-</li>
-<li><p>生成图像距离约束：满足L2距离（&lt;0.02）（计算方式为L2_norm / orig_L2_norm）</p>
-</li>
-<li><p>约束：一个输入能提升的神经元覆盖率随着时间的增加而下降，对应的保留种子的阈值也随着运行时间的增加而降低<font color="red">（代码里体现为保留种子时最少需要提升的覆盖率随迭代次数增加而降低）</font></p>
-<p><img src="/2020/08/20/DLFuzz/fig1.png" alt="fig1" style="zoom: 80%;"></p>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p>MNIST（LeNet-1, LeNet-4, LeNet-5）和ImageNet（VGG-16, VGG-19, ResNet50）</p>
-<font color="red">与DeepXplore相同</font>
-
-<h3 id="默认参数设置"><a href="#默认参数设置" class="headerlink" title="默认参数设置"></a>默认参数设置</h3><ul>
-<li><p>随机选择20个初始输入<font color="red">（类别是否平衡？20是否过少？）</font></p>
-</li>
-<li><p>$k=4,m=10$，strategy为策略1，iter_times=3 </p>
-</li>
-</ul>
-<h3 id="实验1：DLFuzz与DeepXplore比较"><a href="#实验1：DLFuzz与DeepXplore比较" class="headerlink" title="实验1：DLFuzz与DeepXplore比较"></a>实验1：DLFuzz与DeepXplore比较</h3><ul>
-<li><p>实验方法：对相同的20个初始输入，比较DLFuzz相对DeepXplore神经元覆盖率、l2距离、生成对抗样本的个数、每个对抗样本平均生成时间</p>
-</li>
-<li><p>实验结果：</p>
-<ul>
-<li><p>覆盖率提升<font color="red">（DLFuzz的优化目标选择了10个神经元，DeepXplore只选了一个）</font></p>
-</li>
-<li><p>L2距离很小，生成的扰动更隐秘<font color="red">（DeepXplore未对距离做限制，甚至认为L1距离越大多样性越好）</font></p>
-</li>
-<li><p>生成对抗样本数量更多（DeepXplore对每组DNN每张图片最多只生成一个对抗样本，DLFuzz每个模型每张图片可以生成多个对抗样本）</p>
-</li>
-<li><p>更短的时间消耗（除了ResNet50，因为神经元数量大所以选择神经元的耗时长）</p>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/20/DLFuzz/fig2.png" alt="fig2" style="zoom:67%;"></p>
-<h3 id="实验2：四种神经元选择策略比较"><a href="#实验2：四种神经元选择策略比较" class="headerlink" title="实验2：四种神经元选择策略比较"></a>实验2：四种神经元选择策略比较</h3><ul>
-<li><p>实验方法：比较四种策略和DeepXplore，随着测试图片生成数量增多，神经元覆盖率的增长趋势</p>
-</li>
-<li><p>实验结果：策略1略好<font color="red">（生成数量是否过少？19张神经元覆盖率就趋于平缓）</font></p>
-<p><img src="/2020/08/20/DLFuzz/fig3.png" alt="fig3" style="zoom:60%;"></p>
-</li>
-</ul>
-<h3 id="实验3：用生成图片重新训练"><a href="#实验3：用生成图片重新训练" class="headerlink" title="实验3：用生成图片重新训练"></a>实验3：用生成图片重新训练</h3><ul>
-<li>实验方法：用生成的114个对抗样本重新训练MNIST的三个DNN模型，平均提升准确率1.8%<font color="red">（太少？）</font></li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>模糊测试</tag>
-        <tag>测试输入生成</tag>
       </tags>
   </entry>
   <entry>
@@ -896,6 +896,236 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepHunter</title>
+    <url>/2020/08/20/DeepHunter/</url>
+    <content><![CDATA[<p>原文：DeepHunter: A Coverage-Guided Fuzz Testing Framework for Deep Neural Networks （ISSTA’19)</p>
+<p>Coverage-guided Fuzzing for Feedforward Neural Networks (ASE’19)  <a id="more"></a></p>
+<p>代码地址：<a href="https://bitbucket.org/xiaofeixie/deephunter/src/master/">https://bitbucket.org/xiaofeixie/deephunter/src/master/</a></p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
+<li><p>输入和可控变量：</p>
+<ul>
+<li>初始种子集合</li>
+<li>种子选择策略：<ul>
+<li>①随机</li>
+<li>②根据新鲜程度选择</li>
+<li>③平衡新鲜和多样<ul>
+<li>带有参数$\gamma$、$p_{min}$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>蜕变变换方法<ul>
+<li>8种图像变换方法<ul>
+<li>4种像素级别变换（像素值改变）：反相、亮度、模糊、噪声</li>
+<li>4种仿射变换（移动像素位置）：平移、缩放、裁剪、旋转</li>
+</ul>
+</li>
+<li>约束策略中的$\alpha$、$\beta$参数</li>
+</ul>
+</li>
+<li>K：常数，变换次数</li>
+<li>覆盖率标准：5种（NC、KMNC、NBC、SNAC、TKNC）标准及其附带参数</li>
+</ul>
+</li>
+<li><p>输出：1、能最大化覆盖率的预测正确的样例 2、预测错误的样例</p>
+<p><img src="/2020/08/20/DeepHunter/1.png" alt="1" style="zoom:60%;"></p>
+<h3 id="保持蜕变变换语义不变的策略"><a href="#保持蜕变变换语义不变的策略" class="headerlink" title="保持蜕变变换语义不变的策略"></a>保持蜕变变换语义不变的策略</h3><ul>
+<li><p>8种图像变换方法</p>
+<ul>
+<li>4种像素级别变换（像素值改变）：反相、亮度、模糊、噪声</li>
+<li>4种仿射变换（移动像素位置）：平移、缩放、裁剪、旋转</li>
+</ul>
+</li>
+<li><p>假设一次变换语义不变（参数合适的情况下）。</p>
+</li>
+<li><font color="red">策略：只允许一次仿射变换，像素变换可以使用多次，但要进行约束</font>
+
+<ul>
+<li><p>约束条件：像素变换应满足f(s,s’)的条件，$L_0$表示发生变化的像素数目的最大值，$L_\infty$表示像素值变化的最大值。即：要么发生变化的像素数不多，要么变化的像素数多，但像素值变化都不大。平衡二者</p>
+<p><img src="/2020/08/20/DeepHunter/4.png" alt="4" style="zoom:70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>reference image：一张图像在经过一系列变换后（最多一次仿射变换），计算f(s,s’)。如果没有仿射变换的话，参考图像为原图；否则参考图像为中间经过一次仿射变换后的图像。</p>
+<ul>
+<li><p>如果有仿射变换，则$L_0$、$L_\infty$计算方法如下</p>
+<p><img src="/2020/08/20/DeepHunter/3.png" alt="3" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>种子选择策略（三种）</p>
+<ul>
+<li><p>传统程序和TensorFuzz、DeepTest：用栈，选最新生成的种子</p>
+</li>
+<li><p>uniform：随机选一个种子</p>
+</li>
+<li><p>新策略Probability：平衡新鲜性和多样性，种子s被选择的概率：</p>
+<p><img src="/2020/08/20/DeepHunter/4.png" alt="4" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和DNN模型"><a href="#数据集和DNN模型" class="headerlink" title="数据集和DNN模型"></a>数据集和DNN模型</h3><p><img src="/2020/08/20/DeepHunter/5.png" alt="5" style="zoom:60%;"></p>
+<h3 id="共同参数设置"><a href="#共同参数设置" class="headerlink" title="共同参数设置"></a>共同参数设置</h3><ul>
+<li><p>NC阈值：0.75（与DeepXplore相同）</p>
+</li>
+<li><p>KMNC的K=1000</p>
+</li>
+<li><p>SNAC、NBC、TKNC与DeepGauge相同设置</p>
+</li>
+<li><p>TRY_NUM=50</p>
+</li>
+<li><p>$\gamma=20$，$p_{min}=0.5$ </p>
+</li>
+<li>$K=20$</li>
+</ul>
+<h3 id="RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？"><a href="#RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？" class="headerlink" title="RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？"></a>RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？</h3><ul>
+<li><p>实验设计</p>
+<ul>
+<li><p>比较三种变换及约束策略：<font color="red">（仅约束策略还是连带变换策略？没说清楚）</font></p>
+<ul>
+<li><p>DeepHunter：用f(s,s’)限制，设置$\alpha=0.02，\beta=0.2$</p>
+</li>
+<li><p>TensorFuzz： 用 $L_\infty=0.4$限制</p>
+</li>
+<li><p>DeepTest： 用保守的参数限制(原文的MSE限制仅限回归任务，所以没用)</p>
+</li>
+</ul>
+</li>
+<li><p>每个数据集随机选择30个种子输入生成5000张图片，3个数据集*3种生成方法*生成5000张图片=共45000张图片</p>
+</li>
+<li><p>9个测试者每人看一组图片：如果生成的图片与原图分类不同、或是没有语义则被标记为invalid。</p>
+</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/20/DeepHunter/6.png" alt="10"></p>
+<ul>
+<li>对三种策略：CIFAR-10数据集的无效率普遍高于其他两个数据集<ul>
+<li>原因：CIFAR-10分辨率较低，即使是DNN能识别的有效输入，对于人类常难以识别</li>
+</ul>
+</li>
+<li>即使DeepTest的参数设置很保守，但是仍生成了很多无效输入；TensorFuzz经过L∞限制后无效输入少了很多</li>
+<li>结论：DeepHunter的蜕变变换策略有效减少了生成无效图片的数量</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？"><a href="#RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？" class="headerlink" title="RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？"></a>RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？</h3><ul>
+<li><p>RQ2&amp;3 实验设计</p>
+<ul>
+<li>比较5种seed选取策略<ul>
+<li>Random testing (RT)without coverage guidance. 作为baseline，随机测试，无覆盖率作为向导</li>
+<li>DeepHunter+Uniform (DH+UF) ：使用不同的覆盖率标准作为向导，随机选择种子顺序</li>
+<li>DeepHunter+Probability (DH+Prob)：使用不同的覆盖率标准作为向导，用概率策略选择种子顺序</li>
+<li>DeepTest seed selection strategy with coverage guidance：选最新的；如果一个种子生成的所有新样例都不能提升覆盖率，则该种子被移出队列。队列可能变空。</li>
+<li>TensorFuzz seed selection strategy with coverage guidance：随机选一个种子和队列最后的5个种子，再从中随机选一个</li>
+</ul>
+</li>
+<li><p>21个fuzzers：5 个覆盖准则 × 4 个seed选择策略 + 1 RT with no coverage guidance，使用的模型为MNIST和CIFAR-10的四个模型；每个fuzzer运行10遍取平均</p>
+</li>
+<li><p>初始种子1000个：被所有模型都正确分类的测试数据</p>
+</li>
+<li>每个fuzzer迭代次数相同（5000次），使用的蜕变变换策略相同<font color="red">（是什么？）</font></li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/20/DeepHunter/7.png" alt="7" style="zoom:60%;"></p>
+</li>
+<li><p>结论</p>
+<ul>
+<li><p>尽管基本结构与传统程序很不同，CGF方法与随机测试相比较还是能有效最大化DNN程序的覆盖率</p>
+</li>
+<li><p>与传统软件的fuzzer优先选择最新生成的用例作为种子不同，DNN testing中种子选择的优先策略（多样性）也很重要</p>
+</li>
+<li><p>不同覆盖率标准提升的难易程度不同，KMNC, TKNC, 和 NC提升较容易。NBC and SNAC关注corner cases，本身初始seed覆盖率就极低，提升较难</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？"><a href="#RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？" class="headerlink" title="RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？"></a>RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？</h3><ul>
+<li><p>实验结果</p>
+<ul>
+<li><p>检测错误数量</p>
+<p><img src="/2020/08/20/DeepHunter/8.png" alt="8" style="zoom:60%;"></p>
+<ul>
+<li>DH+Prob和DH+UF检测错误数目多于另外三种策略，且模型较小时二者类似，模型较大时DF+Prob更优</li>
+<li>KMNC在检测错误数目上少于其他4个覆盖率标准，因为cover更简单；但DH+Prob的表现还是优于其他策略</li>
+<li>在最后的seed queue中，易于cover的覆盖率标准剩余的seed更多</li>
+</ul>
+</li>
+<li><p>检测出的错误的多样性</p>
+<p><img src="/2020/08/20/DeepHunter/9.png" alt="9" style="zoom:60%;"></p>
+<ul>
+<li>定义从同一个seed变换产生的错误属于同一类别，共1000类</li>
+<li>DH+Prob和DH+UF能检测出更多类的错误，DeepTest和TensorFuzz检测出的错误甚至有的比RT还少，因为这二者都倾向于选择最新的seed</li>
+<li>RT：过于随机，难以发现corner cases</li>
+<li>选最新的seed：能发现Corner cases，但类别过于单一</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测"><a href="#RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测" class="headerlink" title="RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测?"></a>RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测?</h3><ul>
+<li><p>实验设计</p>
+<ul>
+<li><p>每个数据集选择一个模型，原模型都是32bit</p>
+</li>
+<li><p>3种量化方式</p>
+<ul>
+<li><p>随机选10%的权重缩减：32比特-&gt;16比特</p>
+</li>
+<li><p>随机选50%的权重缩减：32比特-&gt;16比特</p>
+</li>
+<li><p>所有权重缩减：32比特-&gt;16比特</p>
+</li>
+</ul>
+</li>
+<li><p>对前两种量化方式（10%和50%的量化模型）：sample10次得到10个模型，每个模型运行5遍取均值</p>
+</li>
+<li><p>为每个原始模型分配10小时生成图片，重复每种配置5次并平均结果</p>
+</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/20/DeepHunter/10.png" alt="10" style="zoom:60%;"></p>
+<ul>
+<li>corner相关的覆盖率标准更易发现量化错误</li>
+<li>DNN模型越大，发现的错误越多</li>
+<li>QR率越大，错误越多</li>
+</ul>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】DeepGauge</title>
     <url>/2020/08/26/DeepGauge/</url>
     <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
@@ -1198,206 +1428,107 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】DeepHunter</title>
-    <url>/2020/08/20/DeepHunter/</url>
-    <content><![CDATA[<p>原文：DeepHunter: A Coverage-Guided Fuzz Testing Framework for Deep Neural Networks （ISSTA’19)</p>
-<p>Coverage-guided Fuzzing for Feedforward Neural Networks (ASE’19)  <a id="more"></a></p>
-<p>代码地址：<a href="https://bitbucket.org/xiaofeixie/deephunter/src/master/">https://bitbucket.org/xiaofeixie/deephunter/src/master/</a></p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
-<li><p>输入和可控变量：</p>
+    <title>【论文笔记】DeepXplore</title>
+    <url>/2020/08/19/DeepXplore/</url>
+    <content><![CDATA[<p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/peikexin9/deepxplore">https://github.com/peikexin9/deepxplore</a></p>
+<h2 id="可控制参数或变量"><a href="#可控制参数或变量" class="headerlink" title="可控制参数或变量"></a>可控制参数或变量</h2><ul>
+<li><p>种子输入集合数量 (类别均衡，随机选择，<u>约束：所有DNN模型必须对每个种子的初始预测结果相同</u>)</p>
+</li>
+<li><p>多个DNN</p>
+</li>
+<li><p>$\lambda_1$：平衡其他DNN和被选中DNN预测的差别（$\lambda_1$越大，选中DNN预测为原类别c的概率越低，$\lambda_1$越小，越能维持其他DNN的预测结果）</p>
+<p><img src="/2020/08/19/DeepXplore/1.png" alt="公式1"></p>
+</li>
+<li><p>$\lambda_2$：平衡两个优化目标大小（即预测差异和神经元覆盖率，$\lambda_2$越大，越关注覆盖更多神经元，否则更关注生成预测差异图片）</p>
+</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/2.png" alt="公式2"></p>
 <ul>
-<li>初始种子集合</li>
-<li>种子选择策略：<ul>
-<li>①随机</li>
-<li>②根据新鲜程度选择</li>
-<li>③平衡新鲜和多样<ul>
-<li>带有参数$\gamma$、$p_{min}$</li>
+<li>$s$: 梯度下降步长（$s$过大可能会导致极小值附近震荡，$s$过小导致迭代次数多）</li>
+<li>$t$: 神经元覆盖率阈值（$t$越大，达到覆盖率目标越难）</li>
+<li>$p$: 覆盖率目标</li>
+<li>梯度下降迭代最大次数（代码里）</li>
+<li><font color="red">在每次迭代的梯度$G$上施加的真实领域约束:</font><ul>
+<li>（1）不同亮度模拟光照：$G$被$mean(G)$ 取代</li>
+<li>（2）单个矩形($m*n$大小)模拟意外或故意遮挡：<ul>
+<li>选择矩形左上顶点所在的位置$(i,j)$，将$G_{i:i+m,j:j+n}$施加于原图相应位置。</li>
+<li><font color="red">$m$、$n$的大小和$(i,j)$为自定义的参数，迭代多次都在相同位置</font></li>
 </ul>
 </li>
-</ul>
-</li>
-<li>蜕变变换方法<ul>
-<li>8种图像变换方法<ul>
-<li>4种像素级别变换（像素值改变）：反相、亮度、模糊、噪声</li>
-<li>4种仿射变换（移动像素位置）：平移、缩放、裁剪、旋转</li>
-</ul>
-</li>
-<li>约束策略中的$\alpha$、$\beta$参数</li>
-</ul>
-</li>
-<li>K：常数，变换次数</li>
-<li>覆盖率标准：5种（NC、KMNC、NBC、SNAC、TKNC）标准及其附带参数</li>
-</ul>
-</li>
-<li><p>输出：1、能最大化覆盖率的预测正确的样例 2、预测错误的样例</p>
-<p><img src="/2020/08/20/DeepHunter/1.png" alt="1" style="zoom:60%;"></p>
-<h3 id="保持蜕变变换语义不变的策略"><a href="#保持蜕变变换语义不变的策略" class="headerlink" title="保持蜕变变换语义不变的策略"></a>保持蜕变变换语义不变的策略</h3><ul>
-<li><p>8种图像变换方法</p>
-<ul>
-<li>4种像素级别变换（像素值改变）：反相、亮度、模糊、噪声</li>
-<li>4种仿射变换（移动像素位置）：平移、缩放、裁剪、旋转</li>
-</ul>
-</li>
-<li><p>假设一次变换语义不变（参数合适的情况下）。</p>
-</li>
-<li><font color="red">策略：只允许一次仿射变换，像素变换可以使用多次，但要进行约束</font>
-
-<ul>
-<li><p>约束条件：像素变换应满足f(s,s’)的条件，$L_0$表示发生变化的像素数目的最大值，$L_\infty$表示像素值变化的最大值。即：要么发生变化的像素数不多，要么变化的像素数多，但像素值变化都不大。平衡二者</p>
-<p><img src="/2020/08/20/DeepHunter/4.png" alt="4" style="zoom:70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>reference image：一张图像在经过一系列变换后（最多一次仿射变换），计算f(s,s’)。如果没有仿射变换的话，参考图像为原图；否则参考图像为中间经过一次仿射变换后的图像。</p>
-<ul>
-<li><p>如果有仿射变换，则$L_0$、$L_\infty$计算方法如下</p>
-<p><img src="/2020/08/20/DeepHunter/3.png" alt="3" style="zoom:60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>种子选择策略（三种）</p>
-<ul>
-<li><p>传统程序和TensorFuzz、DeepTest：用栈，选最新生成的种子</p>
-</li>
-<li><p>uniform：随机选一个种子</p>
-</li>
-<li><p>新策略Probability：平衡新鲜性和多样性，种子s被选择的概率：</p>
-<p><img src="/2020/08/20/DeepHunter/4.png" alt="4" style="zoom:60%;"></p>
-</li>
+<li>（3） 多个随机黑色小矩形模拟镜头污垢<ul>
+<li>位置随机的若干个$m*m$大小的黑色矩形<font color="red">（每次迭代位置不同，$m$值自定义，与数据集图片大小有关）</font></li>
+<li>如果$mean(G_{i:i+m,j:j+m})$，则图片不动，否则变黑（即只允许降低像素值）</li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和DNN模型"><a href="#数据集和DNN模型" class="headerlink" title="数据集和DNN模型"></a>数据集和DNN模型</h3><p><img src="/2020/08/20/DeepHunter/5.png" alt="5" style="zoom:60%;"></p>
-<h3 id="共同参数设置"><a href="#共同参数设置" class="headerlink" title="共同参数设置"></a>共同参数设置</h3><ul>
-<li><p>NC阈值：0.75（与DeepXplore相同）</p>
-</li>
-<li><p>KMNC的K=1000</p>
-</li>
-<li><p>SNAC、NBC、TKNC与DeepGauge相同设置</p>
-</li>
-<li><p>TRY_NUM=50</p>
-</li>
-<li><p>$\gamma=20$，$p_{min}=0.5$ </p>
-</li>
-<li>$K=20$</li>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><img src="/2020/08/19/DeepXplore/算法.png" alt="算法" style="zoom:80%;"></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/19/DeepXplore/dataset.png" alt="dataset"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>种子输入集合：随机从测试集选择2000个输入（保持<font color="red">类别平衡</font>，满足所有DNN预测结果相同的约束）</li>
+<li>参数$\lambda_1,\lambda_2,s,t$</li>
 </ul>
-<h3 id="RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？"><a href="#RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？" class="headerlink" title="RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？"></a>RQ1（蜕变变换）：从人类角度看，不同的变换及约束策略对生成和原图片相同语义的新图效果如何？</h3><ul>
-<li><p>实验设计</p>
-<ul>
-<li><p>比较三种变换及约束策略：<font color="red">（仅约束策略还是连带变换策略？没说清楚）</font></p>
-<ul>
-<li><p>DeepHunter：用f(s,s’)限制，设置$\alpha=0.02，\beta=0.2$</p>
+<p><img src="/2020/08/19/DeepXplore/para.png" alt="para" style="zoom:67%;"></p>
+<h3 id="实验1：神经元覆盖率的优势"><a href="#实验1：神经元覆盖率的优势" class="headerlink" title="实验1：神经元覆盖率的优势"></a>实验1：神经元覆盖率的优势</h3><h4 id="实验1-1：神经元覆盖率与代码覆盖率比较"><a href="#实验1-1：神经元覆盖率与代码覆盖率比较" class="headerlink" title="实验1-1：神经元覆盖率与代码覆盖率比较"></a>实验1-1：神经元覆盖率与代码覆盖率比较</h4><ul>
+<li><p>实验方法：随机选择10个测试输入，测量代码覆盖率和神经元覆盖率大小</p>
 </li>
-<li><p>TensorFuzz： 用 $L_\infty=0.4$限制</p>
+<li><p>参数设置：设置$t=0.75$（神经元激活阈值，<font color="red">按比例缩放至[0,1]区间，不同DNN阈值区别很大？）前面都设的0，故意设大t凸显结果差异）</font></p>
 </li>
-<li><p>DeepTest： 用保守的参数限制(原文的MSE限制仅限回归任务，所以没用)</p>
+<li><p>实验结果：少量测试输入即可达到100%代码覆盖率，但神经元覆盖率最多只有34%：</p>
+<p><img src="/2020/08/19/DeepXplore/ex1-1.png" alt="ex1-1" style="zoom:80%;"></p>
 </li>
 </ul>
+<h4 id="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"><a href="#实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用" class="headerlink" title="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"></a>实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</h4><ul>
+<li>实验方法：从MNIST测试集随机选择2000种子输入，分别设置$\lambda_2$为1和0（$\lambda_2=0$时优化目标里不考虑覆盖新的神经元）。测量生成预测差异样本（difference-inducing inputs）的多样性<strong>（平均$L_1$距离：改变前后像素值之差的和，<font color="red">是否适合作为衡量多样性的指标？</font>）</strong></li>
+<li>参数设置：$t=0.25$</li>
+<li>实验结果：神经元覆盖率帮助提升了生成样本的多样性<font color="red">（①神经元覆盖率NC提升并不明显？作者的解释是NC很高的情况下，NC的一点点提升就能带来多样性的大幅提升。②生成数量#Diffs减少了：作者的解释是设置$\lambda_2=1$后更倾向于生成不同输入而不是提高输入数量，作者认为生成数量并不是一个好的衡量生成样本的方式）</font></li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-2.png" alt="ex1-2" style="zoom:75%;"></p>
+<h4 id="实验1-3：不同类别输入对激活神经元的影响"><a href="#实验1-3：不同类别输入对激活神经元的影响" class="headerlink" title="实验1-3：不同类别输入对激活神经元的影响"></a>实验1-3：不同<strong><em>类别</em></strong>输入对激活神经元的影响</h4><ul>
+<li>实验方法：MNIST数据集的LeNet-5模型，运行100对相同类别（如类别8）图片，和100对不同类别（如类别8和类别4）图片，测量平均激活神经元个数和共同激活神经元的个数（overlap）。</li>
+<li>实验结果：相同类别共同激活的平均神经元个数$&gt;$不同类别。神经元覆盖率可以有效地估计DNN测试中激活的不同规则的数量。</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex1-3.png" alt="ex1-3" style="zoom:80%;"></p>
+<h3 id="实验2：DeepXplore的效果"><a href="#实验2：DeepXplore的效果" class="headerlink" title="实验2：DeepXplore的效果"></a>实验2：DeepXplore的效果</h3><h4 id="实验2-1：DeepXplore在神经元覆盖率上的表现"><a href="#实验2-1：DeepXplore在神经元覆盖率上的表现" class="headerlink" title="实验2-1：DeepXplore在神经元覆盖率上的表现"></a>实验2-1：DeepXplore在神经元覆盖率上的表现</h4><ul>
+<li><p>实验方法：使用三种方法（DeepXplore、对抗样本FGSM、原测试集随机选择）生成相同数量（测试集的1%）的输入，比较神经元覆盖率</p>
 </li>
-<li><p>每个数据集随机选择30个种子输入生成5000张图片，3个数据集*3种生成方法*生成5000张图片=共45000张图片</p>
-</li>
-<li><p>9个测试者每人看一组图片：如果生成的图片与原图分类不同、或是没有语义则被标记为invalid。</p>
+<li><p>实验结果：DeepXplore能达到更高的覆盖率，且随着$t$的提升，覆盖率逐渐降低。</p>
 </li>
 </ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-1.png" alt="ex2-1"></p>
+<h4 id="实验2-2：运行时间"><a href="#实验2-2：运行时间" class="headerlink" title="实验2-2：运行时间"></a>实验2-2：运行时间</h4><ul>
+<li><p>实验方法：不同数据集和模型生成100%覆盖率输入所需时间及相应的生成数量。<font color="red">所有图像分类模型不考虑全连接层的覆盖（作者解释因为全连接层有的神经元非常难覆盖到，但全连接层的覆盖情况应该意义更大？）</font></p>
 </li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/20/DeepHunter/6.png" alt="10"></p>
-<ul>
-<li>对三种策略：CIFAR-10数据集的无效率普遍高于其他两个数据集<ul>
-<li>原因：CIFAR-10分辨率较低，即使是DNN能识别的有效输入，对于人类常难以识别</li>
-</ul>
-</li>
-<li>即使DeepTest的参数设置很保守，但是仍生成了很多无效输入；TensorFuzz经过L∞限制后无效输入少了很多</li>
-<li>结论：DeepHunter的蜕变变换策略有效减少了生成无效图片的数量</li>
-</ul>
+<li><p>实验结果：DeepXplore生成高覆盖率的输入效率非常高。</p>
 </li>
 </ul>
-<h3 id="RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？"><a href="#RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？" class="headerlink" title="RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？"></a>RQ2（覆盖率）：CGF是否在DNN测试领域仍能有效提升覆盖率？不同覆盖标准下，不同的seed生成策略对提升覆盖率效果如何？</h3><ul>
-<li><p>RQ2&amp;3 实验设计</p>
-<ul>
-<li>比较5种seed选取策略<ul>
-<li>Random testing (RT)without coverage guidance. 作为baseline，随机测试，无覆盖率作为向导</li>
-<li>DeepHunter+Uniform (DH+UF) ：使用不同的覆盖率标准作为向导，随机选择种子顺序</li>
-<li>DeepHunter+Probability (DH+Prob)：使用不同的覆盖率标准作为向导，用概率策略选择种子顺序</li>
-<li>DeepTest seed selection strategy with coverage guidance：选最新的；如果一个种子生成的所有新样例都不能提升覆盖率，则该种子被移出队列。队列可能变空。</li>
-<li>TensorFuzz seed selection strategy with coverage guidance：随机选一个种子和队列最后的5个种子，再从中随机选一个</li>
+<p><img src="/2020/08/19/DeepXplore/ex2-2.png" alt="ex2-2" style="zoom: 67%;"></p>
+<h4 id="实验2-3：不同参数设置的影响"><a href="#实验2-3：不同参数设置的影响" class="headerlink" title="实验2-3：不同参数设置的影响"></a>实验2-3：不同参数设置的影响</h4><ul>
+<li>实验方法：改变参数$s$、$\lambda_1$、$\lambda_2$，比较<font color="red">找到第一个导致预测差异的输入平均运行时间（这个指标是否足够适合评价参数？）</font></li>
+<li>实验结果</li>
+</ul>
+<p><img src="/2020/08/19/DeepXplore/ex2-3.png" alt="ex2-3" style="zoom:67%;"></p>
+<p><img src="/2020/08/19/DeepXplore/ex2-4.png" alt="ex2-4" style="zoom:60%;"></p>
+<h4 id="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"><a href="#实验2-4：当多个DNN决策边界相似时DeepXplore的效果" class="headerlink" title="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"></a>实验2-4：当多个DNN决策边界相似时DeepXplore的效果</h4><ul>
+<li>实验方法：<ul>
+<li>对照组：MNIST训练集（60000个样本）和LeNet-1模型，10个epoch</li>
+<li>实验组：改变①训练集样本个数，②DNN卷积层模型filter个数，③训练epoch数</li>
+<li>设置初始种子数为100，对比发现生成第一个使得实验组DNN和对照组DNN预测差异样本的平均迭代次数</li>
 </ul>
 </li>
-<li><p>21个fuzzers：5 个覆盖准则 × 4 个seed选择策略 + 1 RT with no coverage guidance，使用的模型为MNIST和CIFAR-10的四个模型；每个fuzzer运行10遍取平均</p>
-</li>
-<li><p>初始种子1000个：被所有模型都正确分类的测试数据</p>
-</li>
-<li>每个fuzzer迭代次数相同（5000次），使用的蜕变变换策略相同<font color="red">（是什么？）</font></li>
+<li>实验结果：DeepXplore从非常相似的DNN中也能发现错误样本（除了第一行diff为1时），越相似，迭代轮数越多。</li>
 </ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/20/DeepHunter/7.png" alt="7" style="zoom:60%;"></p>
-</li>
-<li><p>结论</p>
-<ul>
-<li><p>尽管基本结构与传统程序很不同，CGF方法与随机测试相比较还是能有效最大化DNN程序的覆盖率</p>
-</li>
-<li><p>与传统软件的fuzzer优先选择最新生成的用例作为种子不同，DNN testing中种子选择的优先策略（多样性）也很重要</p>
-</li>
-<li><p>不同覆盖率标准提升的难易程度不同，KMNC, TKNC, 和 NC提升较容易。NBC and SNAC关注corner cases，本身初始seed覆盖率就极低，提升较难</p>
-</li>
+<p><img src="/2020/08/19/DeepXplore/ex2-5.png" alt="ex2-5" style="zoom:67%;"></p>
+<h3 id="实验3：使用DeepXplore提升DNN"><a href="#实验3：使用DeepXplore提升DNN" class="headerlink" title="实验3：使用DeepXplore提升DNN"></a>实验3：使用DeepXplore提升DNN</h3><h4 id="实验3-1：使用生成样本扩大训练集，重新训练DNN"><a href="#实验3-1：使用生成样本扩大训练集，重新训练DNN" class="headerlink" title="实验3-1：使用生成样本扩大训练集，重新训练DNN"></a>实验3-1：使用生成样本扩大训练集，重新训练DNN</h4><ul>
+<li>与对抗样本训练不同的是：不需标注（采取投票形式）</li>
+<li>实验方法：重新训练MNIST数据集的三个模型5个epoch，增加100张DeepXplore生成的错误图片，与对抗样本和随机从测试集选择样本比较准确率。<font color="red">（测试样本是什么？多个DNN从何而来？）</font></li>
+<li>实验结果：DeepXplore平均提升准确率1%-3%</li>
 </ul>
-</li>
-</ul>
-<h3 id="RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？"><a href="#RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？" class="headerlink" title="RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？"></a>RQ3（错误检测）：现有的覆盖标准在引导错误检测的效果上有何不同？使用不同seed选取标准检测错误的效果有何不同？不同seed选取标准检测出的错误行为有何不同？</h3><ul>
-<li><p>实验结果</p>
-<ul>
-<li><p>检测错误数量</p>
-<p><img src="/2020/08/20/DeepHunter/8.png" alt="8" style="zoom:60%;"></p>
-<ul>
-<li>DH+Prob和DH+UF检测错误数目多于另外三种策略，且模型较小时二者类似，模型较大时DF+Prob更优</li>
-<li>KMNC在检测错误数目上少于其他4个覆盖率标准，因为cover更简单；但DH+Prob的表现还是优于其他策略</li>
-<li>在最后的seed queue中，易于cover的覆盖率标准剩余的seed更多</li>
-</ul>
-</li>
-<li><p>检测出的错误的多样性</p>
-<p><img src="/2020/08/20/DeepHunter/9.png" alt="9" style="zoom:60%;"></p>
-<ul>
-<li>定义从同一个seed变换产生的错误属于同一类别，共1000类</li>
-<li>DH+Prob和DH+UF能检测出更多类的错误，DeepTest和TensorFuzz检测出的错误甚至有的比RT还少，因为这二者都倾向于选择最新的seed</li>
-<li>RT：过于随机，难以发现corner cases</li>
-<li>选最新的seed：能发现Corner cases，但类别过于单一</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测"><a href="#RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测" class="headerlink" title="RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测?"></a>RQ4（平台迁移）：DeepHunter是否适用于平台迁移过程中DNN量化引入的具体缺陷检测?</h3><ul>
-<li><p>实验设计</p>
-<ul>
-<li><p>每个数据集选择一个模型，原模型都是32bit</p>
-</li>
-<li><p>3种量化方式</p>
-<ul>
-<li><p>随机选10%的权重缩减：32比特-&gt;16比特</p>
-</li>
-<li><p>随机选50%的权重缩减：32比特-&gt;16比特</p>
-</li>
-<li><p>所有权重缩减：32比特-&gt;16比特</p>
-</li>
-</ul>
-</li>
-<li><p>对前两种量化方式（10%和50%的量化模型）：sample10次得到10个模型，每个模型运行5遍取均值</p>
-</li>
-<li><p>为每个原始模型分配10小时生成图片，重复每种配置5次并平均结果</p>
-</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/20/DeepHunter/10.png" alt="10" style="zoom:60%;"></p>
-<ul>
-<li>corner相关的覆盖率标准更易发现量化错误</li>
-<li>DNN模型越大，发现的错误越多</li>
-<li>QR率越大，错误越多</li>
-</ul>
-</li>
+<p><img src="/2020/08/19/DeepXplore/ex3-1.png" alt="ex3-1" style="zoom:85%;"></p>
+<h4 id="实验3-2：检测被污染的训练样本"><a href="#实验3-2：检测被污染的训练样本" class="headerlink" title="实验3-2：检测被污染的训练样本"></a>实验3-2：检测被污染的训练样本</h4><ul>
+<li>实验过程：用两个MNIST LeNet-5模型，一个正常训练，另一个类别9的样本中30%被故意标记成了类别1。使用DeepXplore生成被错误预测成9或1的样本，在训练集中找和错误样本结构相似的样本。能识别出95.6%的污染样本。<font color="red">（写得很简略）</font></li>
 </ul>
 <script>
         document.querySelectorAll('.github-emoji')
@@ -1423,8 +1554,9 @@
       </categories>
       <tags>
         <tag>DNN测试</tag>
-        <tag>模糊测试</tag>
         <tag>测试输入生成</tag>
+        <tag>测试标准</tag>
+        <tag>差分测试</tag>
       </tags>
   </entry>
   <entry>
@@ -1583,138 +1715,6 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepXplore</title>
-    <url>/2020/08/19/DeepXplore/</url>
-    <content><![CDATA[<p>原文：DeepXplore: Automated Whitebox Testing of Deep Learning Systems（SOSP’17）<a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/peikexin9/deepxplore">https://github.com/peikexin9/deepxplore</a></p>
-<h2 id="可控制参数或变量"><a href="#可控制参数或变量" class="headerlink" title="可控制参数或变量"></a>可控制参数或变量</h2><ul>
-<li><p>种子输入集合数量 (类别均衡，随机选择，<u>约束：所有DNN模型必须对每个种子的初始预测结果相同</u>)</p>
-</li>
-<li><p>多个DNN</p>
-</li>
-<li><p>$\lambda_1$：平衡其他DNN和被选中DNN预测的差别（$\lambda_1$越大，选中DNN预测为原类别c的概率越低，$\lambda_1$越小，越能维持其他DNN的预测结果）</p>
-<p><img src="/2020/08/19/DeepXplore/1.png" alt="公式1"></p>
-</li>
-<li><p>$\lambda_2$：平衡两个优化目标大小（即预测差异和神经元覆盖率，$\lambda_2$越大，越关注覆盖更多神经元，否则更关注生成预测差异图片）</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/2.png" alt="公式2"></p>
-<ul>
-<li>$s$: 梯度下降步长（$s$过大可能会导致极小值附近震荡，$s$过小导致迭代次数多）</li>
-<li>$t$: 神经元覆盖率阈值（$t$越大，达到覆盖率目标越难）</li>
-<li>$p$: 覆盖率目标</li>
-<li>梯度下降迭代最大次数（代码里）</li>
-<li><font color="red">在每次迭代的梯度$G$上施加的真实领域约束:</font><ul>
-<li>（1）不同亮度模拟光照：$G$被$mean(G)$ 取代</li>
-<li>（2）单个矩形($m*n$大小)模拟意外或故意遮挡：<ul>
-<li>选择矩形左上顶点所在的位置$(i,j)$，将$G_{i:i+m,j:j+n}$施加于原图相应位置。</li>
-<li><font color="red">$m$、$n$的大小和$(i,j)$为自定义的参数，迭代多次都在相同位置</font></li>
-</ul>
-</li>
-<li>（3） 多个随机黑色小矩形模拟镜头污垢<ul>
-<li>位置随机的若干个$m*m$大小的黑色矩形<font color="red">（每次迭代位置不同，$m$值自定义，与数据集图片大小有关）</font></li>
-<li>如果$mean(G_{i:i+m,j:j+m})$，则图片不动，否则变黑（即只允许降低像素值）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><img src="/2020/08/19/DeepXplore/算法.png" alt="算法" style="zoom:80%;"></p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/19/DeepXplore/dataset.png" alt="dataset"></p>
-<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
-<li>种子输入集合：随机从测试集选择2000个输入（保持<font color="red">类别平衡</font>，满足所有DNN预测结果相同的约束）</li>
-<li>参数$\lambda_1,\lambda_2,s,t$</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/para.png" alt="para" style="zoom:67%;"></p>
-<h3 id="实验1：神经元覆盖率的优势"><a href="#实验1：神经元覆盖率的优势" class="headerlink" title="实验1：神经元覆盖率的优势"></a>实验1：神经元覆盖率的优势</h3><h4 id="实验1-1：神经元覆盖率与代码覆盖率比较"><a href="#实验1-1：神经元覆盖率与代码覆盖率比较" class="headerlink" title="实验1-1：神经元覆盖率与代码覆盖率比较"></a>实验1-1：神经元覆盖率与代码覆盖率比较</h4><ul>
-<li><p>实验方法：随机选择10个测试输入，测量代码覆盖率和神经元覆盖率大小</p>
-</li>
-<li><p>参数设置：设置$t=0.75$（神经元激活阈值，<font color="red">按比例缩放至[0,1]区间，不同DNN阈值区别很大？）前面都设的0，故意设大t凸显结果差异）</font></p>
-</li>
-<li><p>实验结果：少量测试输入即可达到100%代码覆盖率，但神经元覆盖率最多只有34%：</p>
-<p><img src="/2020/08/19/DeepXplore/ex1-1.png" alt="ex1-1" style="zoom:80%;"></p>
-</li>
-</ul>
-<h4 id="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"><a href="#实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用" class="headerlink" title="实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用"></a>实验1-2：神经元覆盖率对DeepXplore生成能导致预测差异样本的作用</h4><ul>
-<li>实验方法：从MNIST测试集随机选择2000种子输入，分别设置$\lambda_2$为1和0（$\lambda_2=0$时优化目标里不考虑覆盖新的神经元）。测量生成预测差异样本（difference-inducing inputs）的多样性<strong>（平均$L_1$距离：改变前后像素值之差的和，<font color="red">是否适合作为衡量多样性的指标？</font>）</strong></li>
-<li>参数设置：$t=0.25$</li>
-<li>实验结果：神经元覆盖率帮助提升了生成样本的多样性<font color="red">（①神经元覆盖率NC提升并不明显？作者的解释是NC很高的情况下，NC的一点点提升就能带来多样性的大幅提升。②生成数量#Diffs减少了：作者的解释是设置$\lambda_2=1$后更倾向于生成不同输入而不是提高输入数量，作者认为生成数量并不是一个好的衡量生成样本的方式）</font></li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex1-2.png" alt="ex1-2" style="zoom:75%;"></p>
-<h4 id="实验1-3：不同类别输入对激活神经元的影响"><a href="#实验1-3：不同类别输入对激活神经元的影响" class="headerlink" title="实验1-3：不同类别输入对激活神经元的影响"></a>实验1-3：不同<strong><em>类别</em></strong>输入对激活神经元的影响</h4><ul>
-<li>实验方法：MNIST数据集的LeNet-5模型，运行100对相同类别（如类别8）图片，和100对不同类别（如类别8和类别4）图片，测量平均激活神经元个数和共同激活神经元的个数（overlap）。</li>
-<li>实验结果：相同类别共同激活的平均神经元个数$&gt;$不同类别。神经元覆盖率可以有效地估计DNN测试中激活的不同规则的数量。</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex1-3.png" alt="ex1-3" style="zoom:80%;"></p>
-<h3 id="实验2：DeepXplore的效果"><a href="#实验2：DeepXplore的效果" class="headerlink" title="实验2：DeepXplore的效果"></a>实验2：DeepXplore的效果</h3><h4 id="实验2-1：DeepXplore在神经元覆盖率上的表现"><a href="#实验2-1：DeepXplore在神经元覆盖率上的表现" class="headerlink" title="实验2-1：DeepXplore在神经元覆盖率上的表现"></a>实验2-1：DeepXplore在神经元覆盖率上的表现</h4><ul>
-<li><p>实验方法：使用三种方法（DeepXplore、对抗样本FGSM、原测试集随机选择）生成相同数量（测试集的1%）的输入，比较神经元覆盖率</p>
-</li>
-<li><p>实验结果：DeepXplore能达到更高的覆盖率，且随着$t$的提升，覆盖率逐渐降低。</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-1.png" alt="ex2-1"></p>
-<h4 id="实验2-2：运行时间"><a href="#实验2-2：运行时间" class="headerlink" title="实验2-2：运行时间"></a>实验2-2：运行时间</h4><ul>
-<li><p>实验方法：不同数据集和模型生成100%覆盖率输入所需时间及相应的生成数量。<font color="red">所有图像分类模型不考虑全连接层的覆盖（作者解释因为全连接层有的神经元非常难覆盖到，但全连接层的覆盖情况应该意义更大？）</font></p>
-</li>
-<li><p>实验结果：DeepXplore生成高覆盖率的输入效率非常高。</p>
-</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-2.png" alt="ex2-2" style="zoom: 67%;"></p>
-<h4 id="实验2-3：不同参数设置的影响"><a href="#实验2-3：不同参数设置的影响" class="headerlink" title="实验2-3：不同参数设置的影响"></a>实验2-3：不同参数设置的影响</h4><ul>
-<li>实验方法：改变参数$s$、$\lambda_1$、$\lambda_2$，比较<font color="red">找到第一个导致预测差异的输入平均运行时间（这个指标是否足够适合评价参数？）</font></li>
-<li>实验结果</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-3.png" alt="ex2-3" style="zoom:67%;"></p>
-<p><img src="/2020/08/19/DeepXplore/ex2-4.png" alt="ex2-4" style="zoom:60%;"></p>
-<h4 id="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"><a href="#实验2-4：当多个DNN决策边界相似时DeepXplore的效果" class="headerlink" title="实验2-4：当多个DNN决策边界相似时DeepXplore的效果"></a>实验2-4：当多个DNN决策边界相似时DeepXplore的效果</h4><ul>
-<li>实验方法：<ul>
-<li>对照组：MNIST训练集（60000个样本）和LeNet-1模型，10个epoch</li>
-<li>实验组：改变①训练集样本个数，②DNN卷积层模型filter个数，③训练epoch数</li>
-<li>设置初始种子数为100，对比发现生成第一个使得实验组DNN和对照组DNN预测差异样本的平均迭代次数</li>
-</ul>
-</li>
-<li>实验结果：DeepXplore从非常相似的DNN中也能发现错误样本（除了第一行diff为1时），越相似，迭代轮数越多。</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex2-5.png" alt="ex2-5" style="zoom:67%;"></p>
-<h3 id="实验3：使用DeepXplore提升DNN"><a href="#实验3：使用DeepXplore提升DNN" class="headerlink" title="实验3：使用DeepXplore提升DNN"></a>实验3：使用DeepXplore提升DNN</h3><h4 id="实验3-1：使用生成样本扩大训练集，重新训练DNN"><a href="#实验3-1：使用生成样本扩大训练集，重新训练DNN" class="headerlink" title="实验3-1：使用生成样本扩大训练集，重新训练DNN"></a>实验3-1：使用生成样本扩大训练集，重新训练DNN</h4><ul>
-<li>与对抗样本训练不同的是：不需标注（采取投票形式）</li>
-<li>实验方法：重新训练MNIST数据集的三个模型5个epoch，增加100张DeepXplore生成的错误图片，与对抗样本和随机从测试集选择样本比较准确率。<font color="red">（测试样本是什么？多个DNN从何而来？）</font></li>
-<li>实验结果：DeepXplore平均提升准确率1%-3%</li>
-</ul>
-<p><img src="/2020/08/19/DeepXplore/ex3-1.png" alt="ex3-1" style="zoom:85%;"></p>
-<h4 id="实验3-2：检测被污染的训练样本"><a href="#实验3-2：检测被污染的训练样本" class="headerlink" title="实验3-2：检测被污染的训练样本"></a>实验3-2：检测被污染的训练样本</h4><ul>
-<li>实验过程：用两个MNIST LeNet-5模型，一个正常训练，另一个类别9的样本中30%被故意标记成了类别1。使用DeepXplore生成被错误预测成9或1的样本，在训练集中找和错误样本结构相似的样本。能识别出95.6%的污染样本。<font color="red">（写得很简略）</font></li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
-        <tag>测试标准</tag>
-        <tag>差分测试</tag>
       </tags>
   </entry>
   <entry>
@@ -1940,104 +1940,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】Compiler Validation via Equivalence Modulo Inputs</title>
-    <url>/2020/10/08/EMI/</url>
-    <content><![CDATA[<p>原文：Compiler Validation via Equivalence Modulo Inputs （PLDI’14) <a id="more"></a></p>
-<h2 id="Equivalence-Modulo-Inputs-EMI"><a href="#Equivalence-Modulo-Inputs-EMI" class="headerlink" title="Equivalence Modulo Inputs (EMI)"></a>Equivalence Modulo Inputs (EMI)</h2><ul>
-<li><p>给定程序$P$和一组输入值$I$，由$I$可生成一组程序集合$\mathcal{P}$，使得$\mathcal{P}$中每个程序$Q$都等价于$P$ modulo $I$：$\forall i \in I, Q(i) = P(i) $。则集合$\mathcal{P}$可用于对任意一个编译器$Comp$进行差分测试（differential testing），若存在某个$i \in I$和$Q \in \mathcal{P}$，使得$Comp(P)(i) \neq Comp(Q)(i)$，则该编译器存在bug。</p>
-</li>
-<li><p>核心思想：尽管$Q$只在输入集合$I$上与程序$P$语义等价，但编译器及其使用的静态分析和优化算法应该能为$Q$生成能在$I$上完全运行正确的中间代码。$P$和$Q$在数据流和控制流上可能很不同，经编译器优化后生成的代码也很不同，但结果应该完全一致。</p>
-<p><img src="/2020/10/08/EMI/1.png" alt="emi" style="zoom:60%;"></p>
-</li>
-<li><p>生成EMI 变体的策略</p>
-<ul>
-<li>在$P$上运行输入集合$I$，获得运行轨迹，随机在未执行代码上做剪枝、插入、修改操作（假设$P$是一个确定的程序）</li>
-</ul>
-</li>
-</ul>
-<p>编译器的两类bug：</p>
-<ul>
-<li>导致编译器崩溃</li>
-<li>生成错误代码（更加严重）<ul>
-<li>导致正确的程序运行有bug</li>
-<li>难以发现</li>
-</ul>
-</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>论文笔记</tag>
-        <tag>编译器测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Google Girl Hackathon Season VI赛后感</title>
-    <url>/2020/08/21/Google-Girl-Hackathon/</url>
-    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
-<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
-<hr>
-<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
-<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
-<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
-<p>这是我们的演示视频（更新后的版本）：</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
-
-<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
-<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
-<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
-<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
-<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>杂记随感</category>
-      </categories>
-      <tags>
-        <tag>比赛</tag>
-        <tag>移动开发</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】Effective Path</title>
     <url>/2020/11/12/Effective-Path/</url>
     <content><![CDATA[<p>原文：Adversarial Defense Through Network Profiling Based Path Extraction （CVPR’19)  <a id="more"></a></p>
@@ -2150,6 +2052,104 @@
       </categories>
       <tags>
         <tag>对抗防御</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】Compiler Validation via Equivalence Modulo Inputs</title>
+    <url>/2020/10/08/EMI/</url>
+    <content><![CDATA[<p>原文：Compiler Validation via Equivalence Modulo Inputs （PLDI’14) <a id="more"></a></p>
+<h2 id="Equivalence-Modulo-Inputs-EMI"><a href="#Equivalence-Modulo-Inputs-EMI" class="headerlink" title="Equivalence Modulo Inputs (EMI)"></a>Equivalence Modulo Inputs (EMI)</h2><ul>
+<li><p>给定程序$P$和一组输入值$I$，由$I$可生成一组程序集合$\mathcal{P}$，使得$\mathcal{P}$中每个程序$Q$都等价于$P$ modulo $I$：$\forall i \in I, Q(i) = P(i) $。则集合$\mathcal{P}$可用于对任意一个编译器$Comp$进行差分测试（differential testing），若存在某个$i \in I$和$Q \in \mathcal{P}$，使得$Comp(P)(i) \neq Comp(Q)(i)$，则该编译器存在bug。</p>
+</li>
+<li><p>核心思想：尽管$Q$只在输入集合$I$上与程序$P$语义等价，但编译器及其使用的静态分析和优化算法应该能为$Q$生成能在$I$上完全运行正确的中间代码。$P$和$Q$在数据流和控制流上可能很不同，经编译器优化后生成的代码也很不同，但结果应该完全一致。</p>
+<p><img src="/2020/10/08/EMI/1.png" alt="emi" style="zoom:60%;"></p>
+</li>
+<li><p>生成EMI 变体的策略</p>
+<ul>
+<li>在$P$上运行输入集合$I$，获得运行轨迹，随机在未执行代码上做剪枝、插入、修改操作（假设$P$是一个确定的程序）</li>
+</ul>
+</li>
+</ul>
+<p>编译器的两类bug：</p>
+<ul>
+<li>导致编译器崩溃</li>
+<li>生成错误代码（更加严重）<ul>
+<li>导致正确的程序运行有bug</li>
+<li>难以发现</li>
+</ul>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>论文笔记</tag>
+        <tag>编译器测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Google Girl Hackathon Season VI赛后感</title>
+    <url>/2020/08/21/Google-Girl-Hackathon/</url>
+    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
+<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
+<hr>
+<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
+<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
+<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
+<p>这是我们的演示视频（更新后的版本）：</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
+<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
+<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
+<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
+<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>杂记随感</category>
+      </categories>
+      <tags>
+        <tag>比赛</tag>
+        <tag>移动开发</tag>
       </tags>
   </entry>
   <entry>
@@ -2469,82 +2469,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】TensorFuzz</title>
-    <url>/2020/08/20/TensorFuzz/</url>
-    <content><![CDATA[<p>原文：TensorFuzz: Debugging Neural Networks with Coverage-Guided Fuzzing （ICML’19) <a id="more"></a></p>
-<p>代码：<a href="https://github.com/brain-research/tensorfuzz">https://github.com/brain-research/tensorfuzz</a></p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="CGF基本流程"><a href="#CGF基本流程" class="headerlink" title="CGF基本流程"></a>CGF基本流程</h3><p><img src="/2020/08/20/TensorFuzz/1.png" alt="1" style="zoom:60%;"></p>
-<h3 id="方法细节"><a href="#方法细节" class="headerlink" title="方法细节"></a>方法细节</h3><ul>
-<li><p>输入选择：选择更新鲜的输入</p>
-</li>
-<li><p>输入变换：①白噪声（参数由用户给出）；②增加$L_{\infty}$约束的白噪声</p>
-</li>
-<li><p>目标函数：用户根据覆盖率和元数据情况自定义</p>
-</li>
-<li><p>覆盖分析器：当我们得到一个新的激活向量时，我们可以查找它的最近邻居，然后检查这个最近的邻居在欧几里得距离中有多远，如果这个距离大于某个量，就向语料中添加输入。</p>
-<ul>
-<li>可只选择部分神经元的值作为激活向量，如只选logits或logits前一层</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"><a href="#实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）" class="headerlink" title="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"></a>实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）</h3><ul>
-<li><p>实验方法：使将检查数值运算添加到元数据并运行模糊测试器（fuzzer）。我们训练了一个完全连接的神经网络来对MNIST数据集里的数字进行分类，故意用了一个很糟糕的交叉熵损失，这样就有可能出现数值误差。模型进行了35000步的训练，mini-batch size为100，验证精度为98%。检查MNIST数据集中不含导致数值误差的样本。</p>
-</li>
-<li><p>实验结果：TensorFuzz 却在10次随机初始化后快速找到了 NaN错误。</p>
-<p><img src="/2020/08/20/TensorFuzz/2.jpg" alt="2" style="zoom:67%;"></p>
-<ul>
-<li>基于梯度的搜索技术可能无助于查找数值误差</li>
-<li>随机搜索对于查找数值误差来说效率极低。</li>
-</ul>
-<h3 id="实验2：CGF-解决模型和量化版本不一致的问题"><a href="#实验2：CGF-解决模型和量化版本不一致的问题" class="headerlink" title="实验2：CGF 解决模型和量化版本不一致的问题"></a>实验2：CGF 解决模型和量化版本不一致的问题</h3><ul>
-<li><p>仅检查已有的数据只能找到很少的错误：作为基线实验，我们训练了一个使用 32 位浮点数的 MNIST 分类器（这一次没有故意引入数值错误）。然后把所有权重和激活值修剪为 16 位。之后，我们对比了 32 位和 16 位模型在 MNIST 测试集上的预测，没有找到任何不一致性。</p>
-</li>
-<li><p>CGF 可以快速在数据周围的小区域中找到很多错误：然后运行 fuzzer，变化限制在种子图像周围的半径为 0.4 的无限范数球中，其中仅使用了 32 位模型作为覆盖的激活值。我们将输入限制在种子图像附近，因为这些输入几乎都有明确的类别语义。模型的两个版本在域外的垃圾数据（没有真实类别）上出现不一致性并没有什么意义。通过这些设置，fuzzer 可以生成 70% 样本的不一致性。因此，CGF 允许我们寻找在测试时出现的真实错误.</p>
-</li>
-</ul>
-<h3 id="实验3：TensorFuzz可以发现流行模型实现中的bug"><a href="#实验3：TensorFuzz可以发现流行模型实现中的bug" class="headerlink" title="实验3：TensorFuzz可以发现流行模型实现中的bug"></a>实验3：TensorFuzz可以发现流行模型实现中的bug</h3><h3 id="实验4：TensorFuzz可以帮助进行保持语义的代码转换"><a href="#实验4：TensorFuzz可以帮助进行保持语义的代码转换" class="headerlink" title="实验4：TensorFuzz可以帮助进行保持语义的代码转换"></a>实验4：TensorFuzz可以帮助进行保持语义的代码转换</h3></li>
-</ul>
-<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
-<li><p>输入选择策略</p>
-</li>
-<li><p>变换参数</p>
-</li>
-<li><p>目标函数</p>
-</li>
-<li><p>激活神经元集合</p>
-</li>
-<li><p>距离阈值L</p>
-</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>模糊测试</tag>
-        <tag>测试输入生成</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】Towards Improved Testing For Deep Learning</title>
     <url>/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/</url>
     <content><![CDATA[<p>原文：Towards Improved Testing For Deep Learning（ICSE-NIER’19）<a id="more"></a></p>
@@ -2623,6 +2547,82 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】TensorFuzz</title>
+    <url>/2020/08/20/TensorFuzz/</url>
+    <content><![CDATA[<p>原文：TensorFuzz: Debugging Neural Networks with Coverage-Guided Fuzzing （ICML’19) <a id="more"></a></p>
+<p>代码：<a href="https://github.com/brain-research/tensorfuzz">https://github.com/brain-research/tensorfuzz</a></p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="CGF基本流程"><a href="#CGF基本流程" class="headerlink" title="CGF基本流程"></a>CGF基本流程</h3><p><img src="/2020/08/20/TensorFuzz/1.png" alt="1" style="zoom:60%;"></p>
+<h3 id="方法细节"><a href="#方法细节" class="headerlink" title="方法细节"></a>方法细节</h3><ul>
+<li><p>输入选择：选择更新鲜的输入</p>
+</li>
+<li><p>输入变换：①白噪声（参数由用户给出）；②增加$L_{\infty}$约束的白噪声</p>
+</li>
+<li><p>目标函数：用户根据覆盖率和元数据情况自定义</p>
+</li>
+<li><p>覆盖分析器：当我们得到一个新的激活向量时，我们可以查找它的最近邻居，然后检查这个最近的邻居在欧几里得距离中有多远，如果这个距离大于某个量，就向语料中添加输入。</p>
+<ul>
+<li>可只选择部分神经元的值作为激活向量，如只选logits或logits前一层</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"><a href="#实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）" class="headerlink" title="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"></a>实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）</h3><ul>
+<li><p>实验方法：使将检查数值运算添加到元数据并运行模糊测试器（fuzzer）。我们训练了一个完全连接的神经网络来对MNIST数据集里的数字进行分类，故意用了一个很糟糕的交叉熵损失，这样就有可能出现数值误差。模型进行了35000步的训练，mini-batch size为100，验证精度为98%。检查MNIST数据集中不含导致数值误差的样本。</p>
+</li>
+<li><p>实验结果：TensorFuzz 却在10次随机初始化后快速找到了 NaN错误。</p>
+<p><img src="/2020/08/20/TensorFuzz/2.jpg" alt="2" style="zoom:67%;"></p>
+<ul>
+<li>基于梯度的搜索技术可能无助于查找数值误差</li>
+<li>随机搜索对于查找数值误差来说效率极低。</li>
+</ul>
+<h3 id="实验2：CGF-解决模型和量化版本不一致的问题"><a href="#实验2：CGF-解决模型和量化版本不一致的问题" class="headerlink" title="实验2：CGF 解决模型和量化版本不一致的问题"></a>实验2：CGF 解决模型和量化版本不一致的问题</h3><ul>
+<li><p>仅检查已有的数据只能找到很少的错误：作为基线实验，我们训练了一个使用 32 位浮点数的 MNIST 分类器（这一次没有故意引入数值错误）。然后把所有权重和激活值修剪为 16 位。之后，我们对比了 32 位和 16 位模型在 MNIST 测试集上的预测，没有找到任何不一致性。</p>
+</li>
+<li><p>CGF 可以快速在数据周围的小区域中找到很多错误：然后运行 fuzzer，变化限制在种子图像周围的半径为 0.4 的无限范数球中，其中仅使用了 32 位模型作为覆盖的激活值。我们将输入限制在种子图像附近，因为这些输入几乎都有明确的类别语义。模型的两个版本在域外的垃圾数据（没有真实类别）上出现不一致性并没有什么意义。通过这些设置，fuzzer 可以生成 70% 样本的不一致性。因此，CGF 允许我们寻找在测试时出现的真实错误.</p>
+</li>
+</ul>
+<h3 id="实验3：TensorFuzz可以发现流行模型实现中的bug"><a href="#实验3：TensorFuzz可以发现流行模型实现中的bug" class="headerlink" title="实验3：TensorFuzz可以发现流行模型实现中的bug"></a>实验3：TensorFuzz可以发现流行模型实现中的bug</h3><h3 id="实验4：TensorFuzz可以帮助进行保持语义的代码转换"><a href="#实验4：TensorFuzz可以帮助进行保持语义的代码转换" class="headerlink" title="实验4：TensorFuzz可以帮助进行保持语义的代码转换"></a>实验4：TensorFuzz可以帮助进行保持语义的代码转换</h3></li>
+</ul>
+<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
+<li><p>输入选择策略</p>
+</li>
+<li><p>变换参数</p>
+</li>
+<li><p>目标函数</p>
+</li>
+<li><p>激活神经元集合</p>
+</li>
+<li><p>距离阈值L</p>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
       </tags>
   </entry>
   <entry>

@@ -214,13 +214,6 @@
 
   
   <url>
-    <loc>https://rubychen0611.github.io/tags/DNN%E5%88%86%E8%A7%A3/</loc>
-    <lastmod>2020-11-30</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://rubychen0611.github.io/tags/DNN%E6%B5%8B%E8%AF%95/</loc>
     <lastmod>2020-11-30</lastmod>
     <changefreq>daily</changefreq>
@@ -236,6 +229,13 @@
   
   <url>
     <loc>https://rubychen0611.github.io/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/</loc>
+    <lastmod>2020-11-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://rubychen0611.github.io/tags/DNN%E5%88%86%E8%A7%A3/</loc>
     <lastmod>2020-11-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -291,6 +291,13 @@
   </url>
   
   <url>
+    <loc>https://rubychen0611.github.io/tags/%E5%AF%B9%E6%8A%97%E9%98%B2%E5%BE%A1/</loc>
+    <lastmod>2020-11-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://rubychen0611.github.io/tags/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2020-11-30</lastmod>
     <changefreq>daily</changefreq>
@@ -313,13 +320,6 @@
   
   <url>
     <loc>https://rubychen0611.github.io/tags/%E7%A7%BB%E5%8A%A8%E5%BC%80%E5%8F%91/</loc>
-    <lastmod>2020-11-30</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://rubychen0611.github.io/tags/%E5%AF%B9%E6%8A%97%E9%98%B2%E5%BE%A1/</loc>
     <lastmod>2020-11-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
