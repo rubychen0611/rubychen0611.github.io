@@ -101,6 +101,125 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepCT</title>
+    <url>/2020/08/20/DeepCT/</url>
+    <content><![CDATA[<p>原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)  <a id="more"></a></p>
+<p>代码：没找到</p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出了DNN系统的组合测试方法，根据目标要覆盖的神经元激活模式组合，从种子输入开始，通过search-based testing, 或guided random testing, 或symbolic constraint solving based testing方法生成满足条件的输入，同时最小化L∞距离。以生成覆盖更多的神经元激活模式组合的输入。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><ul>
+<li>为什么层析（tomographic）？<ul>
+<li>DNN学习到的特征随着层数增加越来越复杂、抽象</li>
+</ul>
+</li>
+<li>为什么组合（combinatorial）？<ul>
+<li>每层神经元只与前后两层发生交互。逻辑单元之间可能存在逻辑(无形)的相互作用，其中当前层的神经元共同决定其下一层神经元的逻辑。我们想用CT捕捉和检查每一层神经元之间的这些无形的相互作用。</li>
+</ul>
+</li>
+</ul>
+<h2 id="组合测试标准"><a href="#组合测试标准" class="headerlink" title="组合测试标准"></a>组合测试标准</h2><h3 id="神经元激活配置（Neuron-activation-configuration"><a href="#神经元激活配置（Neuron-activation-configuration" class="headerlink" title="神经元激活配置（Neuron-activation configuration)"></a>神经元激活配置（Neuron-activation configuration)</h3><p>对第$i$层的一组神经元$M=\{n_1,n_2,…,n_k\}$，激活配置为一个元组$c=(b_1,b_2,…,b_k)$，其中$b_i \in \{0,1\}$。若测试集$T$中存在样本$t$能使得激活模式等于$c$，则称$T$可以覆盖$c$。</p>
+<p>$\Theta(t,L_i)$: 第$i$层神经元所有$t$-路覆盖组合</p>
+<p>$\theta \in \Theta(t,L_i)$：是$t$个神经元的集合，拥有$2^t$种激活配置</p>
+<p>$\Theta_{Full}(t,L_i,T) \subseteq \Theta(t,L_i)$：能被$T$完全覆盖的$t$-路覆盖组合</p>
+<h3 id="t-路组合稀疏覆盖"><a href="#t-路组合稀疏覆盖" class="headerlink" title="$t$-路组合稀疏覆盖"></a>$t$-路组合稀疏覆盖</h3><p>$T$的组合稀疏覆盖=覆盖了所有神经元配置的组合数 / 所有组合数</p>
+<p>例子：</p>
+<p><img src="/2020/08/20/DeepCT/fig1.png" alt="fig1" style="zoom:60%;"></p>
+<p>$L_i$层中共有4个神经元${n1,n2,n3,n4}$，<br>2-路组合共有六种：$\{n1,n2\}，\{n1,n3\}，\{n1,n4\}，\{n2,n3\}，\{n2,n4\}，\{n3,n4\}$<br>每个2-路组合有四种神经元激活配置$(0，0)、(0，1)、(1，0)$和$(1，1)$<br>在6个双向组合中，T只覆盖了$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}$和$\{n3，n4\}$的四种神经元激活配置(只有这四个组合出现了四种神经元激活配置)<br>则Li层的2-路组合稀疏覆盖率$= 4 / 6= 66.6\%$</p>
+<p>由于$t$-路组合稀疏覆盖不能考虑每个神经元组合内的覆盖，接下来我们引入t-way组合稠密覆盖。</p>
+<h3 id="t-路组合稠密覆盖"><a href="#t-路组合稠密覆盖" class="headerlink" title="$t$-路组合稠密覆盖"></a>$t$-路组合稠密覆盖</h3><p>$T$的组合稀疏覆盖= 被覆盖了的激活配置数 / 所有组合的所有激活配置数目</p>
+<p>例子：同上图</p>
+<p>由于$L_i$中有六个神经元的双向组合，并且每个组合有四个神经元激活配置,总共有24种激活配置</p>
+<p>测试集T可以覆盖20种配置，未覆盖的神经元激活配置为$\{n1，n3\}=(0，1)，\{n1，n3\}=(1，0)，\{n2，n4\}=(0，1)，\{n2，n4\}=(1，0)$,因此，T的双向组合密集覆盖率为83.3%。</p>
+<h3 id="p-t-完备性"><a href="#p-t-完备性" class="headerlink" title="$(p,t)$完备性"></a>$(p,t)$完备性</h3><p>达到$p$(百分比)覆盖的组合比例</p>
+<p>例子：同上图</p>
+<p>在神经元的双向组合中，$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}，\{n3，n4\}$的覆盖双向构型比为100%，$\{n1，n3\}$和$\{n2，n4\}$的覆盖双向构型比为50%。则$L_i$的(0.5，2)-完备性为100%，$L_i$的(1，2)-完备性为66.6%。即达到100%覆盖的有4个,达到50%以上覆盖的有6个。</p>
+<h2 id="DNN的鲁棒性测试"><a href="#DNN的鲁棒性测试" class="headerlink" title="DNN的鲁棒性测试"></a>DNN的鲁棒性测试</h2><h3 id="d-局部鲁棒性"><a href="#d-局部鲁棒性" class="headerlink" title="$d$-局部鲁棒性"></a>$d$-局部鲁棒性</h3><script type="math/tex; mode=display">\forall x':\parallel x'-x \parallel \leq d \Rightarrow C(x) = C(x')</script><p>约束：$L_{\infty}-norm$</p>
+<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p><img src="/2020/08/20/DeepCT/al.png" alt="al" style="zoom:67%;"></p>
+<ul>
+<li>输入<ul>
+<li>DNN</li>
+<li>$t$:测试粒度，每个组合内神经元个数</li>
+<li>组合测试标准</li>
+<li>初始种子集合</li>
+</ul>
+</li>
+<li>输出<ul>
+<li>正确样本集合</li>
+<li>对抗样本集合</li>
+</ul>
+</li>
+<li>测试用例生成方法<ul>
+<li>没有特殊规定，<font color="red">基于搜索、覆盖率引导的随机测试、符号分析/约束求解都可以</font></li>
+<li>本文实验：DNN使用ReLU激活函数，约束求解方法（Cplex solver）生成测试用例<ul>
+<li><font color="red">即将CT覆盖目标编码为目标的线性约束，使种子输入的$L_{\infty}$-范数扰动距离最小。</font>
+
+
+
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
+<li>数据集和模型<ul>
+<li>MNIST和两个预训练好的DNN模型DNN1和DNN2（结构和精度略）</li>
+</ul>
+</li>
+<li>从原测试集随机选择1000个样本作为初始种子，<font color="red">且这1000个都能被原DNN正确分类</font></li>
+<li>随机测试（Random Testing)<ul>
+<li><font color="red">随机生成10000个测试用例（如何随机生成的？）</font>，然后检测健壮性问题</li>
+<li>实验结果：RT已经能够检测到DNN1上的194个样本和DNN2上的178个样本的健壮性问题，总共266个独特的问题，其中106个是DNN1和DNN2上共同的问题。</li>
+</ul>
+</li>
+<li>DeepCT测试<ul>
+<li>1000个样本中去掉266个随机测试已经发现问题的样本，剩余的734个样本中随机采样50个进一步分析$d$-局部鲁棒性（$d$设为0.15，使用2-路CT标准）</li>
+<li>实验结果：<ul>
+<li>生成图片数量相当的情况下，DeepCT达到的覆盖率远超随机测试</li>
+<li>随着测试层数和生成的测试用例增加，覆盖率也逐渐增加</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/20/DeepCT/fig2.png" alt="fig2" style="zoom:60%;"></p>
+<h2 id="可控制参数-变量总结"><a href="#可控制参数-变量总结" class="headerlink" title="可控制参数/变量总结"></a>可控制参数/变量总结</h2><ul>
+<li>$t$：覆盖粒度</li>
+<li>$d$：鲁棒性约束</li>
+<li>$L_{\infty}$约束的参数</li>
+<li>初始种子集合</li>
+<li>$p$：完备性指标</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] <a href="https://blog.csdn.net/qq_33935895/article/details/105454414">https://blog.csdn.net/qq_33935895/article/details/105454414</a></p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试输入生成</tag>
+        <tag>测试标准</tag>
+        <tag>组合测试</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】On Decomposing a Deep Neural Network into Modules</title>
     <url>/2020/11/16/DNN-Decomposition/</url>
     <content><![CDATA[<p>On Decomposing a Deep Neural Network into Modules （FSE’20）<a id="more"></a></p>
@@ -274,125 +393,6 @@
       </categories>
       <tags>
         <tag>DNN分解</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepCT</title>
-    <url>/2020/08/20/DeepCT/</url>
-    <content><![CDATA[<p>原文：DeepCT: Tomographic Combinatorial Testing for Deep Learning Systems （SANER’19 ERA Track Paper)  <a id="more"></a></p>
-<p>代码：没找到</p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出了DNN系统的组合测试方法，根据目标要覆盖的神经元激活模式组合，从种子输入开始，通过search-based testing, 或guided random testing, 或symbolic constraint solving based testing方法生成满足条件的输入，同时最小化L∞距离。以生成覆盖更多的神经元激活模式组合的输入。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><ul>
-<li>为什么层析（tomographic）？<ul>
-<li>DNN学习到的特征随着层数增加越来越复杂、抽象</li>
-</ul>
-</li>
-<li>为什么组合（combinatorial）？<ul>
-<li>每层神经元只与前后两层发生交互。逻辑单元之间可能存在逻辑(无形)的相互作用，其中当前层的神经元共同决定其下一层神经元的逻辑。我们想用CT捕捉和检查每一层神经元之间的这些无形的相互作用。</li>
-</ul>
-</li>
-</ul>
-<h2 id="组合测试标准"><a href="#组合测试标准" class="headerlink" title="组合测试标准"></a>组合测试标准</h2><h3 id="神经元激活配置（Neuron-activation-configuration"><a href="#神经元激活配置（Neuron-activation-configuration" class="headerlink" title="神经元激活配置（Neuron-activation configuration)"></a>神经元激活配置（Neuron-activation configuration)</h3><p>对第$i$层的一组神经元$M=\{n_1,n_2,…,n_k\}$，激活配置为一个元组$c=(b_1,b_2,…,b_k)$，其中$b_i \in \{0,1\}$。若测试集$T$中存在样本$t$能使得激活模式等于$c$，则称$T$可以覆盖$c$。</p>
-<p>$\Theta(t,L_i)$: 第$i$层神经元所有$t$-路覆盖组合</p>
-<p>$\theta \in \Theta(t,L_i)$：是$t$个神经元的集合，拥有$2^t$种激活配置</p>
-<p>$\Theta_{Full}(t,L_i,T) \subseteq \Theta(t,L_i)$：能被$T$完全覆盖的$t$-路覆盖组合</p>
-<h3 id="t-路组合稀疏覆盖"><a href="#t-路组合稀疏覆盖" class="headerlink" title="$t$-路组合稀疏覆盖"></a>$t$-路组合稀疏覆盖</h3><p>$T$的组合稀疏覆盖=覆盖了所有神经元配置的组合数 / 所有组合数</p>
-<p>例子：</p>
-<p><img src="/2020/08/20/DeepCT/fig1.png" alt="fig1" style="zoom:60%;"></p>
-<p>$L_i$层中共有4个神经元${n1,n2,n3,n4}$，<br>2-路组合共有六种：$\{n1,n2\}，\{n1,n3\}，\{n1,n4\}，\{n2,n3\}，\{n2,n4\}，\{n3,n4\}$<br>每个2-路组合有四种神经元激活配置$(0，0)、(0，1)、(1，0)$和$(1，1)$<br>在6个双向组合中，T只覆盖了$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}$和$\{n3，n4\}$的四种神经元激活配置(只有这四个组合出现了四种神经元激活配置)<br>则Li层的2-路组合稀疏覆盖率$= 4 / 6= 66.6\%$</p>
-<p>由于$t$-路组合稀疏覆盖不能考虑每个神经元组合内的覆盖，接下来我们引入t-way组合稠密覆盖。</p>
-<h3 id="t-路组合稠密覆盖"><a href="#t-路组合稠密覆盖" class="headerlink" title="$t$-路组合稠密覆盖"></a>$t$-路组合稠密覆盖</h3><p>$T$的组合稀疏覆盖= 被覆盖了的激活配置数 / 所有组合的所有激活配置数目</p>
-<p>例子：同上图</p>
-<p>由于$L_i$中有六个神经元的双向组合，并且每个组合有四个神经元激活配置,总共有24种激活配置</p>
-<p>测试集T可以覆盖20种配置，未覆盖的神经元激活配置为$\{n1，n3\}=(0，1)，\{n1，n3\}=(1，0)，\{n2，n4\}=(0，1)，\{n2，n4\}=(1，0)$,因此，T的双向组合密集覆盖率为83.3%。</p>
-<h3 id="p-t-完备性"><a href="#p-t-完备性" class="headerlink" title="$(p,t)$完备性"></a>$(p,t)$完备性</h3><p>达到$p$(百分比)覆盖的组合比例</p>
-<p>例子：同上图</p>
-<p>在神经元的双向组合中，$\{n1，n2\}，\{n1，n4\}，\{n2，n3\}，\{n3，n4\}$的覆盖双向构型比为100%，$\{n1，n3\}$和$\{n2，n4\}$的覆盖双向构型比为50%。则$L_i$的(0.5，2)-完备性为100%，$L_i$的(1，2)-完备性为66.6%。即达到100%覆盖的有4个,达到50%以上覆盖的有6个。</p>
-<h2 id="DNN的鲁棒性测试"><a href="#DNN的鲁棒性测试" class="headerlink" title="DNN的鲁棒性测试"></a>DNN的鲁棒性测试</h2><h3 id="d-局部鲁棒性"><a href="#d-局部鲁棒性" class="headerlink" title="$d$-局部鲁棒性"></a>$d$-局部鲁棒性</h3><script type="math/tex; mode=display">\forall x':\parallel x'-x \parallel \leq d \Rightarrow C(x) = C(x')</script><p>约束：$L_{\infty}-norm$</p>
-<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p><img src="/2020/08/20/DeepCT/al.png" alt="al" style="zoom:67%;"></p>
-<ul>
-<li>输入<ul>
-<li>DNN</li>
-<li>$t$:测试粒度，每个组合内神经元个数</li>
-<li>组合测试标准</li>
-<li>初始种子集合</li>
-</ul>
-</li>
-<li>输出<ul>
-<li>正确样本集合</li>
-<li>对抗样本集合</li>
-</ul>
-</li>
-<li>测试用例生成方法<ul>
-<li>没有特殊规定，<font color="red">基于搜索、覆盖率引导的随机测试、符号分析/约束求解都可以</font></li>
-<li>本文实验：DNN使用ReLU激活函数，约束求解方法（Cplex solver）生成测试用例<ul>
-<li><font color="red">即将CT覆盖目标编码为目标的线性约束，使种子输入的$L_{\infty}$-范数扰动距离最小。</font>
-
-
-
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><ul>
-<li>数据集和模型<ul>
-<li>MNIST和两个预训练好的DNN模型DNN1和DNN2（结构和精度略）</li>
-</ul>
-</li>
-<li>从原测试集随机选择1000个样本作为初始种子，<font color="red">且这1000个都能被原DNN正确分类</font></li>
-<li>随机测试（Random Testing)<ul>
-<li><font color="red">随机生成10000个测试用例（如何随机生成的？）</font>，然后检测健壮性问题</li>
-<li>实验结果：RT已经能够检测到DNN1上的194个样本和DNN2上的178个样本的健壮性问题，总共266个独特的问题，其中106个是DNN1和DNN2上共同的问题。</li>
-</ul>
-</li>
-<li>DeepCT测试<ul>
-<li>1000个样本中去掉266个随机测试已经发现问题的样本，剩余的734个样本中随机采样50个进一步分析$d$-局部鲁棒性（$d$设为0.15，使用2-路CT标准）</li>
-<li>实验结果：<ul>
-<li>生成图片数量相当的情况下，DeepCT达到的覆盖率远超随机测试</li>
-<li>随着测试层数和生成的测试用例增加，覆盖率也逐渐增加</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/20/DeepCT/fig2.png" alt="fig2" style="zoom:60%;"></p>
-<h2 id="可控制参数-变量总结"><a href="#可控制参数-变量总结" class="headerlink" title="可控制参数/变量总结"></a>可控制参数/变量总结</h2><ul>
-<li>$t$：覆盖粒度</li>
-<li>$d$：鲁棒性约束</li>
-<li>$L_{\infty}$约束的参数</li>
-<li>初始种子集合</li>
-<li>$p$：完备性指标</li>
-</ul>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] <a href="https://blog.csdn.net/qq_33935895/article/details/105454414">https://blog.csdn.net/qq_33935895/article/details/105454414</a></p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试输入生成</tag>
-        <tag>测试标准</tag>
-        <tag>组合测试</tag>
       </tags>
   </entry>
   <entry>
@@ -896,6 +896,139 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepGauge</title>
+    <url>/2020/08/26/DeepGauge/</url>
+    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
+<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
+<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
+<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
+<ul>
+<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
+</li>
+<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
+<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
+<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
+<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
+<ul>
+<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
+</li>
+<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
+<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
+</ul>
+</li>
+<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
+<ul>
+<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
+</li>
+<li><p>SNAC只计算上边界覆盖率：</p>
+<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
+</ul>
+</li>
+</ul>
+<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
+<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
+<ul>
+<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
+<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Top-k Neuron Patterns</strong></p>
+<ul>
+<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
+<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
+<li>数据集和模型</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
+<ul>
+<li><p>对抗样本生成算法</p>
+<ul>
+<li>FGSM、BIM、JSMA、CW</li>
+</ul>
+</li>
+<li><p>实验步骤</p>
+<ul>
+<li><p>对于MNIST：</p>
+<ul>
+<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
+</li>
+<li><p>参数设置</p>
+<ul>
+<li>$\sigma$:方差</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
+</li>
+<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
+</li>
+</ul>
+</li>
+<li><p>对于ImageNet：</p>
+<ul>
+<li>随机选择5000张测试图片</li>
+<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
+<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
+<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
+<li>主功能区和边界区均可能出错</li>
+<li>覆盖率提升意味着错误检测能力提升</li>
+<li>测试数据更多覆盖主功能区域</li>
+<li>低边界区比高边界区更难覆盖</li>
+</ul>
+<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
+<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
+<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
+<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
+<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
+<li>KMNC和TKNC的$k$</li>
+<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】DeepHunter</title>
     <url>/2020/08/20/DeepHunter/</url>
     <content><![CDATA[<p>原文：DeepHunter: A Coverage-Guided Fuzz Testing Framework for Deep Neural Networks （ISSTA’19)</p>
@@ -1126,111 +1259,136 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】DeepGauge</title>
-    <url>/2020/08/26/DeepGauge/</url>
-    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
-<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
-<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
-<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
+    <title>【论文笔记】DeepImportance</title>
+    <url>/2020/08/22/DeepImportance/</url>
+    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
 <ul>
-<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
-</li>
-<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
-<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
-<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
-<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
-</li>
+<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
+<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
 </ul>
 </li>
-<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
+<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
+<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
+<p>步骤：</p>
+<p>1、分析重要神经元</p>
+<p>2、重要神经元激活值聚类</p>
+<p>3、评价测试集的重要神经元覆盖率</p>
+<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
+<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
 <ul>
-<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
-</li>
-<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
-<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
+<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
+<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
+<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
+<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
 </ul>
 </li>
-<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
+</ul>
+</li>
+<li><p>重要性计算算法</p>
+<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
 <ul>
-<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
-</li>
-<li><p>SNAC只计算上边界覆盖率：</p>
-<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
+<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
+<li>6-8行：反向传播计算相关性</li>
+<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
+<li>第11行：返回最重要的m个神经元</li>
 </ul>
 </li>
-</ul>
-<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
-<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
+<li><p>相关性分析</p>
 <ul>
-<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
-<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
+<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
+<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
+</ul>
+</li>
+</ul>
+<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
+<li>动机<ul>
+<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
+<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
+</ul>
+</li>
+<li>算法<ul>
+<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
+<li>如何确定$k$值？<ul>
+<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
+</ul>
 </li>
 </ul>
 </li>
-<li><p><strong>Top-k Neuron Patterns</strong></p>
+</ul>
+<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
+<p>重要神经元激活值簇的组合定义为：</p>
+<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
+<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>神经元覆盖率NC：阈值为0.75</li>
+<li>TKNC：$k=3$</li>
+<li>KMNC：$k=1000$</li>
+<li>NBC、SNAC：训练集激活值的最值为上下界</li>
+<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
+<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
+<li>$m \in \{6,8,10,12\}$</li>
+<li>最大运行时间：3h</li>
+<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
+</ul>
+<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
+<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
+<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
+<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
+<li><p>实验方法：</p>
 <ul>
-<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
-<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
-</ul>
+<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
+</li>
+<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
+<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
 </li>
 </ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
-<li>数据集和模型</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
 <ul>
-<li><p>对抗样本生成算法</p>
+<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
+<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
+<li>生成对抗样本<ul>
+<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
 <ul>
-<li>FGSM、BIM、JSMA、CW</li>
+<li>实验结果：<ul>
+<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
+<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
+<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
 </ul>
 </li>
-<li><p>实验步骤</p>
+</ul>
+<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
+<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
+</ul>
+<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
 <ul>
-<li><p>对于MNIST：</p>
-<ul>
-<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
-</li>
-<li><p>参数设置</p>
-<ul>
-<li>$\sigma$:方差</li>
+<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
+<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
+<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
 </ul>
-<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
-</li>
-<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
-</li>
+<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
+<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
+<li>选择重要性神经元的层</li>
 </ul>
-</li>
-<li><p>对于ImageNet：</p>
-<ul>
-<li>随机选择5000张测试图片</li>
-<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
-<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
-<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
-<li>主功能区和边界区均可能出错</li>
-<li>覆盖率提升意味着错误检测能力提升</li>
-<li>测试数据更多覆盖主功能区域</li>
-<li>低边界区比高边界区更难覆盖</li>
-</ul>
-<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
-<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
-<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
-<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
-<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
-<li>KMNC和TKNC的$k$</li>
-<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
-</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》）；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
+<p>疑问：有没有必要覆盖尽可能多的重要神经元激活值的组合？</p>
 <script>
         document.querySelectorAll('.github-emoji')
           .forEach(el => {
@@ -1560,164 +1718,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】DeepImportance</title>
-    <url>/2020/08/22/DeepImportance/</url>
-    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
-<ul>
-<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
-<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
-</ul>
-</li>
-<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
-<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
-</ul>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
-<p>步骤：</p>
-<p>1、分析重要神经元</p>
-<p>2、重要神经元激活值聚类</p>
-<p>3、评价测试集的重要神经元覆盖率</p>
-<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
-<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
-<ul>
-<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
-<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
-<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
-<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>重要性计算算法</p>
-<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
-<ul>
-<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
-<li>6-8行：反向传播计算相关性</li>
-<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
-<li>第11行：返回最重要的m个神经元</li>
-</ul>
-</li>
-<li><p>相关性分析</p>
-<ul>
-<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
-<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
-</ul>
-</li>
-</ul>
-<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
-<li>动机<ul>
-<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
-<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
-</ul>
-</li>
-<li>算法<ul>
-<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
-<li>如何确定$k$值？<ul>
-<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
-<p>重要神经元激活值簇的组合定义为：</p>
-<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
-<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
-<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
-<li>神经元覆盖率NC：阈值为0.75</li>
-<li>TKNC：$k=3$</li>
-<li>KMNC：$k=1000$</li>
-<li>NBC、SNAC：训练集激活值的最值为上下界</li>
-<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
-<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
-<li>$m \in \{6,8,10,12\}$</li>
-<li>最大运行时间：3h</li>
-<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
-</ul>
-<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
-<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
-<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
-<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
-<li><p>实验方法：</p>
-<ul>
-<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
-</li>
-<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
-<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
-<ul>
-<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
-<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
-<li>生成对抗样本<ul>
-<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
-<ul>
-<li>实验结果：<ul>
-<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
-<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
-<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
-<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
-</ul>
-<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
-<ul>
-<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
-<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
-<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
-</ul>
-<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
-<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
-<li>选择重要性神经元的层</li>
-</ul>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》）；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
-<p>疑问：有没有必要覆盖尽可能多的重要神经元激活值的组合？</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】Dynamic Slicing for Deep Neural Networks</title>
     <url>/2020/11/10/Dynamic-Slicing-for-DNN/</url>
     <content><![CDATA[<p>Dynamic Slicing for Deep Neural Networks （FSE’20）<a id="more"></a></p>
@@ -1940,6 +1940,58 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】Compiler Validation via Equivalence Modulo Inputs</title>
+    <url>/2020/10/08/EMI/</url>
+    <content><![CDATA[<p>原文：Compiler Validation via Equivalence Modulo Inputs （PLDI’14) <a id="more"></a></p>
+<h2 id="Equivalence-Modulo-Inputs-EMI"><a href="#Equivalence-Modulo-Inputs-EMI" class="headerlink" title="Equivalence Modulo Inputs (EMI)"></a>Equivalence Modulo Inputs (EMI)</h2><ul>
+<li><p>给定程序$P$和一组输入值$I$，由$I$可生成一组程序集合$\mathcal{P}$，使得$\mathcal{P}$中每个程序$Q$都等价于$P$ modulo $I$：$\forall i \in I, Q(i) = P(i) $。则集合$\mathcal{P}$可用于对任意一个编译器$Comp$进行差分测试（differential testing），若存在某个$i \in I$和$Q \in \mathcal{P}$，使得$Comp(P)(i) \neq Comp(Q)(i)$，则该编译器存在bug。</p>
+</li>
+<li><p>核心思想：尽管$Q$只在输入集合$I$上与程序$P$语义等价，但编译器及其使用的静态分析和优化算法应该能为$Q$生成能在$I$上完全运行正确的中间代码。$P$和$Q$在数据流和控制流上可能很不同，经编译器优化后生成的代码也很不同，但结果应该完全一致。</p>
+<p><img src="/2020/10/08/EMI/1.png" alt="emi" style="zoom:60%;"></p>
+</li>
+<li><p>生成EMI 变体的策略</p>
+<ul>
+<li>在$P$上运行输入集合$I$，获得运行轨迹，随机在未执行代码上做剪枝、插入、修改操作（假设$P$是一个确定的程序）</li>
+</ul>
+</li>
+</ul>
+<p>编译器的两类bug：</p>
+<ul>
+<li>导致编译器崩溃</li>
+<li>生成错误代码（更加严重）<ul>
+<li>导致正确的程序运行有bug</li>
+<li>难以发现</li>
+</ul>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>论文笔记</tag>
+        <tag>编译器测试</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】Effective Path</title>
     <url>/2020/11/12/Effective-Path/</url>
     <content><![CDATA[<p>原文：Adversarial Defense Through Network Profiling Based Path Extraction （CVPR’19)  <a id="more"></a></p>
@@ -2052,58 +2104,6 @@
       </categories>
       <tags>
         <tag>对抗防御</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】Compiler Validation via Equivalence Modulo Inputs</title>
-    <url>/2020/10/08/EMI/</url>
-    <content><![CDATA[<p>原文：Compiler Validation via Equivalence Modulo Inputs （PLDI’14) <a id="more"></a></p>
-<h2 id="Equivalence-Modulo-Inputs-EMI"><a href="#Equivalence-Modulo-Inputs-EMI" class="headerlink" title="Equivalence Modulo Inputs (EMI)"></a>Equivalence Modulo Inputs (EMI)</h2><ul>
-<li><p>给定程序$P$和一组输入值$I$，由$I$可生成一组程序集合$\mathcal{P}$，使得$\mathcal{P}$中每个程序$Q$都等价于$P$ modulo $I$：$\forall i \in I, Q(i) = P(i) $。则集合$\mathcal{P}$可用于对任意一个编译器$Comp$进行差分测试（differential testing），若存在某个$i \in I$和$Q \in \mathcal{P}$，使得$Comp(P)(i) \neq Comp(Q)(i)$，则该编译器存在bug。</p>
-</li>
-<li><p>核心思想：尽管$Q$只在输入集合$I$上与程序$P$语义等价，但编译器及其使用的静态分析和优化算法应该能为$Q$生成能在$I$上完全运行正确的中间代码。$P$和$Q$在数据流和控制流上可能很不同，经编译器优化后生成的代码也很不同，但结果应该完全一致。</p>
-<p><img src="/2020/10/08/EMI/1.png" alt="emi" style="zoom:60%;"></p>
-</li>
-<li><p>生成EMI 变体的策略</p>
-<ul>
-<li>在$P$上运行输入集合$I$，获得运行轨迹，随机在未执行代码上做剪枝、插入、修改操作（假设$P$是一个确定的程序）</li>
-</ul>
-</li>
-</ul>
-<p>编译器的两类bug：</p>
-<ul>
-<li>导致编译器崩溃</li>
-<li>生成错误代码（更加严重）<ul>
-<li>导致正确的程序运行有bug</li>
-<li>难以发现</li>
-</ul>
-</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>论文笔记</tag>
-        <tag>编译器测试</tag>
       </tags>
   </entry>
   <entry>
@@ -2469,6 +2469,82 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】TensorFuzz</title>
+    <url>/2020/08/20/TensorFuzz/</url>
+    <content><![CDATA[<p>原文：TensorFuzz: Debugging Neural Networks with Coverage-Guided Fuzzing （ICML’19) <a id="more"></a></p>
+<p>代码：<a href="https://github.com/brain-research/tensorfuzz">https://github.com/brain-research/tensorfuzz</a></p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="CGF基本流程"><a href="#CGF基本流程" class="headerlink" title="CGF基本流程"></a>CGF基本流程</h3><p><img src="/2020/08/20/TensorFuzz/1.png" alt="1" style="zoom:60%;"></p>
+<h3 id="方法细节"><a href="#方法细节" class="headerlink" title="方法细节"></a>方法细节</h3><ul>
+<li><p>输入选择：选择更新鲜的输入</p>
+</li>
+<li><p>输入变换：①白噪声（参数由用户给出）；②增加$L_{\infty}$约束的白噪声</p>
+</li>
+<li><p>目标函数：用户根据覆盖率和元数据情况自定义</p>
+</li>
+<li><p>覆盖分析器：当我们得到一个新的激活向量时，我们可以查找它的最近邻居，然后检查这个最近的邻居在欧几里得距离中有多远，如果这个距离大于某个量，就向语料中添加输入。</p>
+<ul>
+<li>可只选择部分神经元的值作为激活向量，如只选logits或logits前一层</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"><a href="#实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）" class="headerlink" title="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"></a>实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）</h3><ul>
+<li><p>实验方法：使将检查数值运算添加到元数据并运行模糊测试器（fuzzer）。我们训练了一个完全连接的神经网络来对MNIST数据集里的数字进行分类，故意用了一个很糟糕的交叉熵损失，这样就有可能出现数值误差。模型进行了35000步的训练，mini-batch size为100，验证精度为98%。检查MNIST数据集中不含导致数值误差的样本。</p>
+</li>
+<li><p>实验结果：TensorFuzz 却在10次随机初始化后快速找到了 NaN错误。</p>
+<p><img src="/2020/08/20/TensorFuzz/2.jpg" alt="2" style="zoom:67%;"></p>
+<ul>
+<li>基于梯度的搜索技术可能无助于查找数值误差</li>
+<li>随机搜索对于查找数值误差来说效率极低。</li>
+</ul>
+<h3 id="实验2：CGF-解决模型和量化版本不一致的问题"><a href="#实验2：CGF-解决模型和量化版本不一致的问题" class="headerlink" title="实验2：CGF 解决模型和量化版本不一致的问题"></a>实验2：CGF 解决模型和量化版本不一致的问题</h3><ul>
+<li><p>仅检查已有的数据只能找到很少的错误：作为基线实验，我们训练了一个使用 32 位浮点数的 MNIST 分类器（这一次没有故意引入数值错误）。然后把所有权重和激活值修剪为 16 位。之后，我们对比了 32 位和 16 位模型在 MNIST 测试集上的预测，没有找到任何不一致性。</p>
+</li>
+<li><p>CGF 可以快速在数据周围的小区域中找到很多错误：然后运行 fuzzer，变化限制在种子图像周围的半径为 0.4 的无限范数球中，其中仅使用了 32 位模型作为覆盖的激活值。我们将输入限制在种子图像附近，因为这些输入几乎都有明确的类别语义。模型的两个版本在域外的垃圾数据（没有真实类别）上出现不一致性并没有什么意义。通过这些设置，fuzzer 可以生成 70% 样本的不一致性。因此，CGF 允许我们寻找在测试时出现的真实错误.</p>
+</li>
+</ul>
+<h3 id="实验3：TensorFuzz可以发现流行模型实现中的bug"><a href="#实验3：TensorFuzz可以发现流行模型实现中的bug" class="headerlink" title="实验3：TensorFuzz可以发现流行模型实现中的bug"></a>实验3：TensorFuzz可以发现流行模型实现中的bug</h3><h3 id="实验4：TensorFuzz可以帮助进行保持语义的代码转换"><a href="#实验4：TensorFuzz可以帮助进行保持语义的代码转换" class="headerlink" title="实验4：TensorFuzz可以帮助进行保持语义的代码转换"></a>实验4：TensorFuzz可以帮助进行保持语义的代码转换</h3></li>
+</ul>
+<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
+<li><p>输入选择策略</p>
+</li>
+<li><p>变换参数</p>
+</li>
+<li><p>目标函数</p>
+</li>
+<li><p>激活神经元集合</p>
+</li>
+<li><p>距离阈值L</p>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>模糊测试</tag>
+        <tag>测试输入生成</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】Towards Improved Testing For Deep Learning</title>
     <url>/2020/08/26/Towards-Improved-Testing-For-Deep-Learning/</url>
     <content><![CDATA[<p>原文：Towards Improved Testing For Deep Learning（ICSE-NIER’19）<a id="more"></a></p>
@@ -2547,82 +2623,6 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】TensorFuzz</title>
-    <url>/2020/08/20/TensorFuzz/</url>
-    <content><![CDATA[<p>原文：TensorFuzz: Debugging Neural Networks with Coverage-Guided Fuzzing （ICML’19) <a id="more"></a></p>
-<p>代码：<a href="https://github.com/brain-research/tensorfuzz">https://github.com/brain-research/tensorfuzz</a></p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="CGF基本流程"><a href="#CGF基本流程" class="headerlink" title="CGF基本流程"></a>CGF基本流程</h3><p><img src="/2020/08/20/TensorFuzz/1.png" alt="1" style="zoom:60%;"></p>
-<h3 id="方法细节"><a href="#方法细节" class="headerlink" title="方法细节"></a>方法细节</h3><ul>
-<li><p>输入选择：选择更新鲜的输入</p>
-</li>
-<li><p>输入变换：①白噪声（参数由用户给出）；②增加$L_{\infty}$约束的白噪声</p>
-</li>
-<li><p>目标函数：用户根据覆盖率和元数据情况自定义</p>
-</li>
-<li><p>覆盖分析器：当我们得到一个新的激活向量时，我们可以查找它的最近邻居，然后检查这个最近的邻居在欧几里得距离中有多远，如果这个距离大于某个量，就向语料中添加输入。</p>
-<ul>
-<li>可只选择部分神经元的值作为激活向量，如只选logits或logits前一层</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"><a href="#实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）" class="headerlink" title="实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）"></a>实验1：CGF可以高效地找到已训练神经网络的数值错误（导致NaN的错误）</h3><ul>
-<li><p>实验方法：使将检查数值运算添加到元数据并运行模糊测试器（fuzzer）。我们训练了一个完全连接的神经网络来对MNIST数据集里的数字进行分类，故意用了一个很糟糕的交叉熵损失，这样就有可能出现数值误差。模型进行了35000步的训练，mini-batch size为100，验证精度为98%。检查MNIST数据集中不含导致数值误差的样本。</p>
-</li>
-<li><p>实验结果：TensorFuzz 却在10次随机初始化后快速找到了 NaN错误。</p>
-<p><img src="/2020/08/20/TensorFuzz/2.jpg" alt="2" style="zoom:67%;"></p>
-<ul>
-<li>基于梯度的搜索技术可能无助于查找数值误差</li>
-<li>随机搜索对于查找数值误差来说效率极低。</li>
-</ul>
-<h3 id="实验2：CGF-解决模型和量化版本不一致的问题"><a href="#实验2：CGF-解决模型和量化版本不一致的问题" class="headerlink" title="实验2：CGF 解决模型和量化版本不一致的问题"></a>实验2：CGF 解决模型和量化版本不一致的问题</h3><ul>
-<li><p>仅检查已有的数据只能找到很少的错误：作为基线实验，我们训练了一个使用 32 位浮点数的 MNIST 分类器（这一次没有故意引入数值错误）。然后把所有权重和激活值修剪为 16 位。之后，我们对比了 32 位和 16 位模型在 MNIST 测试集上的预测，没有找到任何不一致性。</p>
-</li>
-<li><p>CGF 可以快速在数据周围的小区域中找到很多错误：然后运行 fuzzer，变化限制在种子图像周围的半径为 0.4 的无限范数球中，其中仅使用了 32 位模型作为覆盖的激活值。我们将输入限制在种子图像附近，因为这些输入几乎都有明确的类别语义。模型的两个版本在域外的垃圾数据（没有真实类别）上出现不一致性并没有什么意义。通过这些设置，fuzzer 可以生成 70% 样本的不一致性。因此，CGF 允许我们寻找在测试时出现的真实错误.</p>
-</li>
-</ul>
-<h3 id="实验3：TensorFuzz可以发现流行模型实现中的bug"><a href="#实验3：TensorFuzz可以发现流行模型实现中的bug" class="headerlink" title="实验3：TensorFuzz可以发现流行模型实现中的bug"></a>实验3：TensorFuzz可以发现流行模型实现中的bug</h3><h3 id="实验4：TensorFuzz可以帮助进行保持语义的代码转换"><a href="#实验4：TensorFuzz可以帮助进行保持语义的代码转换" class="headerlink" title="实验4：TensorFuzz可以帮助进行保持语义的代码转换"></a>实验4：TensorFuzz可以帮助进行保持语义的代码转换</h3></li>
-</ul>
-<h2 id="可控制变量及参数总结"><a href="#可控制变量及参数总结" class="headerlink" title="可控制变量及参数总结"></a>可控制变量及参数总结</h2><ul>
-<li><p>输入选择策略</p>
-</li>
-<li><p>变换参数</p>
-</li>
-<li><p>目标函数</p>
-</li>
-<li><p>激活神经元集合</p>
-</li>
-<li><p>距离阈值L</p>
-</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>模糊测试</tag>
-        <tag>测试输入生成</tag>
       </tags>
   </entry>
   <entry>
@@ -3033,84 +3033,6 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>变异测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《人生的智慧》摘抄（不断更新）</title>
-    <url>/2020/09/03/%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/</url>
-    <content><![CDATA[<p><code>摆在书架上很久的书，心血来潮拿下来觉得该读一读了。这本书与“幸福论”有关，教导人们如何尽量称心、愉快地度过一生这样一门艺术。在此摘抄下一些觉得有道理的句子，以备将来不时之需。</code><a id="more"></a></p>
-<h2 id="第1章-基本的划分"><a href="#第1章-基本的划分" class="headerlink" title="第1章 基本的划分"></a>第1章 基本的划分</h2><p>我认为决定凡人命运的根本差别在于三项内容，它们是：<br> （1）人的自身，即在最广泛意义上属于人的个性的东西。因此，“人的自身”包括健康、力量、外貌、气质、道德品格、精神智力及其潜在发展。<br> （2）人所拥有的身外之物，亦即财产和所有意义上的占有物。<br> （3）人向其他人所展示的样子，众所周知的就是人在其他人眼中所呈现的样子，亦即人们对它的看法。他人的看法又可分为名誉、地位和名声。</p>
-<hr>
-<p>每一个人到底生活在何样的世界，首先取决于这个人对这个世界的理解，这因个人头脑的差异而相应不同：是贫瘠的、浅薄的和肤浅的，抑或是丰富多彩、趣味盎然和充满意义的。例如，不少人羡慕他人在生活中发现和经历饶有趣味的事情，其实他们应该羡慕后者理解事物的禀赋才对，因为正是因为由于理解事物的禀赋，他们经历过的事情，在其描绘中才是那样耐人寻味。这是因为在一个思想丰富的人看来是意味深长的事情，由一个头脑肤浅、平庸的人理解的话，那不过是平凡世界里乏味的一幕而已。</p>
-<hr>
-<p>每个人都囿于自己的意识，正如每个人都囿于自己的皮囊，并且只是直接活在自己的意识之中。</p>
-<hr>
-<p>苏格拉底在看到摆卖的奢侈品时，说道：我不需要的东西，可真不少啊！</p>
-<h2 id="第2章-人的自身"><a href="#第2章-人的自身" class="headerlink" title="第2章 人的自身"></a>第2章 人的自身</h2><h3 id="关于愉快心情"><a href="#关于愉快心情" class="headerlink" title="关于愉快心情"></a>关于愉快心情</h3><p>当愉快心情到来之时，我们应该敞开大门欢迎，因为它的到来永远不会不合时宜。</p>
-<hr>
-<p>高兴的心情直接使我们获益。它才是幸福的现金，而其他别的都只是兑现幸福的支票，因为高兴的心情在当下直接给人以愉快。所以，对于我们的生存，它是一种无与伦比的恩物，因为我们生存的真实性就体现在无法割裂的此时此刻，连接着两段无尽的时间。据此，我们应把获得和促进愉快的心情放在各种追求的首位。</p>
-<hr>
-<p>只需泛泛浏览一下生活，就可知道：人类幸福的两个死敌就是痛苦和无聊。还有我们成功远离了上述其中一个死敌的时候，也就在同等程度上接近了另一个死敌，反之亦然。这样，我们的生活确实就是在这两者之间或强或弱地摇摆。这是因为痛苦和无聊是处于双重的对立关系。一重是外在的，或说客体的；另一重是内在的，或说主体的。也就是说，外在的一重对立关系就是生活的艰辛和匮乏造成了痛苦，而丰裕和安定就产生了无聊。</p>
-<h3 id="关于无聊和空虚"><a href="#关于无聊和空虚" class="headerlink" title="关于无聊和空虚"></a>关于无聊和空虚</h3><p><code>以前就听陈铭老师说过这句话，没想到出处是这里。</code></p>
-<p><img src="/2020/09/03/%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/1.jpg" alt="1" style="zoom:30%;"></p>
-<p>内在空虚就是无聊的真正根源，这种人无时无刻不在向外面寻求刺激，试图借助某事某物使他们的精神和情绪活动起来。…能让我们免于这种痛苦的可靠手段，莫过于拥有丰富的内在，即丰富的精神思想。因为人的精神思想财富越优越和显著，留给无聊的空间就越小。这些人头脑里面的思想活泼，奔涌不息，不断更新；这些人玩味和摸索着内在世界和外部世界的多种现象；还有把这些思想进行各种组合的冲动和能力——所有这些，除了精神松弛下来的个别时候，都使卓越的头脑远离了无聊。但在另一方面，突出的智力以敏锐的感觉为直接前提，以激烈的意欲，亦即强烈的冲动和激情为根基。这些素质结合在一起极大地提高了情感的强烈程度，提高了对精神痛苦，甚至肉体痛苦的敏感性。对任何不如意的事情，甚至细微的骚动，都会感到更加不耐烦。</p>
-<hr>
-<p>一个人的自身拥有越丰富，他对身外之物的需求也就越少，别人对他来说就越不重要。所以，卓越的精神思想会导致一个人不喜与他人交往。…在独处的时候，每个人都返回到自身，这个人的自身拥有就会暴露无遗。</p>
-<hr>
-<p>愚蠢的人饱受无聊之苦。——塞内加</p>
-<hr>
-<p>我们大致上可以发现：一个人对与人交往的热衷程度，与他贫乏的思想和总体的平庸成正比。人们在这个世界上要么选择独处，要么选择庸俗，除此之外，再没有更多别的选择了。</p>
-<h3 id="关于闲暇"><a href="#关于闲暇" class="headerlink" title="关于闲暇"></a>关于闲暇</h3><p>人们辛苦挣来的闲暇，就是人的一生的果实和收获，因为这闲暇让人能够自由地享受自己的意识和个性所带来的乐趣。除此闲暇以外，人的整个一生就只是辛苦和劳作而已。但闲暇给大多数人带来了什么呢？如果不是声色享受和胡闹，就是无聊和浑噩。人们消磨闲暇的方式显示出闲暇对于他们是何等的没有价值。他们的闲暇也就是阿里奥斯托所说的“一无所知者的无聊“。常人考虑的只是如何去打发时间，而略具才华的人却考虑如何利用时间。头脑思想狭隘的人容易受到无聊的侵袭，其原因就是他们的智力纯粹服务于他们的意欲，是发现动因的手段。</p>
-<hr>
-<p>归根到底，每个人都孑然独立，最关键的就是他到底是个什么样的人。</p>
-<hr>
-<p>幸福属于那些自得其乐的人。——亚里士多德</p>
-<p>这是因为幸福和快乐的外在于安全，就其本质而言，都是机器不保险、不确定、为时短暂和受制于偶然的。因此，甚至在形势大好的情况下，这些外在源泉仍会轻易终结。的确，只要这些外在源泉不在我们的控制之下，这种情形就是不可避免的。</p>
-<hr>
-<p>我们这个世界乏善可陈，到处充斥着匮乏和痛苦，对于那些侥幸逃过匮乏和痛苦的人们来说，无聊却正在每个角落等待着它们。</p>
-<hr>
-<p>生活在这样一个世界里，一个拥有丰富内在的人，就像在冬月的晚上，在漫天冰雪当中拥有一间明亮、温暖、愉快的圣诞小屋。因此，能够拥有了优越、丰富的个性，尤其是深邃的精神思想，无疑是在这地球上得到的最大幸运。</p>
-<h3 id="关于精神生活"><a href="#关于精神生活" class="headerlink" title="关于精神生活"></a>关于精神生活</h3><p>一般来说，每个无事可做的人都会根据自己的强项能力而挑选一种能够运用此能力的消遣。</p>
-<hr>
-<p>每个人都会根据自己身上所突出的或这或那的能力而选择相应的异类快乐。第一类是机体新陈代谢能力所带来的快乐。第二类是发挥肌肉力量所带来的快乐。第三类为施展感觉能力方面的快乐。…</p>
-<p>感觉能力比人的另外两种生理能力更为优越，因为人在感觉方面的明显优势就是人优胜于动物之处，而人的另外两种生理基本能力在动物身上也同样存在，甚至超过人类。感觉能力隶属于人的认知能力，因此，卓越的感觉力使我们有能力享受到属于认知的，亦即所谓精神思想上的快乐。</p>
-<hr>
-<p>一个具有思想天赋的人除了个人生活之外，还过着另一种精神的生活，精神的生活逐渐成为了他的唯一目标，而个人生活只是实现自己目标的一种手段而已。但对于芸芸众生来说，只有这一浅薄、空虚和充满烦恼的存在才必须是生活的目标。精神卓越的人首要关注的是精神生活。随着他们对事物的洞察和认识持续地加深和增长，他们的精神生活获得了某种连贯性和持续提升，越来越完整和完美，就像一件逐步变得完美的艺术品。与这种精神生活相比，那种纯粹以追求个人自身安逸为目标的实际生活则显得可悲——这种生活增加的只是长度而不是深度。正如我已经说过的，这种现实生活对于大众就是目的，但对于精神卓越者而言，那只是手段而已。</p>
-<hr>
-<p>孤身独处正是他们求之不得的，闲暇则是至高的礼物，其他的别的一切好处都是可有可无的。</p>
-<hr>
-<p>虽然如此，我们却要考虑到一个具有优异思想禀赋的人由于头脑超常的神经活动，对形形色色的痛苦的感受力大大加强了。另外，他拥有这些思想禀赋的前提条件，亦即那激烈的气质，以及与此密不可分的头脑中那些更加生动、更加完美的表象，都会让透过这些表象而刺激起来的激动情绪更增加了烈度。总的来说，这些激动情绪是痛苦多于愉快。最后就是巨大的精神思想禀赋使拥有这些禀赋的人疏远了其他人及其追求。因为自身的拥有越丰富，他在别人身上所能发现得到的就越少。其他人引以为乐的、花样繁多的事情，在他眼里既乏味又浅薄。</p>
-<h3 id="菲利斯特人"><a href="#菲利斯特人" class="headerlink" title="菲利斯特人"></a>菲利斯特人</h3><p>在这里，我们不会不提及这样一类人：由于仅仅具备了常规的、有限的智力配给，所以，他们并没有精神思想上的需求，他们也就是德语里所说的“菲利斯特人”。…菲利斯特人就是一个没有精神需求的人。</p>
-<hr>
-<p>对这种人来说，真正的快乐只能是感官上的快乐，他们就通过这些补偿自己。</p>
-<hr>
-<p>在与他人的交往中，他们会寻求那些能满足自己生理上的需要，而不是精神上的需求的人。因此，在他们对别人的诸多要求中，最不重要的就是别人必须具备一定的头脑思想。</p>
-<hr>
-<p>菲利斯特人的巨大痛苦就是在于任何观念性的东西都无法带给他们愉快。为了逃避无聊，他们不断需要现实性的东西。但由于现实性的东西一来很快就会被穷尽，一旦这样，它们不但不再提供快乐，反而会使人厌烦；二来还会带来各种祸殃。相比较而言，观念性的东西却是不可穷尽的，它们本身既无邪也乌海。</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>读书笔记</category>
-      </categories>
-      <tags>
-        <tag>叔本华</tag>
       </tags>
   </entry>
   <entry>
@@ -3585,6 +3507,84 @@
       </categories>
       <tags>
         <tag>计算模型</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《人生的智慧》摘抄（不断更新）</title>
+    <url>/2020/09/03/%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/</url>
+    <content><![CDATA[<p><code>摆在书架上很久的书，心血来潮拿下来觉得该读一读了。这本书与“幸福论”有关，教导人们如何尽量称心、愉快地度过一生这样一门艺术。在此摘抄下一些觉得有道理的句子，以备将来不时之需。</code><a id="more"></a></p>
+<h2 id="第1章-基本的划分"><a href="#第1章-基本的划分" class="headerlink" title="第1章 基本的划分"></a>第1章 基本的划分</h2><p>我认为决定凡人命运的根本差别在于三项内容，它们是：<br> （1）人的自身，即在最广泛意义上属于人的个性的东西。因此，“人的自身”包括健康、力量、外貌、气质、道德品格、精神智力及其潜在发展。<br> （2）人所拥有的身外之物，亦即财产和所有意义上的占有物。<br> （3）人向其他人所展示的样子，众所周知的就是人在其他人眼中所呈现的样子，亦即人们对它的看法。他人的看法又可分为名誉、地位和名声。</p>
+<hr>
+<p>每一个人到底生活在何样的世界，首先取决于这个人对这个世界的理解，这因个人头脑的差异而相应不同：是贫瘠的、浅薄的和肤浅的，抑或是丰富多彩、趣味盎然和充满意义的。例如，不少人羡慕他人在生活中发现和经历饶有趣味的事情，其实他们应该羡慕后者理解事物的禀赋才对，因为正是因为由于理解事物的禀赋，他们经历过的事情，在其描绘中才是那样耐人寻味。这是因为在一个思想丰富的人看来是意味深长的事情，由一个头脑肤浅、平庸的人理解的话，那不过是平凡世界里乏味的一幕而已。</p>
+<hr>
+<p>每个人都囿于自己的意识，正如每个人都囿于自己的皮囊，并且只是直接活在自己的意识之中。</p>
+<hr>
+<p>苏格拉底在看到摆卖的奢侈品时，说道：我不需要的东西，可真不少啊！</p>
+<h2 id="第2章-人的自身"><a href="#第2章-人的自身" class="headerlink" title="第2章 人的自身"></a>第2章 人的自身</h2><h3 id="关于愉快心情"><a href="#关于愉快心情" class="headerlink" title="关于愉快心情"></a>关于愉快心情</h3><p>当愉快心情到来之时，我们应该敞开大门欢迎，因为它的到来永远不会不合时宜。</p>
+<hr>
+<p>高兴的心情直接使我们获益。它才是幸福的现金，而其他别的都只是兑现幸福的支票，因为高兴的心情在当下直接给人以愉快。所以，对于我们的生存，它是一种无与伦比的恩物，因为我们生存的真实性就体现在无法割裂的此时此刻，连接着两段无尽的时间。据此，我们应把获得和促进愉快的心情放在各种追求的首位。</p>
+<hr>
+<p>只需泛泛浏览一下生活，就可知道：人类幸福的两个死敌就是痛苦和无聊。还有我们成功远离了上述其中一个死敌的时候，也就在同等程度上接近了另一个死敌，反之亦然。这样，我们的生活确实就是在这两者之间或强或弱地摇摆。这是因为痛苦和无聊是处于双重的对立关系。一重是外在的，或说客体的；另一重是内在的，或说主体的。也就是说，外在的一重对立关系就是生活的艰辛和匮乏造成了痛苦，而丰裕和安定就产生了无聊。</p>
+<h3 id="关于无聊和空虚"><a href="#关于无聊和空虚" class="headerlink" title="关于无聊和空虚"></a>关于无聊和空虚</h3><p><code>以前就听陈铭老师说过这句话，没想到出处是这里。</code></p>
+<p><img src="/2020/09/03/%E4%BA%BA%E7%94%9F%E7%9A%84%E6%99%BA%E6%85%A7/1.jpg" alt="1" style="zoom:30%;"></p>
+<p>内在空虚就是无聊的真正根源，这种人无时无刻不在向外面寻求刺激，试图借助某事某物使他们的精神和情绪活动起来。…能让我们免于这种痛苦的可靠手段，莫过于拥有丰富的内在，即丰富的精神思想。因为人的精神思想财富越优越和显著，留给无聊的空间就越小。这些人头脑里面的思想活泼，奔涌不息，不断更新；这些人玩味和摸索着内在世界和外部世界的多种现象；还有把这些思想进行各种组合的冲动和能力——所有这些，除了精神松弛下来的个别时候，都使卓越的头脑远离了无聊。但在另一方面，突出的智力以敏锐的感觉为直接前提，以激烈的意欲，亦即强烈的冲动和激情为根基。这些素质结合在一起极大地提高了情感的强烈程度，提高了对精神痛苦，甚至肉体痛苦的敏感性。对任何不如意的事情，甚至细微的骚动，都会感到更加不耐烦。</p>
+<hr>
+<p>一个人的自身拥有越丰富，他对身外之物的需求也就越少，别人对他来说就越不重要。所以，卓越的精神思想会导致一个人不喜与他人交往。…在独处的时候，每个人都返回到自身，这个人的自身拥有就会暴露无遗。</p>
+<hr>
+<p>愚蠢的人饱受无聊之苦。——塞内加</p>
+<hr>
+<p>我们大致上可以发现：一个人对与人交往的热衷程度，与他贫乏的思想和总体的平庸成正比。人们在这个世界上要么选择独处，要么选择庸俗，除此之外，再没有更多别的选择了。</p>
+<h3 id="关于闲暇"><a href="#关于闲暇" class="headerlink" title="关于闲暇"></a>关于闲暇</h3><p>人们辛苦挣来的闲暇，就是人的一生的果实和收获，因为这闲暇让人能够自由地享受自己的意识和个性所带来的乐趣。除此闲暇以外，人的整个一生就只是辛苦和劳作而已。但闲暇给大多数人带来了什么呢？如果不是声色享受和胡闹，就是无聊和浑噩。人们消磨闲暇的方式显示出闲暇对于他们是何等的没有价值。他们的闲暇也就是阿里奥斯托所说的“一无所知者的无聊“。常人考虑的只是如何去打发时间，而略具才华的人却考虑如何利用时间。头脑思想狭隘的人容易受到无聊的侵袭，其原因就是他们的智力纯粹服务于他们的意欲，是发现动因的手段。</p>
+<hr>
+<p>归根到底，每个人都孑然独立，最关键的就是他到底是个什么样的人。</p>
+<hr>
+<p>幸福属于那些自得其乐的人。——亚里士多德</p>
+<p>这是因为幸福和快乐的外在于安全，就其本质而言，都是机器不保险、不确定、为时短暂和受制于偶然的。因此，甚至在形势大好的情况下，这些外在源泉仍会轻易终结。的确，只要这些外在源泉不在我们的控制之下，这种情形就是不可避免的。</p>
+<hr>
+<p>我们这个世界乏善可陈，到处充斥着匮乏和痛苦，对于那些侥幸逃过匮乏和痛苦的人们来说，无聊却正在每个角落等待着它们。</p>
+<hr>
+<p>生活在这样一个世界里，一个拥有丰富内在的人，就像在冬月的晚上，在漫天冰雪当中拥有一间明亮、温暖、愉快的圣诞小屋。因此，能够拥有了优越、丰富的个性，尤其是深邃的精神思想，无疑是在这地球上得到的最大幸运。</p>
+<h3 id="关于精神生活"><a href="#关于精神生活" class="headerlink" title="关于精神生活"></a>关于精神生活</h3><p>一般来说，每个无事可做的人都会根据自己的强项能力而挑选一种能够运用此能力的消遣。</p>
+<hr>
+<p>每个人都会根据自己身上所突出的或这或那的能力而选择相应的异类快乐。第一类是机体新陈代谢能力所带来的快乐。第二类是发挥肌肉力量所带来的快乐。第三类为施展感觉能力方面的快乐。…</p>
+<p>感觉能力比人的另外两种生理能力更为优越，因为人在感觉方面的明显优势就是人优胜于动物之处，而人的另外两种生理基本能力在动物身上也同样存在，甚至超过人类。感觉能力隶属于人的认知能力，因此，卓越的感觉力使我们有能力享受到属于认知的，亦即所谓精神思想上的快乐。</p>
+<hr>
+<p>一个具有思想天赋的人除了个人生活之外，还过着另一种精神的生活，精神的生活逐渐成为了他的唯一目标，而个人生活只是实现自己目标的一种手段而已。但对于芸芸众生来说，只有这一浅薄、空虚和充满烦恼的存在才必须是生活的目标。精神卓越的人首要关注的是精神生活。随着他们对事物的洞察和认识持续地加深和增长，他们的精神生活获得了某种连贯性和持续提升，越来越完整和完美，就像一件逐步变得完美的艺术品。与这种精神生活相比，那种纯粹以追求个人自身安逸为目标的实际生活则显得可悲——这种生活增加的只是长度而不是深度。正如我已经说过的，这种现实生活对于大众就是目的，但对于精神卓越者而言，那只是手段而已。</p>
+<hr>
+<p>孤身独处正是他们求之不得的，闲暇则是至高的礼物，其他的别的一切好处都是可有可无的。</p>
+<hr>
+<p>虽然如此，我们却要考虑到一个具有优异思想禀赋的人由于头脑超常的神经活动，对形形色色的痛苦的感受力大大加强了。另外，他拥有这些思想禀赋的前提条件，亦即那激烈的气质，以及与此密不可分的头脑中那些更加生动、更加完美的表象，都会让透过这些表象而刺激起来的激动情绪更增加了烈度。总的来说，这些激动情绪是痛苦多于愉快。最后就是巨大的精神思想禀赋使拥有这些禀赋的人疏远了其他人及其追求。因为自身的拥有越丰富，他在别人身上所能发现得到的就越少。其他人引以为乐的、花样繁多的事情，在他眼里既乏味又浅薄。</p>
+<h3 id="菲利斯特人"><a href="#菲利斯特人" class="headerlink" title="菲利斯特人"></a>菲利斯特人</h3><p>在这里，我们不会不提及这样一类人：由于仅仅具备了常规的、有限的智力配给，所以，他们并没有精神思想上的需求，他们也就是德语里所说的“菲利斯特人”。…菲利斯特人就是一个没有精神需求的人。</p>
+<hr>
+<p>对这种人来说，真正的快乐只能是感官上的快乐，他们就通过这些补偿自己。</p>
+<hr>
+<p>在与他人的交往中，他们会寻求那些能满足自己生理上的需要，而不是精神上的需求的人。因此，在他们对别人的诸多要求中，最不重要的就是别人必须具备一定的头脑思想。</p>
+<hr>
+<p>菲利斯特人的巨大痛苦就是在于任何观念性的东西都无法带给他们愉快。为了逃避无聊，他们不断需要现实性的东西。但由于现实性的东西一来很快就会被穷尽，一旦这样，它们不但不再提供快乐，反而会使人厌烦；二来还会带来各种祸殃。相比较而言，观念性的东西却是不可穷尽的，它们本身既无邪也乌海。</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>叔本华</tag>
       </tags>
   </entry>
 </search>
