@@ -527,139 +527,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【论文笔记】DeepGauge</title>
-    <url>/2020/08/26/DeepGauge/</url>
-    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
-<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
-<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
-<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
-<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
-<ul>
-<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
-</li>
-<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
-<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
-<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
-<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
-<ul>
-<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
-</li>
-<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
-<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
-</ul>
-</li>
-<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
-<ul>
-<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
-</li>
-<li><p>SNAC只计算上边界覆盖率：</p>
-<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
-</ul>
-</li>
-</ul>
-<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
-<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
-<ul>
-<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
-<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
-</li>
-</ul>
-</li>
-<li><p><strong>Top-k Neuron Patterns</strong></p>
-<ul>
-<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
-<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
-</ul>
-</li>
-</ul>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
-<li>数据集和模型</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
-<ul>
-<li><p>对抗样本生成算法</p>
-<ul>
-<li>FGSM、BIM、JSMA、CW</li>
-</ul>
-</li>
-<li><p>实验步骤</p>
-<ul>
-<li><p>对于MNIST：</p>
-<ul>
-<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
-</li>
-<li><p>参数设置</p>
-<ul>
-<li>$\sigma$:方差</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
-</li>
-<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
-</li>
-</ul>
-</li>
-<li><p>对于ImageNet：</p>
-<ul>
-<li>随机选择5000张测试图片</li>
-<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
-<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
-<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
-<li>主功能区和边界区均可能出错</li>
-<li>覆盖率提升意味着错误检测能力提升</li>
-<li>测试数据更多覆盖主功能区域</li>
-<li>低边界区比高边界区更难覆盖</li>
-</ul>
-<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
-<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
-<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
-<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
-</ul>
-<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
-<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
-<li>KMNC和TKNC的$k$</li>
-<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
-</ul>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【论文笔记】DeepConcolic</title>
     <url>/2020/08/19/DeepConcolic/</url>
     <content><![CDATA[<p>原文：Concolic Testing for Deep Neural Networks （ASE’18) <a id="more"></a></p>
@@ -1029,6 +896,297 @@
       </tags>
   </entry>
   <entry>
+    <title>【论文笔记】DeepGauge</title>
+    <url>/2020/08/26/DeepGauge/</url>
+    <content><![CDATA[<p>原文：DeepGauge: Multi-Granularity Testing Criteria for Deep Learning Systems （ASE’18）<a id="more"></a></p>
+<p>介绍网址：<a href="https://deepgauge.github.io/">https://deepgauge.github.io/</a></p>
+<h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>提出基于深度神经网络的主功能区、边界区、层级三类覆盖率标准。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>$\phi (x,n)$：输入$x$在神经元$n$上的输出值</p>
+<h3 id="神经元级别的覆盖率"><a href="#神经元级别的覆盖率" class="headerlink" title="神经元级别的覆盖率"></a>神经元级别的覆盖率</h3><ul>
+<li><p><strong>K-multisection Neuron Coverage (KMNC)</strong></p>
+<ul>
+<li><p>主功能区：设一个神经元$n$在训练集的下界为$low_n$，上界为$high_n$，主功能区为$[low_n,high_n]$</p>
+</li>
+<li><p>将主功能区$[low_n,high_n]$均分为$k$等份，每份为$S_i^n$，则该神经元在测试集$T$上的覆盖率：</p>
+<script type="math/tex; mode=display">\frac{ \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} )}{k}</script></li>
+<li><p>对所有神经元，KMNC定义为：（即所有神经元取平均）</p>
+<p>$ KMNCov(T,k)= \frac{ \sum _{n \in N}| \left\{ S_{i}^{n}| \exists x \in T: \phi (x,n) \in S_{i}^{n} \right\} |}{k \times |N|}$ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Neuron Boundary Coverage（NBC）</strong></p>
+<ul>
+<li><p>边界区：$ (- \infty , low_n) \cup (high_n,+ \infty ) $ </p>
+</li>
+<li><p>NBC定义为所有神经元边缘被覆盖的比例：</p>
+<script type="math/tex; mode=display">NBCov(T)= \frac{|UpperCornerNeuron|+|LowerCornerNeuron| }{2 \times |N|}</script></li>
+</ul>
+</li>
+<li><p><strong>Strong Neuron Activation Coverage (SNAC)</strong></p>
+<ul>
+<li><p>这些极度活跃的神经元可能在神经网络中传递有用的学习模式</p>
+</li>
+<li><p>SNAC只计算上边界覆盖率：</p>
+<script type="math/tex; mode=display">SNACov(T)= \frac{|UpperCornerNeuron|}{|N|}</script></li>
+</ul>
+</li>
+</ul>
+<h3 id="层级别的覆盖率"><a href="#层级别的覆盖率" class="headerlink" title="层级别的覆盖率"></a>层级别的覆盖率</h3><ul>
+<li><p><strong>Top-k Neuron Coverage (TKNC)</strong></p>
+<ul>
+<li><p>表示所有神经元中有多少曾经做过top-k（存在某个$x$使得其激活值在该层属于top-k）</p>
+<p>$ TKNCov(T,k)= \frac{|U_{x \in T}(U_{1 \leqslant i \leqslant 1}top_{k}(x,i))|}{|N|} $ </p>
+</li>
+</ul>
+</li>
+<li><p><strong>Top-k Neuron Patterns</strong></p>
+<ul>
+<li><p>给定一个测试输入$x$，每一层的top-k神经元序列也形成一个模式:</p>
+<script type="math/tex; mode=display">TKNPat(T,k)=| \left\{ (top_{k}(x,1), \ldots ,top_{k}(x,l))|x \in T \right\} |</script></li>
+</ul>
+</li>
+</ul>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h3><ul>
+<li>数据集和模型</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/1.png" alt="1" style="zoom:80%;"></p>
+<ul>
+<li><p>对抗样本生成算法</p>
+<ul>
+<li>FGSM、BIM、JSMA、CW</li>
+</ul>
+</li>
+<li><p>实验步骤</p>
+<ul>
+<li><p>对于MNIST：</p>
+<ul>
+<li><p>对于每个模型，生成10000张对抗样本和原10000张测试集图片混合在一起</p>
+</li>
+<li><p>参数设置</p>
+<ul>
+<li>$\sigma$:方差</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/2.png" alt="2" style="zoom:80%;"></p>
+</li>
+<li><p>总共：3 (models)×5 (datasets)×14 (criterion settings) = 210 evaluation configurations</p>
+</li>
+</ul>
+</li>
+<li><p>对于ImageNet：</p>
+<ul>
+<li>随机选择5000张测试图片</li>
+<li>总共：2 (models)×4 (datasets)×14 (criterion settings) = 112 experimental configurations<ul>
+<li>（JSMA因为开销问题无法运行，dataset少一个）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><ul>
+<li>覆盖率的增加表明对抗样本测试数据总体上探索了新的DNNs的内部状态，其中一些未被原始测试覆盖。</li>
+<li>主功能区和边界区均可能出错</li>
+<li>覆盖率提升意味着错误检测能力提升</li>
+<li>测试数据更多覆盖主功能区域</li>
+<li>低边界区比高边界区更难覆盖</li>
+</ul>
+<h3 id="与神经元覆盖率（NC）比较"><a href="#与神经元覆盖率（NC）比较" class="headerlink" title="与神经元覆盖率（NC）比较"></a>与神经元覆盖率（NC）比较</h3><ul>
+<li>NC难以捕捉对抗样本和原测试集样本的区别</li>
+<li>NC使用<strong>相同的阈值</strong>作为所有神经元的激活评价。但是，我们发现不同神经元的输出统计分布差异很大。给定一个用于分析的测试套件，一些神经元的输出可能表现出相当小的方差，但平均值很大，而另一些神经元可能表现出很大的方差，但平均值很低。<br>因此，对所有神经元使用相同的阈值而不考虑神经元功能分布的差异会大大降低精度。例如，给定一个具有非常小的平均值和标准偏差的神经元，即使用户指定的阈值稍微大一点，通常也会确定该神经元不能被覆盖。</li>
+<li>NC对神经元取值进行了<strong>标准化（归约到[0,1])</strong>，所以相同的激活值在不同数据集代表了不同的意义（因为每个数据集的max和min不同）。</li>
+</ul>
+<p><img src="/2020/08/26/DeepGauge/3.png" alt="3" style="zoom:80%;"></p>
+<h2 id="可控制变量及参数"><a href="#可控制变量及参数" class="headerlink" title="可控制变量及参数"></a>可控制变量及参数</h2><ul>
+<li>KMNC和TKNC的$k$</li>
+<li>NBC和SNAC可选增加参数$\sigma$(在分析过程中神经元输出的标准方差)</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【论文笔记】DeepImportance</title>
+    <url>/2020/08/22/DeepImportance/</url>
+    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
+<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
+<ul>
+<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
+<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
+</ul>
+</li>
+<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
+<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
+<p>步骤：</p>
+<p>1、分析重要神经元</p>
+<p>2、重要神经元激活值聚类</p>
+<p>3、评价测试集的重要神经元覆盖率</p>
+<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
+<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
+<ul>
+<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
+<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
+<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
+<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>重要性计算算法</p>
+<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
+<ul>
+<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
+<li>6-8行：反向传播计算相关性</li>
+<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
+<li>第11行：返回最重要的m个神经元</li>
+</ul>
+</li>
+<li><p>相关性分析</p>
+<ul>
+<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
+<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
+</ul>
+</li>
+</ul>
+<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
+<li>动机<ul>
+<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
+<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
+</ul>
+</li>
+<li>算法<ul>
+<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
+<li>如何确定$k$值？<ul>
+<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
+<p>重要神经元激活值簇的组合定义为：</p>
+<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
+<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li>神经元覆盖率NC：阈值为0.75</li>
+<li>TKNC：$k=3$</li>
+<li>KMNC：$k=1000$</li>
+<li>NBC、SNAC：训练集激活值的最值为上下界</li>
+<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
+<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
+<li>$m \in \{6,8,10,12\}$</li>
+<li>最大运行时间：3h</li>
+<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
+</ul>
+<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
+<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
+<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
+<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
+<li><p>实验方法：</p>
+<ul>
+<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
+</li>
+<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
+<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>实验结果</p>
+<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
+<ul>
+<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
+<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
+<li>生成对抗样本<ul>
+<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
+<ul>
+<li>实验结果：<ul>
+<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
+<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
+<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
+</ul>
+</li>
+</ul>
+<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
+<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
+</ul>
+<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
+<ul>
+<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
+<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
+<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
+</ul>
+<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
+<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
+<li>选择重要性神经元的层</li>
+</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》）；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
+<p>疑问：有没有必要覆盖尽可能多的重要神经元激活值的组合？</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>论文笔记</category>
+      </categories>
+      <tags>
+        <tag>DNN测试</tag>
+        <tag>测试标准</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【论文笔记】DeepHunter</title>
     <url>/2020/08/20/DeepHunter/</url>
     <content><![CDATA[<p>原文：DeepHunter: A Coverage-Guided Fuzz Testing Framework for Deep Neural Networks （ISSTA’19)</p>
@@ -1256,164 +1414,6 @@
         <tag>DNN测试</tag>
         <tag>模糊测试</tag>
         <tag>测试输入生成</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【论文笔记】DeepImportance</title>
-    <url>/2020/08/22/DeepImportance/</url>
-    <content><![CDATA[<p>原文：Importance-Driven Deep Learning System Testing （ICSE’20)  <a id="more"></a></p>
-<p>代码地址：<a href="https://github.com/DeepImportance/deepimportance_code_release">https://github.com/DeepImportance/deepimportance_code_release</a></p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>提出了一种重要性驱动的覆盖标准，首先从训练集和预训练后的DNN模型中分析出重要神经元，然后将重要神经元的激活值聚类，计算测试集对重要神经元激活值簇的组合的覆盖比例，用于评价测试集的<font color="red">语义多样性</font>。</p>
-<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>作者认为前人提出的覆盖标准（如DeepXplore和DeepGauge）：</p>
-<ul>
-<li>这些标准只是神经元(或神经元区域)的集合，它们的激活值符合一定的条件。通过只关注这些受约束的神经元属性而忽略整体DL系统行为，<font color="red">测试集和决策之间的因果关系是无信息性的。</font><ul>
-<li>一个神经元可能有助于增强对其他类的信心，而不是正确的类，这是无法区分的。</li>
-</ul>
-</li>
-<li>这些标准的实例化依赖于<font color="red">用户自定义的条件</font>(所选择神经元的区域、取值上限)，这些条件可能不能充分地表示DL系统的实际行为。</li>
-<li>这些标准不能有效提供<font color="red">单个测试输入的贡献</font>。</li>
-</ul>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2020/08/22/DeepImportance/Fig1.png" alt="Fig1"></p>
-<p>步骤：</p>
-<p>1、分析重要神经元</p>
-<p>2、重要神经元激活值聚类</p>
-<p>3、评价测试集的重要神经元覆盖率</p>
-<h3 id="重要神经元分析"><a href="#重要神经元分析" class="headerlink" title="重要神经元分析"></a>重要神经元分析</h3><ul>
-<li><p>逐层相关性传播算法（layer-wise relevance propagation）：</p>
-<ul>
-<li><p>全连接层中：每个神经元的相关性由下一层所有神经元的相关性计算得出：<font color="red">（分母为什么是$\sum i$ ??)</font></p>
-<script type="math/tex; mode=display">R_{ij}= \sum _{k} \frac{ \phi (x,n_{ij})w_{ijk}}{ \sum _{i} \phi (x,n_{ij})w_{ijk}+ \epsilon }R_{i+1,k}</script><ul>
-<li>相关性与激活值成正比：激活值越高的神经元相关性贡献越大</li>
-<li>相关性与连接权重$w_{ijk}$成正比：通过更重要的连接，会产生更多的相关性</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>重要性计算算法</p>
-<p><img src="/2020/08/22/DeepImportance/Fig2.png" alt="Fig2" style="zoom:70%;"></p>
-<ul>
-<li>第5行：通过前向传播获得最后一层输出值（softmax之前的值）</li>
-<li>6-8行：反向传播计算相关性</li>
-<li>第10行：分析函数分析所有输入的所有神经元的相关性得分，并根据优先级标准(例如，累积相关性，标准化相关性)对它们进行优先级排序（实验中我们使用累积相关性）</li>
-<li>第11行：返回最重要的m个神经元</li>
-</ul>
-</li>
-<li><p>相关性分析</p>
-<ul>
-<li>使用相关性来识别最重要的神经元是我们的方法的一个关键成分。基于最近<font color="red">DL系统可解释性的研究</font>，其目标是识别负责预测的输入部分，深度重要性的目标是识别最具影响力的神经元;这些是高风险的神经元，应该进行彻底的测试。尽管超出了这项工作的范围，我们也强调<strong>其他可解释性驱动技术</strong>可以用于鉴定最重要的神经元</li>
-<li>与敏感性分析有很大区别：敏感性分析关注的是什么使<strong>已标记</strong>的样本(例如，一只狗)更多或更少地被归类为<strong>目标标签</strong>，而相关性分析研究的是什么使样本被归类为该标签。敏感度分数并不能真正解释为什么样本以某种方式被预测，而是解释输出在<font color="red">输入空间</font>的哪个方向最敏感<font color="red">（输入空间而不是神经元）</font>。相反，相关性得分表明哪些神经元/输入对分类是关键的。</li>
-</ul>
-</li>
-</ul>
-<h3 id="重要神经元聚类"><a href="#重要神经元聚类" class="headerlink" title="重要神经元聚类"></a>重要神经元聚类</h3><ul>
-<li>动机<ul>
-<li>由于每个神经元负责感知输入区域内的特定特征，我们认为，对于具有类似特征的输入，那些重要神经元的激活值集中在它们的<font color="red">值域中的特定区域</font>。非正式地说，这些区域形成一种模式，捕获DL系统中最具影响力的神经元的活动。</li>
-<li>与DeepGauge中的KMNC相比较，我们的方法生成的簇对应每个神经元不同的<strong>语义特征</strong>。</li>
-</ul>
-</li>
-<li>算法<ul>
-<li>$k$-means聚类：我们将每个重要神经元的激活值划分为组(簇)，使同一组内的激活值与同一组内的其他激活值更相似，而与其他组内的激活值不相似。</li>
-<li>如何确定$k$值？<ul>
-<li>我们使用Silhouette index自动识别一种神经元特异性的最优策略，用于聚类每个重要神经元的激活值。（略）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="基于重要性的覆盖率（IDC）"><a href="#基于重要性的覆盖率（IDC）" class="headerlink" title="基于重要性的覆盖率（IDC）"></a>基于重要性的覆盖率（IDC）</h3><p>评价测试集对于重要神经元的激活值簇的组合的覆盖情况。</p>
-<p>重要神经元激活值簇的组合定义为：</p>
-<script type="math/tex; mode=display">INCC= \prod _{n \in D_{m}} \left\{ CENTROID( \Phi _{n}^{i})|\forall 1 \leqslant i \leqslant | \Phi _{n}| \right\}</script><p>IDC定义为：(即有多少组组合被覆盖)</p>
-<p>$IDC(Y)= \frac{| \left\{ INCC(j)|\exists y \in Y:\forall V_{n}^{i} \in INCC(j) \bullet \min d( \phi (y,n),V_{n}^{i} \right\} |}{|INCC|}$</p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="数据集和模型"><a href="#数据集和模型" class="headerlink" title="数据集和模型"></a>数据集和模型</h3><p><img src="/2020/08/22/DeepImportance/Fig3.png" alt="Fig3" style="zoom:60%;"></p>
-<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
-<li>神经元覆盖率NC：阈值为0.75</li>
-<li>TKNC：$k=3$</li>
-<li>KMNC：$k=1000$</li>
-<li>NBC、SNAC：训练集激活值的最值为上下界</li>
-<li>DSC、LSC：上界为2、2000，bucket数为1000</li>
-<li>选择重要性神经元的层：<strong>倒数第二层</strong></li>
-<li>$m \in \{6,8,10,12\}$</li>
-<li>最大运行时间：3h</li>
-<li>对抗样本生成方法：FGSM、BIM、JSMA、C&amp;W</li>
-</ul>
-<h3 id="RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗"><a href="#RQ1-重要性-神经元重要性分析能识别出最重要的神经元吗" class="headerlink" title="RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?"></a>RQ1(重要性):神经元重要性分析能识别出最重要的神经元吗?</h3><ul>
-<li>实验方法：使用[11]中可解释性工作的方法识别出前10%的重要像素，扰动这些像素的值（超过0.5则设为0，不足0.5设为1），测量随机选取的神经元和DeepImportance选取的重要神经元的值的改动情况，如下表所示。</li>
-<li>实验结果：DeepImportance选取出的重要神经元变动幅度更大，说明这些神经元对给定输入的相关像素的变化更敏感。</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig4.png" alt="Fig4" style="zoom:30%;"></p>
-<h3 id="RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗"><a href="#RQ2-多样性-DeepImportance能有助于选择多样化的测试集吗" class="headerlink" title="RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?"></a>RQ2(多样性):DeepImportance能有助于选择多样化的测试集吗?</h3><ul>
-<li><p>实验方法：</p>
-<ul>
-<li><p>$U_{DI}$: 在所有图片前2%重要像素（识别方法同上）上增加高斯白噪声扰动（MNIST 15个像素，CIFAR-10 20个像素，driving 200个像素）</p>
-</li>
-<li><p>$U_S$:和$U_{DI}$一样，但像素位置是随机选的</p>
-<p><img src="/2020/08/22/DeepImportance/Fig5.png" alt="Fig5" style="zoom:60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实验结果</p>
-<p><img src="/2020/08/22/DeepImportance/Fig6.png" alt="Fig6"></p>
-<ul>
-<li>对于IDC标准：$U_{O+DI}$在所有实验配置上覆盖率最高。表明IDC对决策任务中重要的输入特性更为敏感，而不是随机选择的特性。</li>
-<li>随着$m$增加，IDC覆盖率逐渐降低，</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果"><a href="#RQ3-有效性-DeepImportance在识别DL系统中的错误行为时的效果" class="headerlink" title="RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?"></a>RQ3(有效性):DeepImportance在识别DL系统中的错误行为时的效果?</h3><ul>
-<li>生成对抗样本<ul>
-<li>FGSM、BIM、JSMA、C&amp;W和RQ1中的白噪音数据集（$U_S$:方差为0.3,准确率97.4%）</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/08/22/DeepImportance/Fig7.png" alt="Fig7" style="zoom:40%;"></p>
-<ul>
-<li>实验结果：<ul>
-<li>与原始测试集$U_O$相比，所有DL系统的增强测试集的IDC覆盖率结果都有相当大的增长。</li>
-<li>与高斯类噪声输入$U_{O+S}$相比，在含有对抗样本的测试集中，这种增长更为显著。</li>
-<li>IDC对敌对的输入很敏感，并且在输入与之前遇到的输入在语义上不同的测试集中能够有效地检测出错误行为。</li>
-</ul>
-</li>
-</ul>
-<h3 id="RQ4-相关性-DeepImportance与现有覆盖率标准的相关性"><a href="#RQ4-相关性-DeepImportance与现有覆盖率标准的相关性" class="headerlink" title="RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?"></a>RQ4(相关性):DeepImportance与现有覆盖率标准的相关性?</h3><ul>
-<li>如上图。IDC显示了与DL系统其他覆盖标准相似的行为;因此，二者之间存在正相关关系。</li>
-</ul>
-<h3 id="RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为"><a href="#RQ5-层灵敏度-特定神经元层的选择如何影响DeepImportance的行为" class="headerlink" title="RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?"></a>RQ5(层灵敏度):特定神经元层的选择如何影响DeepImportance的行为?</h3><p><img src="/2020/08/22/DeepImportance/Fig8.png" alt="Fig8" style="zoom:60%;"></p>
-<ul>
-<li>我们观察到，当分析在较深的层而不是浅层执行时，IDC值会增加</li>
-<li>IDC对具有不同语义输入的测试集更敏感($U_{O+DI}$)</li>
-<li>目标层的选择会影响IDC的结果。由于倒数第二层负责理解语义上重要的高级特性，我们认为它是使用IDC评估测试集充分性的合适选择。</li>
-</ul>
-<h2 id="可控制参数-变量"><a href="#可控制参数-变量" class="headerlink" title="可控制参数/变量"></a>可控制参数/变量</h2><ul>
-<li>$m$：选择的重要神经元个数，决定了测试的粒度，$m$越大组合数爆炸式增长</li>
-<li>选择重要性神经元的层</li>
-</ul>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>这篇文章所采用的重要性神经元识别方法非原创（来自《On Pixel-Wise Explanations for Non-Linear Classifier Decisions by Layer-Wise Relevance Propagation》）；覆盖率计算方法也很简单（组合测试）。亮点在于将DNN测试覆盖标准与语义可解释性相结合，这可能是未来的一个趋势。</p>
-<p>疑问：有没有必要覆盖尽可能多的重要神经元激活值的组合？</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>论文笔记</category>
-      </categories>
-      <tags>
-        <tag>DNN测试</tag>
-        <tag>测试标准</tag>
       </tags>
   </entry>
   <entry>
@@ -2107,52 +2107,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Google Girl Hackathon Season VI赛后感</title>
-    <url>/2020/08/21/Google-Girl-Hackathon/</url>
-    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
-<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
-<hr>
-<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
-<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
-<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
-<p>这是我们的演示视频（更新后的版本）：</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
-
-<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
-<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
-<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
-<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
-<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
-<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
-<script>
-        document.querySelectorAll('.github-emoji')
-          .forEach(el => {
-            if (!el.dataset.src) { return; }
-            const img = document.createElement('img');
-            img.style = 'display:none !important;';
-            img.src = el.dataset.src;
-            img.addEventListener('error', () => {
-              img.remove();
-              el.style.color = 'inherit';
-              el.style.backgroundImage = 'none';
-              el.style.background = 'none';
-            });
-            img.addEventListener('load', () => {
-              img.remove();
-            });
-            document.body.appendChild(img);
-          });
-      </script>]]></content>
-      <categories>
-        <category>杂记随感</category>
-      </categories>
-      <tags>
-        <tag>比赛</tag>
-        <tag>移动开发</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>用python从零实现一个神经网络</title>
     <url>/2020/11/30/My-Neural-Network/</url>
     <content><![CDATA[<p>不用tensorflow、pytorch等任何现有深度学习框架以及各种封装好的机器学习库，仅使用python语言及矩阵运算的库，从零开始实现一个全联接的神经网络。<a id="more"></a></p>
@@ -2466,6 +2420,52 @@
         <tag>DNN测试</tag>
         <tag>测试标准</tag>
         <tag>输入验证</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Google Girl Hackathon Season VI赛后感</title>
+    <url>/2020/08/21/Google-Girl-Hackathon/</url>
+    <content><![CDATA[<p>【8月27日更新】终于收齐所有奖品啦~~<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span><span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png?v8">😁</span>  </p>
+<p>一整套​Google周边<span class="github-emoji" style="color: transparent;background:no-repeat url(https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8) center/contain" data-src="https://github.githubassets.com/images/icons/emoji/unicode/1f447.png?v8">👇</span><a id="more"></a></p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/Fig1.jpg" alt="Fig1" style="zoom:15%;"></p>
+<hr>
+<p>今年的Google女生黑客马拉松比赛历时四个月终于在上个周末结束啦。我们队伍获得项目第一名（1/198）和最受欢迎奖（所有决赛参赛者投票投出来的），这个结果其实在意料之外也在意料之中，不过归根结底还是很不容易（要知道去年我可是连简历关都没过= = |||），今天来总结一下赛后感。</p>
+<p>今年由于疫情，比赛改成了线上举办，赛题为设计并开发出一款对疫情有帮助的产品，形式不限，必须用到至少一个Google的工具。初赛交设计方案，复赛交代码、文档和视频Demo，决赛线上展示和答辩。（比赛主页：<a href="https://events.withgoogle.com/google-girl-hackathon-cn/#content">https://events.withgoogle.com/google-girl-hackathon-cn/#content</a> ）</p>
+<p>我们提交的产品是一款疫情国际新闻浏览APP，但与一般新闻APP不同的是，我们的APP将不同媒体报道的同一新闻（或相关新闻）聚集成一个个新闻组，对新闻组里每条新闻组进行情绪分析后，将包含情绪分差较大的新闻组排到前面展示给用户。核心思想是情绪差异较大的文章往往意味着观点上的差异也较大，从中我们可以发现媒体偏见，尽管每篇文章本身并非完全客观的，但通过对比不同观点的文章，希望用户从中培养理性和独立思考的习惯，摒弃偏见和成见，增进互相理解、齐心抗疫。</p>
+<p>这是我们的演示视频（更新后的版本）：</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/8401Arz0FHs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>APP前端用的是Google的Flutter，这个是第一次写，以前只写过IOS和一点点安卓，不过上手还是蛮快的，现成的模板有很多。下面是APP后端运行的一个原理流程图↓，后端由Python编写，新闻爬虫部分使用的是GitHub上的一个开源工具NewsPaper3k，能够自动从指定的新闻网站链接爬取新闻（标题、内容、图片等，共50多个英文网站），先保存在本地的MySQL数据库里。接下来我们将每篇文章用TF-IDF算法进行编码，然后使用基于密聚类度的DBSCAN算法将相关新闻聚类，选择合适参数下聚类效果还是不错的，其余没被聚成类的文章则被丢弃。然后用Vader工具对新闻组里的文章进行情绪分析，Vader使用的是基于词典的无监督情绪分析算法，根据标题和正文的综合得分给出每篇文章的情绪分数，Vader是跟其他两个工具（包括TextBlob和另外一个忘了）进行人工比较效果后选择的，效果还是可以的，比如我们观察到跟朝鲜相关的新闻，几乎都是一水儿的超级负面情绪，（评委曾问我如何评价效果，这个因为没有标注我说只能人工检查，或者说我们的效果依赖于使用工具的效果，暂时没想到更好的检查方法）。最后我们将包含情绪分差较大的新闻组排在前面，并上传到LeanCloud后端云数据库中（其实本来想用的是Google的Firebase，但网实在不太好，而且Firebase竟然没有关于在Flutter上如何使用的文档，震惊）。前端的设备直接和LeanCloud交互获得数据，以及完成一些辅助功能如评论、收藏、搜索等。</p>
+<p><img src="/2020/08/21/Google-Girl-Hackathon/overview.png" alt="overview" style="zoom:30%;"></p>
+<p>总结一下我觉得此次能得奖的关键之处吧（开始不要脸的自夸）：</p>
+<p>首先我们的立足点足够大、解决的问题足够广泛，评委在颁奖时强调了我们产品注重多样性的特点与Google致力的目标一致。这个idea其实是我日常刷完各种公众号、豆瓣、知乎之后半夜躺在床上有感而发想出来的，视频和PPT里引用的谭德塞的话是某天知乎热榜标题上看到的，所以动机其实也是带着真情实感的。。虽然受到过队友质疑反对但还是据理力争做下来了。尽管情绪分析的方法很简单常见，但我们的最终目标其实是发现不同观点的文章，情绪分析只是我们挑选的一个容易下手的角度，还有更多复杂的观点分析方法可以运用在我们的产品中。</p>
+<p>高中语文课学过的课文我一篇也记不起来了，但语文老师有两句话我一直记得，一句是他在我们文理分科前建议我们学理科，因为科技可以改变世界，但记住一定要做一个“有情怀的理科生”。另一句是他语重心长地和我们说人应该常怀“悲悯“。当时之所以印象深刻，可能是因为这两个词都曾被他大大地写在了黑板上，但那时候却并不明白个中意味，直到最近几年才常想起才觉得常想常新。我想今天拿到这个比赛结果也算没有辜负他的话。我始终觉得，作为科技行业从业者，开发出为人们提供日常生活便利和娱乐的产品当然好，但更高的要求是看到人世间的苦难并尝试为其做出一点改变，或是对人们的思想和精神领域带来正面的影响。</p>
+<p>第二也要感激这一年的研究生生活，从写论文、看论文、讲论文的过程中不知不觉培养了自己英文学术写作和演示的能力。逐渐发现作品本身质量固然重要，但如何讲好一个完整的故事有时候更加重要，一个专业、逻辑清晰完整、美观大方的展示会给产品大大加分，反之搞不好会给本来不错的产品扣印象分，那就得不偿失了。</p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>杂记随感</category>
+      </categories>
+      <tags>
+        <tag>比赛</tag>
+        <tag>移动开发</tag>
       </tags>
   </entry>
   <entry>
@@ -3033,6 +3033,276 @@
       <tags>
         <tag>DNN测试</tag>
         <tag>变异测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【算法复习】基础知识——算法分析、分治策略</title>
+    <url>/2020/11/04/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</url>
+    <content><![CDATA[<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ul>
+<li><p><strong>算法</strong>的定义：定义良好的计算过程。即一系列的计算步骤，用来将输入数据转换成输出结果。</p>
+</li>
+<li><p>正确的算法：如果一个算法对其每一个输入实例，都能输出正确的结果并停止，则称它是正确的。</p>
+</li>
+</ul>
+<a id="more"></a>
+<h2 id="算法分析"><a href="#算法分析" class="headerlink" title="算法分析"></a>算法分析</h2><ul>
+<li>算法的运行时间：特定输入时，算法执行的基本操作数（步数）。</li>
+<li><p>一般考察算法的最坏运行时间</p>
+</li>
+<li><p>$\Theta$记号：</p>
+<ul>
+<li><p>$\Theta(g(n))=\{f(n):存在正常量c_1、c_2和n_0，使得对于所有n\geq n_0，有0 \leq c_1g(n) \leq f(n)\leq c_2g(n)\}$</p>
+<p><img src="/2020/11/04/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/算法分析1.png" alt="算法分析1" style="zoom:70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>$O$记号和$\Omega$记号</p>
+<ul>
+<li>$O(g(n))=\{f(n):存在正常量c和n_0，使得对于所有n\geq n_0，有0 \leq f(n)\leq cg(n)\}$</li>
+<li>$\Omega(g(n))=\{f(n):存在正常量c和n_0，使得对于所有n\geq n_0，有0 \leq cg(n) \leq f(n)\}$</li>
+</ul>
+</li>
+<li><p>$f(n)=\Theta(g(n))$当且仅当$f(n)=O(g(n))$且$f(n)=\Omega(g(n))$</p>
+</li>
+</ul>
+<h2 id="分治策略（divide-and-conquer"><a href="#分治策略（divide-and-conquer" class="headerlink" title="分治策略（divide-and-conquer)"></a>分治策略（divide-and-conquer)</h2><p>把原问题划分成n个规模较小而结构与原问题相似的子问题；递归地解决这些问题，然后合并其结果，就得到原问题的解。</p>
+<ul>
+<li>分解（Divide）：划分子问题</li>
+<li>解决（Conquer）：递归地求解子问题</li>
+<li>合并（Combine）：合并子问题的解</li>
+</ul>
+<h3 id="最大子数组问题"><a href="#最大子数组问题" class="headerlink" title="最大子数组问题"></a>最大子数组问题</h3><p>分治法求解数组A的和最大的非空连续子数组。</p>
+<ul>
+<li><p>三种情况：</p>
+<p><img src="/2020/11/04/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/最大子数组1.png" alt="最大子数组1" style="zoom:75%;"></p>
+</li>
+<li><p>求解跨越中点的子数组（$\Theta(n)$）：必须包含中点，向左右依次寻找最大数组然后合并即可</p>
+<p><img src="/2020/11/04/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/最大子数组2.png" alt="最大子数组2" style="zoom:80%;"></p>
+</li>
+<li><p>递归求解：</p>
+<p><img src="/2020/11/04/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/最大子数组3.png" alt="最大子数组3" style="zoom:80%;"></p>
+</li>
+<li><p>时间开销：$\Theta(nlgn)$</p>
+</li>
+</ul>
+<figure class="highlight c++"><table><tbody><tr><td class="code"><pre><span class="line"><span class="comment">// LeetCode 53: 最大子序和</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> {</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">int</span> MAX_INT = <span class="number">0xFFFFFFF</span>;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">max</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b, <span class="keyword">int</span> c)</span></span></span><br><span class="line"><span class="function">    </span>{</span><br><span class="line">        <span class="keyword">if</span> (a &gt;= b &amp;&amp; a &gt;= c)</span><br><span class="line">            <span class="keyword">return</span> a;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (b &gt;= a &amp;&amp; b &gt;= c)</span><br><span class="line">            <span class="keyword">return</span> b;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">return</span> c;</span><br><span class="line">    }</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">findCrossingMaxSumArray</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp;a, <span class="keyword">int</span> left, <span class="keyword">int</span> mid, <span class="keyword">int</span> right)</span></span></span><br><span class="line"><span class="function">    </span>{</span><br><span class="line">        <span class="keyword">int</span> left_max = -MAX_INT, right_max = -MAX_INT, left_sum = <span class="number">0</span>, right_sum = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = mid; i &gt;= left; i--)</span><br><span class="line">        {</span><br><span class="line">            left_sum += a[i];</span><br><span class="line">            <span class="keyword">if</span> (left_sum &gt; left_max)</span><br><span class="line">                left_max = left_sum;</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = mid+<span class="number">1</span>; i &lt;= right; i++)</span><br><span class="line">        {</span><br><span class="line">            right_sum += a[i];</span><br><span class="line">            <span class="keyword">if</span> (right_sum &gt; right_max)</span><br><span class="line">                right_max = right_sum;</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">return</span> left_max + right_max;</span><br><span class="line">    }</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">findMaxSubArray</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; a, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span></span></span><br><span class="line"><span class="function">    </span>{</span><br><span class="line">        <span class="keyword">if</span>(left == right)</span><br><span class="line">            <span class="keyword">return</span> a[left];</span><br><span class="line">        <span class="keyword">int</span> mid = (left + right) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> left_max = findMaxSubArray(a, left, mid);</span><br><span class="line">        <span class="keyword">int</span> right_max = findMaxSubArray(a, mid+<span class="number">1</span>, right);</span><br><span class="line">        <span class="keyword">int</span> crossing_max = findCrossingMaxSumArray(a, left, mid, right);</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">max</span>(left_max, right_max, crossing_max);</span><br><span class="line">    }</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">maxSubArray</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; nums)</span> </span>{</span><br><span class="line">        <span class="keyword">return</span> findMaxSubArray(nums, <span class="number">0</span>, nums.<span class="built_in">size</span>()<span class="number">-1</span>);</span><br><span class="line">    }</span><br><span class="line">};</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="矩阵乘法的Strassen算法"><a href="#矩阵乘法的Strassen算法" class="headerlink" title="矩阵乘法的Strassen算法"></a>矩阵乘法的Strassen算法</h3><ul>
+<li>减少一次递归，时间开销：$\Theta(n^{lg7})$，即$O(n^{2.81})$</li>
+</ul>
+<h3 id="求解递归式的方法"><a href="#求解递归式的方法" class="headerlink" title="求解递归式的方法"></a>求解递归式的方法</h3><ul>
+<li>代入法：猜测解的形式，数学归纳法证明</li>
+<li>递归树</li>
+<li>主方法<ul>
+<li>$T(n) = aT(n/b) + f(n)$</li>
+</ul>
+</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>算法</category>
+      </categories>
+      <tags>
+        <tag>算法导论</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【算法复习】排序和顺序统计量</title>
+    <url>/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/</url>
+    <content><![CDATA[<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><h3 id="排序算法总结"><a href="#排序算法总结" class="headerlink" title="排序算法总结"></a>排序算法总结</h3><p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/小结.png" alt="小结" style="zoom: 80%;"></p>
+<ul>
+<li>任何比较排序在最坏情况下都要经过$\Omega(nlgn)$次比较，因此归并排序和堆排序都是渐近最优的</li>
+</ul>
+<a id="more"></a>
+<h3 id="插入排序"><a href="#插入排序" class="headerlink" title="插入排序"></a>插入排序</h3><ul>
+<li>把第j个数作为key插入到A[1…j-1]的有序数列中：从后向前查找，将大于key的数向后移</li>
+</ul>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/插入排序.png" alt="插入排序"></p>
+<ul>
+<li>时间开销：$\Theta(n^2)$</li>
+<li>空间开销：原址的（仅有常数个元素 需要在排序过程中存储在数组之外）</li>
+</ul>
+<figure class="highlight c++"><table><tbody><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">InsertionSort</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; &amp;a)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; a.<span class="built_in">size</span>(); i++)</span><br><span class="line">    {</span><br><span class="line">        <span class="keyword">int</span> key = a[i];</span><br><span class="line">        <span class="keyword">int</span> j = i - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(j &gt;= <span class="number">0</span> &amp;&amp; a[j] &gt; key)</span><br><span class="line">        {</span><br><span class="line">            a[j + <span class="number">1</span>] = a[j];</span><br><span class="line">            j--;</span><br><span class="line">        }</span><br><span class="line">        a[j + <span class="number">1</span>] = key;</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="合并排序"><a href="#合并排序" class="headerlink" title="合并排序"></a>合并排序</h3><ul>
+<li><p>思想</p>
+<ul>
+<li>分解（Divide）：将n个元素分成各含n/2个元素的子序列；</li>
+<li>解决（Conquer）：用合并排序法对两个子序列递归地排序；</li>
+<li>合并（Combine）：合并两个已排序的子序列以得到排序结果。</li>
+</ul>
+</li>
+<li><p>辅助过程<strong>MERGE</strong>：（合并两个子数组A[p…q], A[q+1…r]）</p>
+<ul>
+<li>把两个子数组复制到两个新的数组L和R，合并两数组</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/合并排序1.png" alt="合并排序1"></p>
+<ul>
+<li><p>递归过程：MERGE-SORT</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/合并排序2.png" alt="合并排序2" style="zoom:60%;"></p>
+</li>
+<li><p>递归式分析代价：<script type="math/tex">T(n)= \begin{cases} \Theta(1)& \text{n=1}\\ 2T(n/2)+\Theta(n) & \text{n>1} \end{cases}</script></p>
+<ul>
+<li><p>递归树</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/合并排序3.png" alt="合并排序3" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>时间开销：$\Theta(nlgn)$</p>
+</li>
+<li><p>空间开销：非原址</p>
+</li>
+</ul>
+<figure class="highlight c++"><table><tbody><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Merge</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; &amp;a, <span class="keyword">int</span> left, <span class="keyword">int</span> mid, <span class="keyword">int</span> right)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="keyword">int</span> n1 = mid - left + <span class="number">1</span>, n2 = right - mid;</span><br><span class="line">    vector&lt;int&gt; L(n1), R(n2);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n1; i++)</span><br><span class="line">        L[i] = a[left + i];</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n2; i++)</span><br><span class="line">        R[i] = a[mid + <span class="number">1</span> + i];</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> k = left; k &lt;= right; k++)</span><br><span class="line">    {</span><br><span class="line">        <span class="keyword">if</span> (i &lt; n1 &amp;&amp; j &lt; n2)</span><br><span class="line">        {</span><br><span class="line">            <span class="keyword">if</span> (L[i] &lt;= R[j])</span><br><span class="line">                a[k] = L[i++];</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                a[k] = R[j++];</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (i == n1)</span><br><span class="line">            a[k] = R[j++];</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            a[k] = L[i++];</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MergeSort</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; &amp;a, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="keyword">if</span> (left &lt; right)</span><br><span class="line">    {</span><br><span class="line">        <span class="keyword">int</span> mid = (left + right) / <span class="number">2</span>;</span><br><span class="line">        MergeSort(a, left, mid);</span><br><span class="line">        MergeSort(a, mid+<span class="number">1</span>, right);</span><br><span class="line">        Merge(a, left, mid, right);</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h3><ul>
+<li><p>思想：反复交换相邻的未按次序排序的元素</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/冒泡排序1.png" alt="冒泡排序1" style="zoom:67%;"></p>
+</li>
+<li><p>时间开销：$\Theta(n^2)$</p>
+</li>
+</ul>
+<figure class="highlight c++"><table><tbody><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BubbleSort</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; &amp;a)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; a.<span class="built_in">size</span>() - <span class="number">1</span>; i++)   <span class="comment">// 已到位数字数目</span></span><br><span class="line">    {</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; a.<span class="built_in">size</span>() - i - <span class="number">1</span>; j++)   <span class="comment">//遍历剩余的相邻项</span></span><br><span class="line">        {</span><br><span class="line">            <span class="keyword">if</span>(a[j] &gt; a[j + <span class="number">1</span>])</span><br><span class="line">            {</span><br><span class="line">                <span class="keyword">int</span> temp = a[j];</span><br><span class="line">                a[j] = a[j + <span class="number">1</span>];</span><br><span class="line">                a[j + <span class="number">1</span>] = temp;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h3><h4 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h4><p>一个近似的完全二叉树，除了最底层外，该树是完全充满的。</p>
+<ul>
+<li>$A.length$：数组长度</li>
+<li>$A.heap-size$：当前有效元素个数</li>
+<li>根节点：$A[1]$</li>
+<li>给定一个节点下标$i$，计算父节点、左孩子、右孩子的下标：</li>
+</ul>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/堆1.png" alt="堆1" style="zoom: 80%;"></p>
+<p><strong>堆的性质：</strong></p>
+<ul>
+<li>最大堆性质：除了根节点以外所有节点$i$满足：$A[PARENT(i)]\geq A[i]$</li>
+<li>最小堆性质：除了根节点以外所有节点$i$满足：$A[PARENT(i)]\leq A[i]$</li>
+<li>树的高度：一个包含$n$个元素的堆的高度为$\Theta(lgn)$</li>
+</ul>
+<h4 id="维护堆的性质"><a href="#维护堆的性质" class="headerlink" title="维护堆的性质"></a>维护堆的性质</h4><ul>
+<li>输入：堆$A$，节点$i$</li>
+<li>输出：当节点$i$违背最大堆性质（值小于其子节点时），让其值在最大堆中逐级下降，从而使得<strong>以$i$为根节点的子树</strong>重新遵循最大堆的性质。</li>
+<li>在父节点、左孩子、右孩子中选出最大的，若最大的不是父节点，则将该子节点与父节点交换，对该子节点递归地调用函数。</li>
+<li>代价：$O(lgn)$</li>
+</ul>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/维护堆的性质.png" alt="维护堆的性质"></p>
+<h4 id="建堆"><a href="#建堆" class="headerlink" title="建堆"></a>建堆</h4><p>从最后一个非叶节点到根节点，依次调用MAX-HEAPIFY方法</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/建堆.png" alt="建堆"></p>
+<ul>
+<li>代价：$O(n)$</li>
+</ul>
+<h4 id="堆排序-1"><a href="#堆排序-1" class="headerlink" title="堆排序"></a>堆排序</h4><p>首先调用BUILD-MAX-HEAP构造最大堆，此时最大元素在$A[1]$中，交换$A[1]$和$A[n]$，此时新的根节点可能违背了最大堆性质，调用MAX_HEAPIFY(A,1)，从而在$A[1…n-1]$上构造一个新的最大堆。以此类推，直到堆的大小降到2。</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/堆排序.png" alt="堆排序"></p>
+<ul>
+<li><p>时间开销：$O(lgn)$</p>
+</li>
+<li><p>空间开销：原址的</p>
+</li>
+</ul>
+<h4 id="最大优先队列"><a href="#最大优先队列" class="headerlink" title="最大优先队列"></a>最大优先队列</h4><ul>
+<li>$MAXIMUM(S)$：返回$S$中最大键字的元素。（return A[1]）<ul>
+<li>$\Theta(1)$</li>
+</ul>
+</li>
+<li>$EXTRACT-MAX(S)$：去掉并返回S中具有最大键字的元素。<ul>
+<li>交换A[1]和A[n]，调用MAX_HEAPIFY(A,1)</li>
+<li>$O(lgn)$</li>
+</ul>
+</li>
+<li>$INCREASE(S,x,k)$：将元素x的关键字值增加到k（假设k不小于x节点原关键字值）<ul>
+<li>将新关键字值不断与父节点进行比较，大于则交换</li>
+<li>$O(lgn)$</li>
+</ul>
+</li>
+<li>$INSERT(S,x)$：把元素x插入到S中。<ul>
+<li>在最后增加一个大小为$-\infin$节点，调用$INCREASE(A,A.heapsize,key)$</li>
+<li>$O(lgn)$</li>
+</ul>
+</li>
+</ul>
+<h3 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h3><p>PARTITION：将数组$A[p…r]$划分成两个子数组$A[p…q-1]$和$A[q+1…r]$，使得$A[p…q-1]$中每个元素都小于等于$A[q]$，$A[q]$也小于等于$A[q+1…r]$中每个元素。</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/快速排序.png" alt="快速排序" style="zoom:80%;"></p>
+<ul>
+<li><p>PARTITION过程</p>
+<ul>
+<li>选择$x=A[r]$作为主元</li>
+<li>$A[p…i]$：小于等于主元的部分</li>
+<li>$A[i+1…j-1]$：大于主元的部分</li>
+<li>$A[j…r-1]$：尚未考虑的部分</li>
+<li>复杂度：$\Theta(n)$，其中$n=r-p+1$</li>
+</ul>
+</li>
+<li><p>时间开销：最坏$\Theta(n^2)$，最好$O(nlgn)$</p>
+</li>
+</ul>
+<figure class="highlight c++"><table><tbody><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">Partition</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; &amp;a, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="keyword">int</span> x = a[right];   <span class="comment">// 主元</span></span><br><span class="line">    <span class="keyword">int</span> i = left - <span class="number">1</span>;       <span class="comment">// i标记小于x、大于x的分界点（a[i]是最后一个小于主元的元素，a[i+1]是第一个大于主元的元素）</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j = left; j &lt;= right - <span class="number">1</span>; j++)     <span class="comment">// j遍历每个除主元外的元素</span></span><br><span class="line">    {</span><br><span class="line">        <span class="keyword">if</span>(a[j] &lt;= x)</span><br><span class="line">        {</span><br><span class="line">            i ++;        </span><br><span class="line">            swap(a[i], a[j]);        <span class="comment">//将新的a[j]与第一个大于主元的元素交换</span></span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    swap(a[i + <span class="number">1</span>], a[right]);    <span class="comment">// 放置主元</span></span><br><span class="line">    <span class="keyword">return</span> i + <span class="number">1</span>;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">QuickSort</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; &amp;a, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="keyword">if</span> (left &lt; right)</span><br><span class="line">    {</span><br><span class="line">        <span class="keyword">int</span> pivot = Partition(a, left, right);</span><br><span class="line">        QuickSort(a, left, pivot - <span class="number">1</span>);</span><br><span class="line">        QuickSort(a, pivot + <span class="number">1</span>, right);</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="计数排序"><a href="#计数排序" class="headerlink" title="计数排序"></a>计数排序</h3><p>假设$n$个输入元素都是在0到$k$区间内的一个整数。对于每一个输入元素$x$，确定小于x的元素个数，利用这一信息，就可以直接把x放到它在输出数组中的位置上了。例如有17个元素小于x，则x就应该在第18个输出位置上。</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/计数排序.png" style="zoom:80%;"></p>
+<ul>
+<li>代价：当$k=O(n)$时，排序的运行时间为$\Theta(n)$</li>
+</ul>
+<h3 id="基数排序"><a href="#基数排序" class="headerlink" title="基数排序"></a>基数排序</h3><p>从最低有效位到最高有效位进行排序。</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/基数排序2.png" alt="基数排序2" style="zoom:80%;"></p>
+<ul>
+<li>代价：给定$n$个$d$位数，其中每一个数位可能有$k$个可能的取值，若使用的稳定排序方法耗时$n+k$，那么它就可以在$\Theta(d(n+k))$时间内将这些数排好序。</li>
+</ul>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/基数排序.png" alt="基数排序" style="zoom:80%;"></p>
+<h3 id="桶排序"><a href="#桶排序" class="headerlink" title="桶排序"></a>桶排序</h3><p>假设数据服从$[0,1)$上的$均匀分布</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/桶排序.png" alt="桶排序" style="zoom:80%;"></p>
+<ul>
+<li>时间代价：$O(n)$</li>
+</ul>
+<h2 id="中位数和顺序统计量"><a href="#中位数和顺序统计量" class="headerlink" title="中位数和顺序统计量"></a>中位数和顺序统计量</h2><h3 id="同时找到最大值和最小值"><a href="#同时找到最大值和最小值" class="headerlink" title="同时找到最大值和最小值"></a>同时找到最大值和最小值</h3><p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/最大值最小值.png" alt="最大值最小值" style="zoom: 67%;"></p>
+<h3 id="期望时间为线性的选择算法"><a href="#期望时间为线性的选择算法" class="headerlink" title="期望时间为线性的选择算法"></a>期望时间为线性的选择算法</h3><p>一种分治算法，用到了快速排序中的RANDOMIZED-SELECT算法，但快排会递归处理划分的两边，这里只处理一边。</p>
+<ul>
+<li>算法返回数组$A[p…r]$中第$i$小的元素</li>
+<li>期望运行时间：$\Theta(n)$</li>
+<li>最坏运行时间：$\Theta(n^2)$</li>
+</ul>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/随机选择.png" alt="随机选择" style="zoom:80%;"></p>
+<figure class="highlight c++"><table><tbody><tr><td class="code"><pre><span class="line"><span class="comment">//LeetCode 215: 在未排序的数组中找到第 k 个最大的元素。</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> {</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">Partition</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; a, <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span></span></span><br><span class="line"><span class="function">    </span>{</span><br><span class="line">        <span class="keyword">int</span> x = a[right];</span><br><span class="line">        <span class="keyword">int</span> i = left - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = left; j &lt;= right - <span class="number">1</span>; j++)</span><br><span class="line">        {</span><br><span class="line">            <span class="keyword">if</span> (a[j] &gt;= x)    <span class="comment">// 注意这里改成了&gt;=</span></span><br><span class="line">            {</span><br><span class="line">                i++;</span><br><span class="line">                swap(a[i], a[j]);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        swap(a[i+<span class="number">1</span>], a[right]);</span><br><span class="line">        <span class="keyword">return</span> i + <span class="number">1</span>;</span><br><span class="line">    }</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">Select</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; a, <span class="keyword">int</span> left, <span class="keyword">int</span> right, <span class="keyword">int</span> i)</span></span></span><br><span class="line"><span class="function">    </span>{</span><br><span class="line">        <span class="keyword">if</span> (left == right)</span><br><span class="line">            <span class="keyword">return</span> a[left];</span><br><span class="line">        <span class="keyword">int</span> x = Partition(a, left, right);</span><br><span class="line">        <span class="keyword">int</span> k = x - left + <span class="number">1</span>;   <span class="comment">// 当前的x是第几个数字</span></span><br><span class="line">        <span class="keyword">if</span> (i == k)</span><br><span class="line">            <span class="keyword">return</span> a[x];</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (i &lt; k)</span><br><span class="line">            <span class="keyword">return</span> Select(a, left, x - <span class="number">1</span>, i);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> Select(a, x + <span class="number">1</span>, right, i - k);</span><br><span class="line">    }</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">findKthLargest</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; nums, <span class="keyword">int</span> k)</span></span></span><br><span class="line"><span class="function">    </span>{</span><br><span class="line">        <span class="keyword">return</span> Select(nums, <span class="number">0</span>, nums.<span class="built_in">size</span>()<span class="number">-1</span>, k);</span><br><span class="line">    }</span><br><span class="line">};</span><br></pre></td></tr></tbody></table></figure>
+<h3 id="最坏情况为线性的选择算法"><a href="#最坏情况为线性的选择算法" class="headerlink" title="最坏情况为线性的选择算法"></a>最坏情况为线性的选择算法</h3><p>与随机选择相比，保证对数组能做出一个较好的划分：</p>
+<p><img src="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/select.png" alt="select" style="zoom: 67%;"></p>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>]]></content>
+      <categories>
+        <category>算法</category>
+      </categories>
+      <tags>
+        <tag>算法导论</tag>
+        <tag>排序</tag>
       </tags>
   </entry>
   <entry>
