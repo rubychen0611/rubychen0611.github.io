@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ruby.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ruby.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="XDofhadHoQx92S_zQN-nchPmB54b_ndx1Hf561gampk">
+  <meta name="baidu-site-verification" content="code-famAsDgLf7">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rubychen0611.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、生物神经系统与人工神经网络生物神经系统的结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【复习笔记】神经网络及其应用">
+<meta property="og:url" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/index.html">
+<meta property="og:site_name" content="与我常在">
+<meta property="og:description" content="一、生物神经系统与人工神经网络生物神经系统的结构">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-6.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-7.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-8.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-5.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-9.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/4-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/4-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-4.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-5.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/6-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/6-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/6-3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/7-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/7-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-1.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-2.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-3.png">
+<meta property="og:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-4.png">
+<meta property="article:published_time" content="2020-12-25T11:34:02.862Z">
+<meta property="article:modified_time" content="2021-01-07T02:43:26.035Z">
+<meta property="article:author" content="Ruby Chen">
+<meta property="article:tag" content="神经网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-1.png">
+
+<link rel="canonical" href="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【复习笔记】神经网络及其应用 | 与我常在</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/rss2.xml" title="与我常在" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">与我常在</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">未经审视的人生不值一过</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-link fa-fw"></i>朋友们</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-comment fa-fw"></i>留言板</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.jpg">
+      <meta itemprop="name" content="Ruby Chen">
+      <meta itemprop="description" content="自爱兼爱，善感而不多愁。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="与我常在">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【复习笔记】神经网络及其应用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-25 19:34:02" itemprop="dateCreated datePublished" datetime="2020-12-25T19:34:02+08:00">2020-12-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-01-07 10:43:26" itemprop="dateModified" datetime="2021-01-07T10:43:26+08:00">2021-01-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">复习笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/" class="post-meta-item leancloud_visitors" data-flag-title="【复习笔记】神经网络及其应用" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">评论数：</span>
+    
+    <a title="valine" href="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、生物神经系统与人工神经网络"><a href="#一、生物神经系统与人工神经网络" class="headerlink" title="一、生物神经系统与人工神经网络"></a>一、生物神经系统与人工神经网络</h2><h3 id="生物神经系统的结构"><a href="#生物神经系统的结构" class="headerlink" title="生物神经系统的结构"></a>生物神经系统的结构<a id="more"></a></h3><ul>
+<li><p>什么是意识？</p>
+<ul>
+<li>意识是人脑对大脑内外表象的觉察</li>
+<li>人的头脑对于客观物质世界的反映，也是感觉、思维等各种心理过程的总和</li>
+<li>我：意识是一种信息</li>
+</ul>
+</li>
+<li><p>人工神经网络</p>
+<ul>
+<li><p>能从输入数据中学习“信息”</p>
+</li>
+<li><p>信息以某种方式存储在神经网络这个“黑匣子”中</p>
+</li>
+<li><p>人工神经网络能利用学到的“信息”完成很多任务</p>
+<p><u>人工神经网络在“信息”意义上已经具有了某种“意识”</u></p>
+</li>
+</ul>
+</li>
+<li><p>意识是如何产生的？</p>
+<ul>
+<li>二元论：心理和身体是两种不同的物质，他们独立存在——违背了能量守恒定律</li>
+<li>一元论：宇宙只是由一种物质构成<ul>
+<li>唯物主义：所有存在的物质都是物质的、有形的</li>
+<li>唯心主义：没有心理去感知，物理世界将不会存在</li>
+<li>同一性观点：心理过程和某些大脑活动过程是一样的，只不过用不同的术语来描述</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="人工神经网络简介"><a href="#人工神经网络简介" class="headerlink" title="人工神经网络简介"></a>人工神经网络简介</h3><ul>
+<li>神经网络：模拟人类大脑的模型<ul>
+<li>大规模并行分布处理器，由一些简单的处理单元（神经元）组成，能够保存经验知识，并且能够利用这些经验知识完成一些任务</li>
+<li>通过“学习”来从环境中积累知识，知识被保存在神经元之间的连接上</li>
+</ul>
+</li>
+<li><strong>有两个方面类似于人脑</strong>：<ol>
+<li>知识由网络通过学习过程得到；</li>
+<li>神经元间的互联，用来存储知识的已知的联合权值</li>
+</ol>
+</li>
+<li><strong>神经网络的特点</strong><ul>
+<li>面向神经元和联结性</li>
+<li>信息的分布表示<ul>
+<li>并行、分布处理结构</li>
+<li>一个处理单元的输出可以被任意分枝，且大小不变</li>
+<li>记忆效应</li>
+</ul>
+</li>
+<li>运算的全局并行和局部操作<ul>
+<li>处理单元完全的局部操作</li>
+<li>集体效应</li>
+</ul>
+</li>
+<li>处理的非线性性<ul>
+<li>可以模拟任意的数学模型</li>
+</ul>
+</li>
+<li>自组织性</li>
+</ul>
+</li>
+<li><strong>神经网络的能力</strong><ul>
+<li>学习能力<ul>
+<li>学习从环境中获取的信息</li>
+</ul>
+</li>
+<li>泛化能力<ul>
+<li>对从未学习过的输入产生可信的输出</li>
+</ul>
+</li>
+<li>容错能力<ul>
+<li>系统受到局部损伤时仍然能够正常工作</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="二、人工神经元"><a href="#二、人工神经元" class="headerlink" title="二、人工神经元"></a>二、人工神经元</h2><h3 id="MP神经元"><a href="#MP神经元" class="headerlink" title="MP神经元"></a>MP神经元</h3><ul>
+<li><p>结构（f为阶跃函数）</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-1.png" alt="2-1" style="zoom:60%;"></p>
+</li>
+<li><p>特征</p>
+<ul>
+<li>二值网络（binary：fire-1, or not fire-0）：自变量及其函数的值、向量分量的值只取0和1函数、向量。</li>
+<li>由有方向的、带权重的路径联系</li>
+<li>权为正：刺激；权为负：抑制</li>
+<li>全或无：每个神经元有一个固定的阈值，如果输入大于阈值，就fires</li>
+<li>绝对抑制：阈值被设为使得抑制为绝对的，即，非0的抑制输入将阻止该神经元兴奋。</li>
+<li>花费一个时间单位使得信号通过一个连接</li>
+<li>任意命题逻辑函数都可由一两层的MP模型计算</li>
+<li><font color="red">所有的命题逻辑函数都可以用MP AND逻辑门、MP OR逻辑门、MP NOT逻辑门予以表达和实现（*重点）</font> </li>
+<li>MP模型具有神经计算模型一般和普遍的特性，可表达一般人工神经网络的赋权联结和相对抑制</li>
+</ul>
+</li>
+<li><p>与</p>
+<ul>
+<li>W = 1，threshold = -2</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-2.png" alt="2-2" style="zoom:50%;"></p>
+</li>
+<li><p>或</p>
+<ul>
+<li><p>W = 1，threshold = -1</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-6.png" alt="2-6" style="zoom:40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>非</p>
+<ul>
+<li><p>W=-1,threshold=0</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-7.png" alt="2-7" style="zoom: 50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>与非</p>
+<ul>
+<li>W = 2, p = 1, threshold = 2</li>
+</ul>
+</li>
+<li><p>异或</p>
+<ul>
+<li><p>X1 XOR x2 &lt;-&gt; (x1 AND NOT x2) OR (x2 AND NOT x1)</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-8.png" alt="2-8" style="zoom:50%;"></p>
+</li>
+<li><p>X1 XOR x2 &lt;-&gt; NOT (NOT x1 OR x2) OR NOT(x1 OR NOT x2)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="线性模型"><a href="#线性模型" class="headerlink" title="线性模型"></a>线性模型</h3><h4 id="最小二乘法（-重点）"><a href="#最小二乘法（-重点）" class="headerlink" title="最小二乘法（*重点）"></a><font color="red">最小二乘法（*重点）</font></h4><p>假设$h(x)=wx+b$，均方误差$ E= \frac{1}{n} \sum _{i=1}^{n} \left[ h(x_{i})-y_{i} \right] ^{2} $ ，问题就被化为求$ =argmin_{w,b}\frac{1}{n} \sum _{i=1}^{n}(wx_{i}+b-y_{i})^{2} $ 。令导数为0，解得：</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-3.png" alt="2-3" style="zoom:50%;"></p>
+<p>神经元表示：</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-4.png" alt="2-4" style="zoom:67%;"></p>
+<h3 id="线性分类"><a href="#线性分类" class="headerlink" title="线性分类"></a>线性分类</h3><p>线性分类需要更复杂的神经元来解决，两分类问题可用一个神经元来表示，但不同于线性回归，神经元中对数据加权求和后需要在进行一步非线性操作，即用单位阶跃函数对求和结果进行映射。输出𝑦也不再是一个常数，两分类中用0,1表示不同的类别</p>
+<h3 id="感知器神经元"><a href="#感知器神经元" class="headerlink" title="感知器神经元"></a>感知器神经元</h3><h4 id="激活函数"><a href="#激活函数" class="headerlink" title="激活函数"></a>激活函数</h4><ul>
+<li><p>功能：将神经元的加权输入线性/非线性转换成一个输出的激活函数</p>
+</li>
+<li><p>阶跃式激活函数</p>
+<ul>
+<li>Identity function (同一函数)</li>
+<li>Threshold function (阈值函数)<ul>
+<li>f(x)=1, if x&gt;=阈值</li>
+<li>f(x)=-1, if x&lt;阈值</li>
+</ul>
+</li>
+<li>Piecewise linear function(分段线性函数)<ul>
+<li>f(x)=1, if x&gt;=阈值</li>
+<li>f(x)=x, if -阈值&lt;x&lt;阈值</li>
+<li>f(x)=-1, if x&lt;=-阈值</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>非线性激活函数：保持在上限和下限之间的非线性的连续函数<br>（1）非线性：函数的输出随输入做非线性的变化，<br>（2）连续函数：函数中没有顶点或者中断，可以从始至终进行微分</p>
+<p>$ Sigmoid (z)= \frac{1}{1+e^{-z}} $ </p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-5.png" alt="2-5" style="zoom:50%;"></p>
+</li>
+</ul>
+<h3 id="FT神经元"><a href="#FT神经元" class="headerlink" title="FT神经元"></a>FT神经元</h3><p>启发来源：神经元A接收到来自神经元B的刺激信号后的响应，不仅取决于神经元B的轴突传递强度，还依赖与神经元A的树突浓度，这与神经元A的记忆单元有关。</p>
+<h2 id="三、人工神经元的学习"><a href="#三、人工神经元的学习" class="headerlink" title="三、人工神经元的学习"></a>三、人工神经元的学习</h2><h3 id="生物神经元的学习"><a href="#生物神经元的学习" class="headerlink" title="生物神经元的学习"></a>生物神经元的学习</h3><p>学习的两种具体类型</p>
+<ul>
+<li>经典条件作用<ul>
+<li>由一个刺激或事件预示另一个刺激或事件的到来</li>
+<li>巴浦洛夫的狗——巴浦洛夫条件作用</li>
+<li>刺激泛化：反应自动扩展到与刺激相似的新刺激上</li>
+</ul>
+</li>
+<li>操作性条件作用<ul>
+<li>操作：自发产生的行为，可按照他作用于环境并使环境发生了可观察的结果来描述其特点</li>
+<li>效果律：带来满意结果的反应出现的概率会越来越大，带来不满意结果的反应出现的概率越来越小</li>
+<li>桑代克的迷笼（猫）——指向成功的特定冲动则因愉快的结果而保留下来 </li>
+</ul>
+</li>
+</ul>
+<h3 id="感知器学习方法"><a href="#感知器学习方法" class="headerlink" title="感知器学习方法"></a>感知器学习方法</h3><h4 id="随机学习"><a href="#随机学习" class="headerlink" title="随机学习"></a>随机学习</h4><ul>
+<li><p>随机更新权矩阵𝑾和偏置矩阵𝑩，然后慢慢对赋值进行修正</p>
+</li>
+<li><p>尽管随机学习效率很低，但其思想简单，实现容易，且具有能找到全局最优解等特点，在对其搜索方法进行改进后，也能够具有一定的实际应用意义</p>
+</li>
+</ul>
+<h4 id="Hebbian学习"><a href="#Hebbian学习" class="headerlink" title="Hebbian学习"></a>Hebbian学习</h4><ul>
+<li>一个网络里的信息被储存在神经元之间的权值中；</li>
+<li>假定两个神经元之间<u>的权值变换是与它们神经元的输出成比例</u>的；</li>
+<li>假定随着通过重复和激励一组弱连接神经元而发生学习时，它们之间权值的强度和模式经历逐步增加改变，最终导致神经元形成强连接集合形式。</li>
+<li>假设两个神经元有x和y的输出，如果x激励y，它们之间的连接强度就会增加。两个神经元之间的权值改变Δw与x和y成比例：$\Delta w= \beta x \cdot y$<ul>
+<li>比例系数𝛽叫做“学习率”，决定学习发生的速度。𝛽越大，权值改变得越快。</li>
+</ul>
+</li>
+</ul>
+<h4 id="实例1：作为分类器的有监督学习的感知器（PPT-29-36，-会计算"><a href="#实例1：作为分类器的有监督学习的感知器（PPT-29-36，-会计算" class="headerlink" title="实例1：作为分类器的有监督学习的感知器（PPT 29-36， *会计算)"></a><font color="red">实例1：作为分类器的有监督学习的感知器（PPT 29-36， *会计算)</font></h4><p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/2-9.png" alt="2-9" style="zoom:45%;"></p>
+<h4 id="实例2：线性神经元预报器-PPT-38-42，-会计算"><a href="#实例2：线性神经元预报器-PPT-38-42，-会计算" class="headerlink" title="实例2：线性神经元预报器 (PPT 38-42， *会计算)"></a><font color="red">实例2：线性神经元预报器 (PPT 38-42， *会计算)</font></h4><p>上述方法尝试利用一个样本来更新w权重，为何有效？</p>
+<ul>
+<li>其本质是利用单个样本在平方差损失函数$ L(t,y)= \frac{1}{2}(y-t)^{2} $ 上的梯度信息，进行更新。</li>
+</ul>
+<h4 id="梯度下降法学习"><a href="#梯度下降法学习" class="headerlink" title="梯度下降法学习"></a><font color="red">梯度下降法学习</font></h4><p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-1.png" alt="3-1" style="zoom: 50%;"></p>
+<ul>
+<li><p><strong>学习率调整方法：</strong></p>
+<ul>
+<li><p>（1）学习率衰减</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-2.png" alt="3-2" style="zoom: 60%;"></p>
+</li>
+<li><p>（2）学习率预热</p>
+<p>为了让初始阶段的学习更加稳定：在初始的几轮，采用较小的学习率。梯度下降到一定程度之后，再恢复到初始设置的学习率</p>
+</li>
+<li><p>（3）周期学习率</p>
+<p>循环学习率（Cyclic）是让学习率在一个区间内周期性的增大和缩小</p>
+</li>
+<li><p>（4）自适应调整学习率：AdaGrad，RMSprop，AdaDelta</p>
+</li>
+</ul>
+</li>
+<li><p><strong>梯度下降面临的困难</strong></p>
+<ul>
+<li>很难选择一个合适学习率</li>
+<li>对于所有的参数，均使用相同的学习率。不同参数的梯度大小有差异。</li>
+<li>在非凸函数的优化过程中，我们往往希望模型能够跳过那些局部极值点，去找一个更好的极值。实际问题中，鞍点问题很难解决。</li>
+</ul>
+</li>
+<li><p>感知机学习算法</p>
+<ul>
+<li>算法的收敛性：证明经过有限次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型。</li>
+<li>感知机算法存在许多解，既依赖于初值，也依赖迭代过程中误分类点的选择顺序。</li>
+<li>为得到唯一分离超平面，需要增加约束。</li>
+<li>线性不可分数据集，迭代震荡。</li>
+</ul>
+</li>
+</ul>
+<h3 id="ADALINE-Adaptive-Linear-Element"><a href="#ADALINE-Adaptive-Linear-Element" class="headerlink" title="ADALINE: Adaptive Linear Element"></a>ADALINE: Adaptive Linear Element</h3><ul>
+<li>结构<ul>
+<li>与感知器网络结构非常相似</li>
+<li>激活函数不同：<strong>线性函数</strong></li>
+</ul>
+</li>
+<li>ADALINE的学习：LMS（Least-Mean-Square learning algorithm）</li>
+<li><strong>ADALINE和感知器的比较</strong><ul>
+<li>神经元模型不同<ul>
+<li>感知器：非线性模型，只能输出两种可能的值，其激活函数是<strong>阈值函数</strong></li>
+<li>ADALINE：线性模型，输出可以取任意值，其激活函数是线性函数</li>
+</ul>
+</li>
+<li>功能不同<ul>
+<li>Perceptron:感知器只能做简单的分类</li>
+<li>LMS：还可以实现拟合或逼近</li>
+</ul>
+</li>
+<li><strong>分类性能不同</strong><ul>
+<li>LMS算法得到的分类边界往往处于两类模式的正中间</li>
+<li>感知器学习算法在刚刚能正确分类的位置就停下来，使分类边界离一些模式距离过近，使系统对误差更敏感</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="四、神经元的连接"><a href="#四、神经元的连接" class="headerlink" title="四、神经元的连接"></a>四、神经元的连接</h2><h3 id="神经元的联结综述"><a href="#神经元的联结综述" class="headerlink" title="神经元的联结综述"></a>神经元的联结综述</h3><ul>
+<li>神经元的连接方式<ul>
+<li>层级结构和互联网型结构：通常同一层不具有连接、两个相邻层完全连接(每一层的每一个神经元到另一层的每个神经元)。</li>
+<li>层（级）内联结模式：用来加强和完成层内神经元之间的竞争</li>
+<li>互联网型连接模式：最典型的就是马可夫链和Hopfield网络(HN)。</li>
+</ul>
+</li>
+<li>神经元计算方式<ul>
+<li>循环联结模式</li>
+<li>卷积计算模式</li>
+</ul>
+</li>
+</ul>
+<h3 id="宽度扩展：以多输出的单层感知器为例"><a href="#宽度扩展：以多输出的单层感知器为例" class="headerlink" title="宽度扩展：以多输出的单层感知器为例"></a>宽度扩展：以多输出的单层感知器为例</h3><p>算法思想：将单输出感知器的处理逐个地用于多输出感知器输出层的每一个神经元的处理。</p>
+<ul>
+<li><p>离散多输出感知器训练算法</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-3.png" alt="3-3" style="zoom:50%;"></p>
+</li>
+<li><p>连续多输出感知器训练算法</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/3-4.png" alt="3-4" style="zoom:50%;"></p>
+</li>
+</ul>
+<h3 id="深度扩展：多层感知器"><a href="#深度扩展：多层感知器" class="headerlink" title="深度扩展：多层感知器"></a>深度扩展：多层感知器</h3><p>在输入层和输出层之间至少有一层（称之为隐藏层，hidden layer）</p>
+<ul>
+<li>和单层神经网络相比能解决更加复杂的问题</li>
+<li>训练更加困难</li>
+<li>有些情况下能解决单层不能解决的问题</li>
+</ul>
+<p>代表：多层感知器、CNN</p>
+<ul>
+<li><font color="red">手工搭建并设置单隐藏层网络模型：拟合sin函数 (*计算,PPT53-60)</font>
+
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/4-1.png" alt="4-1"></p>
+</li>
+</ul>
+<h3 id="其他连接方式"><a href="#其他连接方式" class="headerlink" title="其他连接方式"></a>其他连接方式</h3><ul>
+<li>卷积神经网络（Convolutional Net）</li>
+<li>竞争神经网络（Competitive Net ）</li>
+<li>循环神经网络（Recurrent Net ）</li>
+<li>其他类型网络</li>
+</ul>
+<h3 id="作业"><a href="#作业" class="headerlink" title="作业"></a>作业</h3><ul>
+<li><p>阈值函数为什么不适合作为激活函数？</p>
+<ul>
+<li>理由，大多数激活函数都需要满足以下条件（当然也存在不完全满足的，比如relu函数）<ol>
+<li>神经网络的激活函数需要满足的条件之一就是函数是<strong>连续可导</strong>的，这样才能使用梯度下降法更新网络参数，这里该函数在x=0处不是连续可导的</li>
+<li>神经网络激活函数还需要满足函数是<strong>单调增/减</strong>的，这里也不满足</li>
+</ol>
+</li>
+<li><u>不适合，因为它不连续、不光滑，导致在x=0处不可微，并且在其他地方的导数是零，无法使用基于梯度的参数优化方法。</u></li>
+</ul>
+</li>
+<li><p>能否用一个神经元拟合二次曲线吗？如果能，请给出实例。如果不能，请说明至少需要多少个神经元才能拟合二次曲<br>线。</p>
+<ul>
+<li><p>能，考虑二次函数的一般形式 $y=ax^2 + bx + c$，可设计如下单个神经元结构就能拟合二次曲线。</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/4-2.png" alt="4-2" style="zoom: 33%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="五、多层感知器"><a href="#五、多层感知器" class="headerlink" title="五、多层感知器"></a>五、多层感知器</h2><h3 id="BP网络的训练—基本算法"><a href="#BP网络的训练—基本算法" class="headerlink" title="BP网络的训练—基本算法"></a>BP网络的训练—基本算法</h3><ul>
+<li><font color="red">弱点：训练速度非常慢、局部极小点的逃离问题、算法不一定收敛</font>
+</li>
+<li><font color="red">优点：广泛的适应性和有效性</font>
+
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-1.png" alt="5-1" style="zoom:80%;"></p>
+</li>
+</ul>
+<font color="red">计算例子（PPT 21-24）</font>
+
+
+
+<h3 id="BP算法的改进"><a href="#BP算法的改进" class="headerlink" title="BP算法的改进"></a>BP算法的改进</h3><ul>
+<li><p>BP针对单个样例进行更新</p>
+<ul>
+<li>不同样例的更新的效果可能“抵消”。BP网络接受样本的顺序对训练结果有较大影响。它更“偏爱”较后出现的样本。给样本安排一个适当的顺序，是非常困难的。</li>
+<li><strong>用多个样本的“总效果”修改权重</strong>$ \Delta w_{ij}^{(k)}= \sum _{p} \Delta w_{ij}^{(k)} $ </li>
+</ul>
+</li>
+<li><p>消除样本顺序影响的BP算法:</p>
+<ul>
+<li>较好地解决了因样本的顺序引起的精度问题和训练的抖动问题</li>
+<li>收敛速度：比较慢</li>
+<li>偏移量：给每一个神经元增加一个偏移量来加快收敛速度</li>
+<li>冲量：<u>联接权的本次修改要考虑上次修改的影响，以减少抖动问题</u></li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-2.png" alt="5-2" style="zoom: 50%;"></p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-3.png" alt="5-3" style="zoom:55%;"></p>
+<ul>
+<li>设置冲量的BP算法</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-4.png" alt="5-4" style="zoom:60%;"></p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/5-5.png" alt="5-5" style="zoom:94%;"></p>
+<h3 id="算法的理论基础（-掌握）"><a href="#算法的理论基础（-掌握）" class="headerlink" title="算法的理论基础（*掌握）"></a><font color="red">算法的理论基础（*掌握）</font></h3><ul>
+<li><font color="red">实例：拟合正弦波的第一个1/4周期波形(PPT 42-63)</font>
+</li>
+<li><p>局部极小点问题</p>
+<ul>
+<li>修改初值：从多个初始点开始进行搜索。</li>
+<li>模拟退火：以一定概率接受比当前结果更差的解。</li>
+<li><strong>随机梯度下降：计算梯度值时，加入了随机因素，极小值点处计算的梯度不为0，有机会跳出局部极小。</strong></li>
+<li>遗传算法</li>
+</ul>
+</li>
+<li>几个问题的讨论<ul>
+<li>收敛速度问题</li>
+<li>网络瘫痪问题<ul>
+<li>在训练中，权可能变得很大，这会使神经元的网络输入变得很大，从而又使得其激活函数的导函数在此点上的取值很小。根据相应式子，此时的训练步长会变得非常小，进而将导致训练速度降得非常低，最终导致网络停止收敛</li>
+</ul>
+</li>
+<li>稳定性问题<ul>
+<li>用修改量的综合实施权的修改</li>
+<li>连续变化的环境，它将变成无效的</li>
+</ul>
+</li>
+<li>步长问题<ul>
+<li>BP网络的收敛是基于无穷小的权修改量</li>
+<li>步长太小，收敛就非常慢</li>
+<li>步长太大，可能会导致网络的瘫痪和不稳定</li>
+<li>自适应步长，使得权修改量能随着网络的训练而不断变化。[1988年，Wasserman]<ul>
+<li>AdaGrad方法：在模型训练初期，参数变化快（学习率大），而在模型训练后期，参数变化慢且梯度更新值小。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="作业-1"><a href="#作业-1" class="headerlink" title="作业"></a>作业</h3><ul>
+<li>进一步提高神经网络识别率的方法：</li>
+</ul>
+<ol>
+<li>增加隐藏层数；</li>
+<li>增加隐藏层神经元个数；</li>
+<li>增加训练轮数；</li>
+<li>获取更多训练数据；</li>
+<li>使用卷积神经网络等其他网络结构</li>
+</ol>
+<h2 id="六、正则化、归一化和预训练"><a href="#六、正则化、归一化和预训练" class="headerlink" title="六、正则化、归一化和预训练"></a>六、正则化、归一化和预训练</h2><h3 id="数据、模型与特征工程"><a href="#数据、模型与特征工程" class="headerlink" title="数据、模型与特征工程"></a>数据、模型与特征工程</h3><ul>
+<li>常见的数据问题<ul>
+<li>不同维度差异过大（数据中心偏置）</li>
+<li>正负例样本不均衡</li>
+</ul>
+</li>
+<li>模型问题<ul>
+<li>过/欠拟合</li>
+<li>梯度消失/梯度爆炸</li>
+<li>模型过大，难以重新训练等</li>
+</ul>
+</li>
+<li>解决上述问题常用的手段有：<br>1、正则化，规一化<br>2、预训练和迁移学习<br>3、特征预处理（特征工程）</li>
+</ul>
+<h3 id="正则化与归一化"><a href="#正则化与归一化" class="headerlink" title="正则化与归一化"></a>正则化与归一化</h3><h4 id="正则化"><a href="#正则化" class="headerlink" title="正则化"></a>正则化</h4><ul>
+<li><p>过拟合和欠拟合</p>
+<ul>
+<li>过拟合：模型过于复杂，参数过多或训练数据过少，噪声过多。</li>
+<li>欠拟合：模型比较简单，特征维度过少。</li>
+</ul>
+</li>
+<li><p>偏差和方差：定量分析</p>
+<ul>
+<li><p>偏差：衡量模型预测值和实际值之间的偏离关系，即模型在样本上拟合得好不好。</p>
+</li>
+<li><p>方差：描述模型在整体数据上表现的稳定情况，在训练集和验证集/测试集上表现是否一致</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/6-1.png" alt="6-1" style="zoom:60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>正则化：<strong>通过限制模型的复杂度，避免过拟合，提高泛化能</strong></p>
+</li>
+<li><font color="red">不同的正则化方法</font>
+
+
+</li>
+</ul>
+<p>1、<font color="red">L1和L2正则化（*掌握）</font></p>
+<ul>
+<li><p>l1正则化：$ argmin_{ \theta } \frac{1}{N}( \sum _{i}^{N} L(y_{i},f(x_{i}, \theta ))+ \lambda | \theta |) $ </p>
+<ul>
+<li>目的：<strong>使𝜃更容易为0，整体权重矩阵更为稀疏，抑制过拟合。</strong></li>
+</ul>
+</li>
+<li><p>l2正则化：$ argmin_{ \theta } \frac{1}{N}( \sum _{i}^{N}L(y_{i},f(x_{i}, \theta ))+ \lambda \theta ^{2}) $ </p>
+</li>
+<li><p>目的：<strong>使得权重变得更小</strong></p>
+</li>
+</ul>
+<ul>
+<li>参数$\lambda$的意义<ul>
+<li>$\lambda$：正则化项系数，用来控制正则化项的“力度”，<u>平衡损失函数和正则化项之间的关系</u>。<ul>
+<li>若ƛ项越大，正则化项在损失函数中所占比例更大，因此损失函数更倾向于优化正则化项，对原始的损失函数V产生较小影响，易导致模型简单，发生欠拟合；</li>
+</ul>
+</li>
+<li>若ƛ项越小，相比于原始的损失函数，正则化项在损失函数中所占比例很小，几乎<br>不起作用，容易发生过拟合问题。</li>
+</ul>
+</li>
+</ul>
+<p>  2、权重衰减法</p>
+<ul>
+<li><p>每次参数更新时，都先对参数进行一定衰减：$ \theta :=(1-w) \theta - \alpha d \theta $ （其中w为权重衰减系数）</p>
+<p>3、丢弃法</p>
+</li>
+<li><p>在训练时，以概率p随机丢弃部分神经元。</p>
+</li>
+<li><p>1.相当于取平均的作用，取每次丢弃后子网络的平均结果。</p>
+<ul>
+<li>2.降低神经元之间的敏感度，增加整体鲁棒性。</li>
+</ul>
+<p>4、提前停止</p>
+</li>
+<li><p>思路：提早结束训练</p>
+</li>
+<li><p>验证集错误率基本不下降时或有反增趋势时，可以提前停止训练。</p>
+<p>5、数据增强</p>
+</li>
+<li><p>在不实质增加数据的情况下，对当前数据执行一些操作达到数据增加的效果。</p>
+<ul>
+<li>图像数据：翻转、旋转、镜像、裁剪、增加高斯白噪声等</li>
+<li>文本数据：同义词替换、随机插入、随机交换、随机删除等</li>
+</ul>
+</li>
+</ul>
+<h4 id="归一化"><a href="#归一化" class="headerlink" title="归一化"></a>归一化</h4><ul>
+<li><p>为什么要归一化？</p>
+<ul>
+<li>提升模型的收敛速度<ul>
+<li>所形成的等高线非常尖。当使用梯度下降法寻求最优解时，很有可能走“之字型”路线（垂直等高线走），从而导致需要迭代很多次才能收敛</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><font color="red">最常用的归一化方法</font>
+
+<ul>
+<li><p>Min-max归一化：将结果映射到[0,1]之间$ \widehat{x}= \frac{x- \min (x)}{ \max (x)- \min (x)} $ </p>
+</li>
+<li><p>Z-score归一化（标准归一化）：$ \widehat{x}= \frac{x- \mu }{ \sigma } $ </p>
+</li>
+<li><p><strong>批归一化（Batch Normalization，BN）</strong></p>
+<ul>
+<li>思路：逐层归一化方法，对神经网络中任意的中间层进行归一化操作。使得净输入的分布一致（例如正态分布），一般应用在激活函数之前。</li>
+<li>加快了模型的收敛速度，而且更重要的是在一定程度缓解了深层网络中“梯度弥散”的问题，从而使得训练深层网络模型更加容易和稳定。</li>
+<li>BN的输出服从什么分布？<ul>
+<li>标准正态分布，N(0,1)：均值为0，方差为1.</li>
+</ul>
+</li>
+<li><strong>Batch normalization为什么归一化后还有放缩（γ ）和平移（β ）？</strong><ul>
+<li>平移和放缩是变换的反操作。通过反操作将标准化后的数据尽可能恢复。如果批标准化没有发挥作用，通过放缩和平移可以抵消一部分标准化的作用。防止网络表达能力下降，恢复数据。弥补归一化后模型损失的表征能力。</li>
+<li>规范化操作让每一层网络的输入数据分布都变得稳定，但却导致了数据表达能力的缺失。也就是我<br>们通过变换操作改变了原有数据的信息表达，使得底层网络学习到的参数信息丢失。另一方面，通过让<br>每一层的输入分布均值为0，方差为1，会使得输入在经过sigmoid或tanh激活函数时，容易陷入非线性<br>激活函数的线性区域。放缩和平移这两个参数对规范化后的数据进行线性变换，是为了<u>恢复数据本身的</u><br><u>表达能力，保留原始输入特征的分布信息。</u></li>
+</ul>
+</li>
+<li>算法</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/6-2.png" alt="6-2" style="zoom: 60%;"></p>
+</li>
+<li><p>层归一化（Layer Normalization，LN）</p>
+<ul>
+<li>思路：对中间层的所有神经元进行归一化</li>
+</ul>
+</li>
+<li><p>实例归一化（Instance Normalization，IN）</p>
+<ul>
+<li>主要用于依赖于某个图像实例的任务。</li>
+<li>N：batch维度，C：特征通道维度，H、W：特征图高和宽维度。</li>
+<li>对每个样本的H和W的数据求均值和标准化，保留N、C维度。</li>
+</ul>
+</li>
+<li><p>组归一化（Group Normalization，GN）</p>
+<ul>
+<li>把特征通道分为G组，每组有C/G个特征通道，在组内归一</li>
+</ul>
+</li>
+<li><p>可转换归一化（Switchable Normalization，SN）</p>
+<ul>
+<li>将批归一化、层归一化、实例归一化结合起来的方法，使网络自适应学习如何组合起来的权重。</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/6-3.png" alt="6-3" style="zoom:80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="初始化、预训练和迁移学习"><a href="#初始化、预训练和迁移学习" class="headerlink" title="初始化、预训练和迁移学习"></a>初始化、预训练和迁移学习</h3><h4 id="网络参数初始化"><a href="#网络参数初始化" class="headerlink" title="网络参数初始化"></a>网络参数初始化</h4><ul>
+<li><p>不同的初始化参数，计算得到的“全局最小”差距很大。好的初始化值能够帮助网络更快地计算得到最优值，更容易收敛到目标函数。</p>
+</li>
+<li><p>目前没有发现一种初始化方式可以适用于任何网络结构。初始化需要避免“对称权重”现象（唯一确知的特性）</p>
+</li>
+<li><p>权重矩阵的初始化</p>
+<ul>
+<li>均匀分布初始化<ul>
+<li>主要思想：在区间(-r,r)的均匀分布U(-r,r)中随机选取所有网络权值</li>
+<li>如何确定区间范围？尽量保持梯度能够在多层网络中传播</li>
+<li>规则1：对于任意网络权值$w_{ij}$，从如下分布中随机选取初始值：$ w_{ij} \sim U(- \frac{1}{ \sqrt{n_{i}}}, \frac{1}{ \sqrt{n_{i}}}) $ (其中$n_i$表示第i层的神经元数量。)</li>
+<li>规则2：Xavier 初始化</li>
+</ul>
+</li>
+<li>高斯分布初始化<ul>
+<li>主要思想：在固定均值和固定方差的高斯分布中随机选取所有网络权值</li>
+<li>缺陷：深层模型会非常难以收敛</li>
+</ul>
+</li>
+<li>稀疏初始化<ul>
+<li>主要思想：稀疏初始化降低连接数量，使得初始化的数值不会太小</li>
+</ul>
+</li>
+<li>正交初始化<ul>
+<li>主要思想：正交初始化可以避免训练开始时就出现梯度消失或梯度爆炸现象</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>偏置矩阵初始化</p>
+<ul>
+<li>偏置矩阵通常不需要考虑破坏对称性的问题，通常我们可以把偏置矩阵初始化为<u>全0矩阵</u>；</li>
+<li>除了一些例外情况：<ul>
+<li>偏置作为输出单元，初始化偏置以获得正确的输出边缘的统计是有利的；</li>
+<li>需要选择偏置以避免初始化引起的太大饱和</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>不合理的初始化会导致梯度消失或爆炸现象</strong><br>（1）大的梯度会使网络十分不稳定，会导致权重成为一个特别大的值，最终导致溢出而无法学习<br>（2）小的梯度传过多层网络，达到靠近输入的隐藏层后会越来越小，导致隐藏层无法正常地进行学习。</p>
+</li>
+</ul>
+<h4 id="网络预训练和迁移学习"><a href="#网络预训练和迁移学习" class="headerlink" title="网络预训练和迁移学习"></a>网络预训练和迁移学习</h4><ul>
+<li>网络预训练：采用相同结构的，并且已经训练好的网络权值作为初始值，在当前任务上再次进行训练</li>
+<li>为什么使用网络预训练？<ul>
+<li>为了能够在更短时间内训练得到更好的网络性能</li>
+<li>相似的任务之间，训练好的神经网络可以复用，通常作为特征提取器</li>
+</ul>
+</li>
+<li>预训练方法<ul>
+<li>无监督预训练<ul>
+<li>玻尔兹曼机</li>
+<li>自编码器</li>
+</ul>
+</li>
+<li>有监督预训练：迁移学习<ul>
+<li>主要思想：通过大量带标签的数据集，大幅减少网络收敛的训练时间。站在巨人的肩膀上，复用已经得到的研究成果</li>
+<li>使用预训练模型的方式：<ul>
+<li>（1）<strong>直接作为特征提取网络</strong>：即将网络直接用于数据的特征提取，将输出作为特征，根据任务目标进行后续的分类、回归等操作，不再对这些预训练层进行进一步的学习，可以看作预训练模型“冻结（frozen）”了；</li>
+<li>（2）<strong>作为初始化模型进行微调</strong>：部分或全部使用这个模型作为初始化模型，根据手头的数据对这个模型进行再次训练，这个过程被称为“精调（fine-tune）”。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="七、神经动力学系统"><a href="#七、神经动力学系统" class="headerlink" title="七、神经动力学系统"></a>七、神经动力学系统</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
+<li><p>神经动力学：研究神经系统随时间的变化过程和规律</p>
+<ul>
+<li><p>确定性神经动力学：神经网络有确定的行为。用一组非线性微分方程描述。</p>
+</li>
+<li><p>统计性神经动力学：神经网络受到噪声扰动，在数学上采用随机性的非线性微分方程来描述系统的行为，方程的解用概率表示</p>
+</li>
+</ul>
+</li>
+<li><p>动力学系统</p>
+<ul>
+<li>大型的非线性动力学系统的动力特性可用下面的微分方程表示： $\frac{d}{dt}V(t)=F(V(t)) $</li>
+<li>如果一个非线性动力系统的向量函数$F(V(t))$不隐含地依赖于时间$t$，则此系统称为自治系统，否则不是自治的。</li>
+</ul>
+</li>
+</ul>
+<h3 id="离散Hopfield网络（重点）"><a href="#离散Hopfield网络（重点）" class="headerlink" title="离散Hopfield网络（重点）"></a><font color="red">离散Hopfield网络（重点）</font></h3><ul>
+<li><p>离散Hopfield网络是单层全互连的，其表现形式有两种</p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/7-1.png" alt="7-1" style="zoom:60%;"></p>
+<ul>
+<li>神经元可取二值{0/1}或{−1/1}</li>
+<li><strong>条件</strong>：神经元之间联接是对称的，即$ W_{ij}=W_{ji} $ ；神经元自身无联接,即$W_{ii} = 0$</li>
+<li>每个神经元都将其输出通过突触权值传递给其它的神经元，同时每个神经元又都接收其它神经元传来的信息</li>
+<li>对每个神经元来说，其输出信号经过其它神经元后又有可能反馈给自己，所以Hopfield网络是一种<strong>反馈神经网络</strong>。</li>
+<li>输出计算：$ u_{i}(t)= \sum _{j=1,j\neq i}^{n}w_{ij}v_{j}(t)+b_{i} $ , $ v_{i}(t+1)=f(u_{i}(t)) $ <ul>
+<li>其中的激励函数$f(\cdot)$可取阶跃函数或符号函数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>运行规则：Hopfield网络的工作方式主要有两种形式</p>
+<ul>
+<li><p><font color="red"><strong>串行（异步）工作方式</strong></font>：在任一时刻$t$，只有某一神经元$i$（随机的或确定的选择）依上式变化，而其他神经元的状态不变。</p>
+<blockquote>
+<p>第一步：对网络进行初始化<br>第二步：从网络中随机选取一个神经元$i$<br>第三步：求出该神经元$i$的输入 $ u_{i}(t)= \sum _{j=1,j\neq i}^{n}w_{ij}v_{j}(t)+b_{i} $</p>
+<p>第四步：求出该神经元$i$的输出$ v_{i}(t+1)=f(u_{i}(t)) $ ，此时网络中的其它神经元的输出保持不变</p>
+<p>第五步：判断网络是否达到稳定状态，若达到稳定状态或满足给定条件，则结束；否则转到第二步继续运行。这里网络的稳定状态定义为：若网络从某一时刻以后，状态不再发生变化，则称网络处于稳定状态。</p>
+</blockquote>
+<ul>
+<li><p>Hopfield网络“能量函数”（Lyapunov函数）的“能量”在网络运行过程中应不断地降低，<strong>最后达到稳定的平衡状态</strong></p>
+<ul>
+<li>能量函数：$ E=- \frac{1}{2} \sum _{i=1,i\neq j}^{n} \sum _{j=1,j\neq i}^{n}w_{ji}v_{j}v_{j}+ \sum _{j=1}^{n}b_{i}v_{i} $ </li>
+<li><p>上式所定义的“能量函数”值应单调减小。所以在满足参数条件下，Hopfield网络状态是向着能量函数减小的方向演化。由于能量函数有界，所以系统必然会趋于稳定状态，该稳定状态即为Hopfield网络的输出</p>
+</li>
+<li><p>能量函数的变化曲线含有全局最小点和局部最小点。将这些极值点作为记忆状态，可将Hopfield网络用于<u>联想记忆</u>；将能量函数作为代价函数，全局最小点看成最优解，则Hopfield网络可用于<u>最优化计算</u></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>并行（同步）工作方式：在任一时刻t，部分神经元或全部神经元的状态同时改变。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="连续Hopfield网络"><a href="#连续Hopfield网络" class="headerlink" title="连续Hopfield网络"></a>连续Hopfield网络</h3><p>激励函数为连续函数</p>
+<h3 id="联想记忆"><a href="#联想记忆" class="headerlink" title="联想记忆"></a>联想记忆</h3><ul>
+<li><p>人工神经网络的联想就是指系统在给定一组刺激信号的作用下，该系统能联系出与之相对应的信号。联想是以记忆为前提的，即首先信息存储起来，再按某种方式或规则将相关信息取出。联想记忆的过程就是信息的存取过程。</p>
+</li>
+<li><p>所谓的联想记忆也称为<strong>基于内容的存取</strong>（Content-addressed memory），信息被分布于生物记忆的内容之中，而不是某个确定的地址。</p>
+<ul>
+<li>（1）信息的存贮是按内容存贮记忆的(content addressable memory CAM)，而传统的计算机是基于地址存贮的（Addressable Memory）即一组信息对应着一定的存储单元。<br>（2）信息的存贮是分布的，而不是集中的。</li>
+</ul>
+</li>
+<li><p>联想记忆的分类：联想记忆可分为自联想与异联想。Hopfield网络属于自联想。</p>
+<ul>
+<li><strong>自联想</strong>记忆(Auto-AssociativeMemory)<br>自联想能将网络中输入模式映射到存贮在网络中不同模式中的一种。联想记忆网络不仅能将输入模式映射为自己所存贮的模式，而且还能对具有缺省/噪音的输入模式有一定的容错能力。<ul>
+<li>设在学习过程中给联想记忆网络存入$M$个样本,若给联想记忆网络加以输入$ X^{ \prime }=X^{m}+V $ ，其中$X^{m}$是$M$个学习样本之一，$V$是偏差项（可代表噪声、缺损与畸变等），通过自联想联想记忆网络的输出为$X^{m}$，即使之复原（比如，破损照片→完整照片）</li>
+</ul>
+</li>
+<li><strong>异联想</strong>网络：在受到具有一定噪音的输入模式激发时，能通过状态的演化联想到原来样本的模式对(如从破损照片得到某人的姓名)</li>
+</ul>
+</li>
+<li><p>联想记忆的工作过程</p>
+<ul>
+<li><p>（1）<strong>记忆阶段</strong>：在记忆阶段就是通过设计或学习网络的权值，使网络具有<u>若干个稳定的平衡状态</u>，这些稳定的平衡状态也称为<strong>吸引子（Attractor）</strong></p>
+<ul>
+<li>吸引子有一定的吸引域（Basin of Attraction），吸引子的吸引域就是能够稳定该吸引子的<u>所有初始状态的集合</u>，吸引域的大小用吸引半径来描述，吸引半径可定义为：吸引域中所含所有状态之间的最大距离或吸引子所能吸引状态的最大距离</li>
+<li>吸引子也就是<u>联想记忆网络能量函数的极值点</u>，记忆过程就是将<u>要记忆和存储的模式设计或训练成网络吸引子的过程</u></li>
+</ul>
+</li>
+<li><p>（2）<strong>联想阶段</strong></p>
+<ul>
+<li>联想过程就是给定输入模式，联想记忆网络通过动力学的演化过程达到稳定状态，即收敛到吸引子，回忆起已存储模式的过程。</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/7-2.png" alt="7-2" style="zoom:40%;"></p>
+<ul>
+<li>吸引子的数量代表着AM的记忆容量（Memory Capacity）或存储容量（Storage Capacity），存储容量就是在一定的联想出错概率容限下，网络中存储互不干扰样本的最大数目</li>
+<li>吸引子具有一定的吸引域，吸引域是衡量网络容错性的指标，<u>吸引域越大网络的容错性能越好，或者说网络的联想能力就越强</u></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Hopfield联想记忆网络</strong></p>
+<ul>
+<li><p>将Hopfield网络作为AM需要设计或训练网络的权值，使吸引子存储记忆模式。常用的设计或学习算法有：外积法（OuterProductMethod）、投影学习法（ProjectionLearningRule）、伪逆法（PseudoInverseMethod）以及特征结构法（EigenStructureMethod）等</p>
+</li>
+<li><font color="red">Hopfield联想记忆网络运行步骤</font>
+
+<ul>
+<li><p>第一步：设定记忆模式。将欲存储的模式进行编码，得到取值为1和−1的记忆模式($m&lt;n$)：</p>
+<p>$ U_{k}= \left[ u_{1}^{k},u_{2}^{k}, \cdots ,u_{i}^{k}, \cdots ,u_{n}^{k} \right] ^{T}k=1,2, \cdots ,m $ </p>
+</li>
+<li><p>第二步：设计网络的权值</p>
+<p>$ w_{ij}= \begin{cases} \frac{1}{N} \sum _{ \mu =1}^{M}u_{i}^{k}u_{j}^{k},j \neq i \\\\ 0,j=i \end{cases} $ </p>
+</li>
+<li><p>第三步：初始化网络状态。将欲识别模式$ U^{ \prime }= \left[ u_{1}’,u_{2}’, \cdots ,u_{i}’, \cdots ,u_{n}’\right] ^{T} $ 设为网络状态的初始状态，即：$ \nu _{i}(0)=u_{i} $ ，是网络中任意神经元$i$在$t=0$时刻的状态</p>
+</li>
+<li><p>第四步：迭代收敛，随机地更新某一神经元的状态$ \nu _{i}(t+1)=Sgn \left[ \sum _{j=1}^{N}w_{ij}x_{j}(n) \right] $ 。反复迭代直至网络中所有神经元的状态不变为止</p>
+</li>
+<li><p>第五步：网络输出，这时的网络状态（稳定状态），即为网络的输出$y=v_i(T)$</p>
+</li>
+</ul>
+</li>
+<li><p>Hopfield联想记忆网络的记忆容量：就是在一定的联想出错概率容限下，网络中存储互不干扰样本的最大数目。记忆容量$\alpha$反映所记忆的模式$m$和神经元的数目$N$之间的关系：$\alpha=m/N$。记忆$m$个模式所需的神经元数$N=m/\alpha$，联接权值数目为$(m/\alpha)^2$，若$\alpha$增加一倍，联接权值数目降为原来的$1/4$，这是一对矛盾。在技术实现上也是很困难的。实验和理论研究表明Hopfield联想记忆网络记忆容量的上限为$0.15N$。</p>
+</li>
+<li><p>Hopfield AM网络存在伪状态（Spurious States），伪状态是指除记忆状态之外网络多余的稳定状态。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="最优化计算"><a href="#最优化计算" class="headerlink" title="最优化计算"></a>最优化计算</h3><p>将Hopfield神经网络应用于求解组合优化问题，就是把目标函数转化为网络的能量函数，把问题的变量对应于网络的状态，当网络的能量函数收敛于极小值时，网络的状态就对应于问题的最优解。</p>
+<h2 id="八、随机神经网络"><a href="#八、随机神经网络" class="headerlink" title="八、随机神经网络"></a>八、随机神经网络</h2><h3 id="基本的非确定方法"><a href="#基本的非确定方法" class="headerlink" title="基本的非确定方法"></a>基本的非确定方法</h3><ul>
+<li><p>非确定的方法：生物神经网络按照概率运行（别称：统计方法（Statistical Method））</p>
+</li>
+<li><p>既可以用于训练，又可以用于运行</p>
+</li>
+<li><p>基本思想</p>
+<ul>
+<li>从所给的网络中“随机地选取一个联接权”</li>
+<li>对该联接权提出一个“伪随机调整量”</li>
+<li>当用此调整量对所选的联接权进行修改后<ul>
+<li>如果“被认为”修改改进了网络的性能，则保留<br>此调整；</li>
+<li>否则放弃本次调整。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>算法1 基本统计训练算法</p>
+<p>1、从样本集$S$中取一样本$(X,Y)$；</p>
+<p>2、将$X$输入到网络中，计算出实际输出$O$；</p>
+<p>3、求出网络关于$Y$、$O$的误差测度$E$；</p>
+<p>4、随机地从$W ^ { ( 1 ) } W ^ { ( 2 ) }, \ldots, W ^ { ( L ) }$中选择一个联接权$ w_{ij}^{(p)} $ ；</p>
+<p>5、生成一个小随机数$ \Delta w_{ij}^{(p)} $ ；</p>
+<p>6、用$ \Delta w_{ij}^{(p)} $ 修改$ w_{ij}^{(p)} $ ；</p>
+<p>7、用修改后的$W ^ { ( 1 ) } W ^ { ( 2 ) }, \ldots, W ^ { ( L ) }$重新计算$X$对应的实际输出$O’$；<br>8、求出网络关于$Y$、$O’$的误差测度$E’$ ；<br>9、如果$E’&lt;E$，则保留本次对$W ^ { ( 1 ) } W ^ { ( 2 ) }, \ldots, W ^ { ( L ) }$的修改，否则，根据概率判断本次修改是否有用，如果认为有用，则保留本次对$W ^ { ( 1 ) } W ^ { ( 2 ) }, \ldots, W ^ { ( L ) }$的修改，如果认为本次修改无用，则放弃它；<br>重复上述过程，直到网络满足要求。</p>
+</li>
+</ul>
+<h3 id="模拟退火（重点）"><a href="#模拟退火（重点）" class="headerlink" title="模拟退火（重点）"></a><font color="red">模拟退火（重点）</font></h3><ul>
+<li>金属中原子的能量与温度有关。原子能量高的时候，有能力摆脱其原来的能量状态而最后达到一个更加稳定的状态——全局极小能量状态</li>
+<li>在金属的退火过程中，能量的状态分布$ P(E) \propto exp(- \frac{E}{kT}) $ <ul>
+<li>$P(E)$——系统处于具有能量$E$的状态的概率；</li>
+<li>$k$——Boltzmann常数；</li>
+<li>$T$——系统的绝对温度(Kelvin)</li>
+</ul>
+</li>
+<li>高温情况下：$T$足够大，对系统所能处的任意能量状态$E$，有$exp(- \frac{E}{kT}) $ 将趋于1</li>
+<li>中温情况下：$T$比较小，$E$的大小对$P(E)$有较大的影响，设$E_1&gt;E_2,P(E_2)&gt;P(E_1)$，即，系统处于高能量状态的可能性小于处于低能量状态的可能性</li>
+<li>低温情况下：$T$非常小，$E$的大小对影响非常大，设$E_1&gt;E_2,P(E_2)&gt;&gt;P(E_1)$，即，当温度趋近于0时，系统几乎不可能处于高能量状态</li>
+</ul>
+<h4 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h4><ul>
+<li>首先在高温下进行搜索，此时各状态出现概率相差不大，可以很快进入“热平衡状态”，这时进行的是一种“粗搜索”，也就是大<u>致找到系统的低能区</u></li>
+<li>随着温度的逐渐降低，各状态出现概率的差距逐渐被扩大，搜索精度不断提高。这就可以<u>越来越准确地找到网络能量函数的全局最小点</u></li>
+</ul>
+<h4 id="模拟退火与传统迭代最优算法的比较"><a href="#模拟退火与传统迭代最优算法的比较" class="headerlink" title="模拟退火与传统迭代最优算法的比较"></a>模拟退火与传统迭代最优算法的比较</h4><p>（1）当系统在非零温度下时，从局部最优中跳出是非常可能的，因此不会陷入局部最优。<br>（2）系统最终状态的总特征可以在较高温度下看到，而状态的好的细节却在低温下表现，因此，模拟退火是自适应的。</p>
+<h4 id="模拟退火原理"><a href="#模拟退火原理" class="headerlink" title="模拟退火原理"></a>模拟退火原理</h4><p>1.Metropolis抽样过程</p>
+<ul>
+<li>ΔE表示系统从状态vi转移至状态vj所引起的能量差。如果能量差ΔE为负，这种转移就导致状态能量的降低，这种转移就被接受。接下来，新状态作为算法下一步的起始点。</li>
+<li>若能量差为正，算法在这一点进行概率操作。首先，选定一个在[0,1]内服从均匀分布的随机数ξ。如果$ξ&lt;e^{-ΔE/T}$，则接受这种转移，否则，拒绝这种转移；即在算法的下一步中拒绝旧的状态。如此反复，达到系统在此温度下的热平衡。</li>
+</ul>
+<p>2.退火过程（降温过程）</p>
+<ul>
+<li>Metropolis抽样过程中温度$T$缓慢地降低。</li>
+<li>初始温度值：初始温度值$T_0$要选得足够高，保证模拟退火算法中所有可能的转移都能被接受。</li>
+<li>温度的下降：原先使用指数函数实现温度的下降。但是这种方法使降温幅度过小，从而延长搜索时间。在实际中，通常使用下式：$ T_{k}= \lambda T_{k-1},k=1,2, \cdots $ </li>
+<li>终止温度：如果在连续的若干个温度下没有可接受的新状态，系统冻结或退火停止。</li>
+</ul>
+<h3 id="模拟退火算法用于组合优化问题"><a href="#模拟退火算法用于组合优化问题" class="headerlink" title="模拟退火算法用于组合优化问题"></a>模拟退火算法用于组合优化问题</h3><p>第一步：初始化。依据所要解决的组合优化问题，确定代价函数𝐶(﹒)的表达式，随机选择初始状态𝑉=𝑉(0)，设定初始温度$T_0$，终止温度$T_{final}$，概率阈值ξ。</p>
+<p>第二步：Metropolis抽样过程<br>（1）在温度𝑇下依据某一规定的方式，根据当前解所处的状态𝑉，产生一个近邻子集𝑁(𝑉)（可包括𝑉，也可不包括𝑉），在𝑁(𝑉)内随机寻找一个新状态𝑆’作为下一个当前解的候选解，计算Δ𝐶’=𝐶(𝑉’)−𝐶(𝑉)。</p>
+<p>（2）若Δ𝐶’&lt;0,则𝑉=𝑉’，作为下一状态；若Δ𝐶’&gt;0，则计算概率$ e^{- \Delta C^{ \prime }/T} $ ，若其大于给定概率阈值ξ，则取下一状态为𝑉=𝑉’，否则，保留这一状态。<br>（3）<u>按某一给定的收敛算法检查算法在温度T下是否应停止，若符合收敛条件则表示已达到热平衡，转向第三步的退火过程，若不符合收敛条件，则转向（1）继续迭代，直至在此温度下收敛。</u><!--0,则𝑉=𝑉’，作为下一状态；若Δ𝐶’--></p>
+<p>第三步：退火过程。<br>按照一定的降温方法得到一个新的温度𝑇，检查𝑇是否小于给定的温度终止阈值$T_{final}$。若小于，则退火过程结束，当前状态𝑉即为算法最终输出解。若温度𝑇大于等于给定阈值，则转至Metropolis抽样过程，在新的温度下搜索状态。</p>
+<h3 id="玻尔兹曼机"><a href="#玻尔兹曼机" class="headerlink" title="玻尔兹曼机"></a>玻尔兹曼机</h3><h4 id="随机神经网络与其他网络的比较"><a href="#随机神经网络与其他网络的比较" class="headerlink" title="随机神经网络与其他网络的比较"></a>随机神经网络与其他网络的比较</h4><p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-1.png" alt="8-1" style="zoom: 67%;"></p>
+<ul>
+<li>BP网络是一种“贪心”算法，容易陷入局部最小点。</li>
+<li>Hopfield网络很难避免出现伪状态，网络是严格按照能量减小的方向运行的，容易陷入局部极小点，而无法跳出。</li>
+<li>所以，在用BP网络和Hopfield网络进行最优化的计算时，由于限定条件的不足，往往会使网络稳定在误差或能量函数的局部最小点，而不是全局最小点，即所得的解不是最优解。</li>
+</ul>
+<h4 id="随机神经网络的基本思想"><a href="#随机神经网络的基本思想" class="headerlink" title="随机神经网络的基本思想"></a>随机神经网络的基本思想</h4><font color="red">网络向误差或能量函数减小方向运行的概率大，同时向误差或能量函数增大方向运行的概率存在，这样网络跳出局部极小点的可能性存在，而且向全局最小点收敛的概率最大。</font>
+
+<h4 id="Boltzmann机的网络结构"><a href="#Boltzmann机的网络结构" class="headerlink" title="Boltzmann机的网络结构"></a>Boltzmann机的网络结构</h4><ul>
+<li>Boltzmann机由输入部、输出部和中间部构成。输入神经元和输出神经元可称为显见神经元，它们是网络与外部环境进行信息交换的媒介。中间部的神经元称为隐见神经元，它们通过显见神经元与外部进行信息交换。</li>
+<li>每一对神经元之间的信息传递是双向对称的，即$w_{ij}=w_{ji}$，而且自身无反馈即$w_{ii}=0$。学习期间，显见神经元将被外部环境“约束”在某一特定的状态，而中间部隐见神经元则不受外部环境约束。</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-2.png" alt="8-2" style="zoom:67%;"></p>
+<ul>
+<li><p><strong>单个神经元的运行特性</strong></p>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-3.png" alt="8-3" style="zoom:50%;"></p>
+<ul>
+<li>神经元$i$的全部输入信号的总和为$u_i$为：$ u_{i}= \sum _{j}^{n}w_{ij}v_{j}+b_{i} $ </li>
+<li>神经元的输出$v_i$依概率取1或0：<ul>
+<li>$v_i$取1的概率：$ P( v _{i}=1)=1/(1+e^{-u_{i}/T}) $ </li>
+<li>$v_i$取0的概率：$ P( v _{i}=0)=1-P( v _{i}=1)$</li>
+</ul>
+</li>
+<li>由此可见，$v_i$取1的概率受两个因素的影响：<br>(1) $u_i$越大$v_i$则取1的概率越大，而取0的概率越小；<br>(2)参数$T$称为“温度”，在不同的温度下$v_i$取1的概率$P$随$u_i$的变化如图所示。<ul>
+<li>可见，$T$越高时，曲线越平滑，因此，即使$u_i$有很大变动，也不会对$v_i$取1的概率变化造成很大的影响；反之，$T$越低时，曲线越陡峭，当$u_i$有稍许变动时就会使概率有很大差异。<u>即温度高时状态变化接近随机，随着温度的降低向确定性的动作靠近。</u></li>
+<li>当$T$→0时，每个神经元不再具有随机特性，而具有确定的特性，<u>激励函数变为阶跃函数，这时Boltzmann机趋向于Hopfield网络。</u></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/8-4.png" alt="8-4" style="zoom:50%;"></p>
+<h4 id="Boltzmann机的工作原理"><a href="#Boltzmann机的工作原理" class="headerlink" title="Boltzmann机的工作原理"></a>Boltzmann机的工作原理</h4><ul>
+<li>Boltzmann机采用下式所示的能量函数作为描述其状态的函数: $ E=- \frac{1}{2} \sum _{i,j}w_{ij}v_{i} \nu _{j} $ </li>
+<li>Boltzmann机在运行时，假设每次只改变一个神经元的状态，如第$i$个神经元，设$v_i$取0和取1时系统的能量函数分别为0和$ - \sum _{j}w_{ij}v_{j} $ ，它们的差值为$\Delta E_i$。$ \Delta E_{i}=E|_{v_{i}=0}-E|_{v_{i}=1}=0-(- \sum _{j}w_{ij} \nu _{j})= \sum _{j}w_{ij} \nu _{j} $ </li>
+<li>$\Delta E_i$的取值可能有两种情况：$\Delta E_i$&gt;0或$\Delta E_i$&lt;0<ul>
+<li>当$\Delta E_i&gt;0$时，即$ u_{i}= \sum _{j}w_{ij}v_{j}&gt;0 $ 时，$E|_{v_{i}=0}&gt;E|_{v_{i}=1}$<ul>
+<li>神经元取1的概率：$ P( v _{i}=1)=1/(1+e^{-u_{i}/T}) $ </li>
+<li>神经元取0的概率：$P( v_{i}=0)=e^{-u_{i}/T}/(1+e^{-u_{i}/T})$</li>
+<li>$u_i&gt;0$时，$ e^{-u_{i}/T}&lt;1 $ ，$ p( v _{i}="1)"&gt;P( v _{i}=0) $ <!--1--></li>
+<li>这时神经元$i$的状态取1的可能性比取0的可能性大，即网络状态取能量低的可能性大。</li>
+</ul>
+</li>
+<li>当$\Delta E_i&lt;0$时，即$ u_{i}= \sum _{j}w_{ij}v_{j}&lt;0 $ 时，$E|_{v_{i}=0}&lt;E|_{v_{i}=1}$<ul>
+<li>此时，$ P( v _{i}=1)&lt;P( v _{i}=0) $ </li>
+<li>神经元$i$的状态取0的可能性比取1的可能性大，即网络状态取能量低的可能性大。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><font color="red">网络状态取能量低的可能性大。运行过程中总的趋势是朝能量下降的方向运动，但也存在能量上升的可能性。</font>
+
+</li>
+</ul>
+<h4 id="Boltzmann机的运行步骤"><a href="#Boltzmann机的运行步骤" class="headerlink" title="Boltzmann机的运行步骤"></a>Boltzmann机的运行步骤</h4><ul>
+<li>第一步：对网络进行初始化。设定初始温度$T_0$、终止温度$T_{final}$和阈值𝜉，以及网络各神经元的连接权值$w_{ij}$。</li>
+<li>第二步：在温度$T_m$条件下（初始温度为$T_0$）随机选取网络中的一个神经元$i$，计算神经元$i$的输入信号总和$u_i$：$ u_{i}= \sum _{j=1,i\neq j}^{n}w_{ij}v_{j}+b_{i} $ </li>
+<li>第三步：若$u_i$&gt;0，即能量差$Δ𝐸_𝑖$&gt;0，取$v_i=1$为神经元$i$的下一状态值。若$u_i$&lt;0，计算概率：$ P_{i}=1/(1+e^{-u_{i}/T}) $ </li>
+<li>第四步：判断网络在温度$T_m$是否达到稳定，若未达到稳定，则继续在网络中随机选取另一神经元$j$，令$j=i$，转至第二步重复计算，直至网络在$T_m$下达到稳定。若网络在$T_m$下已达到稳定则转至第五步计算。</li>
+<li>第五步：以一定规律降低温度，使$T_{m+1}&lt;T_m$ ，判断$T_{m+1}$是否小于$T_{final}$，若$T_{m+1}$大于等于$T_{final}$，则$T_m=T_{m+1}$，转至第二步重复计算；若$T_{m+1}$小于$T_{final}$，则运行结束。此时在$T_m$下所求得的网络稳定状态，即为网络的输出。</li>
+</ul>
+<h4 id="Boltzmann机的学习规则"><a href="#Boltzmann机的学习规则" class="headerlink" title="Boltzmann机的学习规则"></a>Boltzmann机的学习规则</h4><ul>
+<li>Boltzmann机是一种随机神经网络，可使用概率中的似然函数量度其模拟外界环境概率分布的性能。因此，Boltzmann机的学习规则就是根据最大似然规则，通过调整权值$w_{ij}$，最小化似然函数或其对数</li>
+</ul>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ruby Chen
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://rubychen0611.github.io/2020/12/25/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/" title="【复习笔记】神经网络及其应用">https://rubychen0611.github.io/2020/12/25/神经网络及其应用/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="tag"># 神经网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/03/%E3%80%90%E7%AE%97%E6%B3%95%E5%A4%8D%E4%B9%A0%E3%80%91%E6%8E%92%E5%BA%8F/" rel="prev" title="【算法复习】排序和顺序统计量">
+      <i class="fa fa-chevron-left"></i> 【算法复习】排序和顺序统计量
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%94%9F%E7%89%A9%E7%A5%9E%E7%BB%8F%E7%B3%BB%E7%BB%9F%E4%B8%8E%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">1.</span> <span class="nav-text">一、生物神经系统与人工神经网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E7%89%A9%E7%A5%9E%E7%BB%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">生物神经系统的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%80%E4%BB%8B"><span class="nav-number">1.2.</span> <span class="nav-text">人工神经网络简介</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E5%85%83"><span class="nav-number">2.</span> <span class="nav-text">二、人工神经元</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MP%E7%A5%9E%E7%BB%8F%E5%85%83"><span class="nav-number">2.1.</span> <span class="nav-text">MP神经元</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">线性模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95%EF%BC%88-%E9%87%8D%E7%82%B9%EF%BC%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">最小二乘法（*重点）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB"><span class="nav-number">2.3.</span> <span class="nav-text">线性分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%9F%E7%9F%A5%E5%99%A8%E7%A5%9E%E7%BB%8F%E5%85%83"><span class="nav-number">2.4.</span> <span class="nav-text">感知器神经元</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-number">2.4.1.</span> <span class="nav-text">激活函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FT%E7%A5%9E%E7%BB%8F%E5%85%83"><span class="nav-number">2.5.</span> <span class="nav-text">FT神经元</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E5%85%83%E7%9A%84%E5%AD%A6%E4%B9%A0"><span class="nav-number">3.</span> <span class="nav-text">三、人工神经元的学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E7%89%A9%E7%A5%9E%E7%BB%8F%E5%85%83%E7%9A%84%E5%AD%A6%E4%B9%A0"><span class="nav-number">3.1.</span> <span class="nav-text">生物神经元的学习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%9F%E7%9F%A5%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">感知器学习方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E5%AD%A6%E4%B9%A0"><span class="nav-number">3.2.1.</span> <span class="nav-text">随机学习</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hebbian%E5%AD%A6%E4%B9%A0"><span class="nav-number">3.2.2.</span> <span class="nav-text">Hebbian学习</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B1%EF%BC%9A%E4%BD%9C%E4%B8%BA%E5%88%86%E7%B1%BB%E5%99%A8%E7%9A%84%E6%9C%89%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%84%9F%E7%9F%A5%E5%99%A8%EF%BC%88PPT-29-36%EF%BC%8C-%E4%BC%9A%E8%AE%A1%E7%AE%97"><span class="nav-number">3.2.3.</span> <span class="nav-text">实例1：作为分类器的有监督学习的感知器（PPT 29-36， *会计算)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B2%EF%BC%9A%E7%BA%BF%E6%80%A7%E7%A5%9E%E7%BB%8F%E5%85%83%E9%A2%84%E6%8A%A5%E5%99%A8-PPT-38-42%EF%BC%8C-%E4%BC%9A%E8%AE%A1%E7%AE%97"><span class="nav-number">3.2.4.</span> <span class="nav-text">实例2：线性神经元预报器 (PPT 38-42， *会计算)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95%E5%AD%A6%E4%B9%A0"><span class="nav-number">3.2.5.</span> <span class="nav-text">梯度下降法学习</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ADALINE-Adaptive-Linear-Element"><span class="nav-number">3.3.</span> <span class="nav-text">ADALINE: Adaptive Linear Element</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%A5%9E%E7%BB%8F%E5%85%83%E7%9A%84%E8%BF%9E%E6%8E%A5"><span class="nav-number">4.</span> <span class="nav-text">四、神经元的连接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E5%85%83%E7%9A%84%E8%81%94%E7%BB%93%E7%BB%BC%E8%BF%B0"><span class="nav-number">4.1.</span> <span class="nav-text">神经元的联结综述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%BD%E5%BA%A6%E6%89%A9%E5%B1%95%EF%BC%9A%E4%BB%A5%E5%A4%9A%E8%BE%93%E5%87%BA%E7%9A%84%E5%8D%95%E5%B1%82%E6%84%9F%E7%9F%A5%E5%99%A8%E4%B8%BA%E4%BE%8B"><span class="nav-number">4.2.</span> <span class="nav-text">宽度扩展：以多输出的单层感知器为例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E6%89%A9%E5%B1%95%EF%BC%9A%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E5%99%A8"><span class="nav-number">4.3.</span> <span class="nav-text">深度扩展：多层感知器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E8%BF%9E%E6%8E%A5%E6%96%B9%E5%BC%8F"><span class="nav-number">4.4.</span> <span class="nav-text">其他连接方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E4%B8%9A"><span class="nav-number">4.5.</span> <span class="nav-text">作业</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">五、多层感知器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BP%E7%BD%91%E7%BB%9C%E7%9A%84%E8%AE%AD%E7%BB%83%E2%80%94%E5%9F%BA%E6%9C%AC%E7%AE%97%E6%B3%95"><span class="nav-number">5.1.</span> <span class="nav-text">BP网络的训练—基本算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BP%E7%AE%97%E6%B3%95%E7%9A%84%E6%94%B9%E8%BF%9B"><span class="nav-number">5.2.</span> <span class="nav-text">BP算法的改进</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E7%9A%84%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80%EF%BC%88-%E6%8E%8C%E6%8F%A1%EF%BC%89"><span class="nav-number">5.3.</span> <span class="nav-text">算法的理论基础（*掌握）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E4%B8%9A-1"><span class="nav-number">5.4.</span> <span class="nav-text">作业</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%AD%A3%E5%88%99%E5%8C%96%E3%80%81%E5%BD%92%E4%B8%80%E5%8C%96%E5%92%8C%E9%A2%84%E8%AE%AD%E7%BB%83"><span class="nav-number">6.</span> <span class="nav-text">六、正则化、归一化和预训练</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E3%80%81%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%89%B9%E5%BE%81%E5%B7%A5%E7%A8%8B"><span class="nav-number">6.1.</span> <span class="nav-text">数据、模型与特征工程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E5%8C%96%E4%B8%8E%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">6.2.</span> <span class="nav-text">正则化与归一化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E5%8C%96"><span class="nav-number">6.2.1.</span> <span class="nav-text">正则化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">6.2.2.</span> <span class="nav-text">归一化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E3%80%81%E9%A2%84%E8%AE%AD%E7%BB%83%E5%92%8C%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0"><span class="nav-number">6.3.</span> <span class="nav-text">初始化、预训练和迁移学习</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%8F%82%E6%95%B0%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">6.3.1.</span> <span class="nav-text">网络参数初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%A2%84%E8%AE%AD%E7%BB%83%E5%92%8C%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0"><span class="nav-number">6.3.2.</span> <span class="nav-text">网络预训练和迁移学习</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E7%A5%9E%E7%BB%8F%E5%8A%A8%E5%8A%9B%E5%AD%A6%E7%B3%BB%E7%BB%9F"><span class="nav-number">7.</span> <span class="nav-text">七、神经动力学系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">7.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A6%BB%E6%95%A3Hopfield%E7%BD%91%E7%BB%9C%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%89"><span class="nav-number">7.2.</span> <span class="nav-text">离散Hopfield网络（重点）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E7%BB%ADHopfield%E7%BD%91%E7%BB%9C"><span class="nav-number">7.3.</span> <span class="nav-text">连续Hopfield网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%94%E6%83%B3%E8%AE%B0%E5%BF%86"><span class="nav-number">7.4.</span> <span class="nav-text">联想记忆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E4%BC%98%E5%8C%96%E8%AE%A1%E7%AE%97"><span class="nav-number">7.5.</span> <span class="nav-text">最优化计算</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E9%9A%8F%E6%9C%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">8.</span> <span class="nav-text">八、随机神经网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%9A%84%E9%9D%9E%E7%A1%AE%E5%AE%9A%E6%96%B9%E6%B3%95"><span class="nav-number">8.1.</span> <span class="nav-text">基本的非确定方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%89"><span class="nav-number">8.2.</span> <span class="nav-text">模拟退火（重点）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%80%9D%E8%B7%AF"><span class="nav-number">8.2.1.</span> <span class="nav-text">基本思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E4%B8%8E%E4%BC%A0%E7%BB%9F%E8%BF%AD%E4%BB%A3%E6%9C%80%E4%BC%98%E7%AE%97%E6%B3%95%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">8.2.2.</span> <span class="nav-text">模拟退火与传统迭代最优算法的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E5%8E%9F%E7%90%86"><span class="nav-number">8.2.3.</span> <span class="nav-text">模拟退火原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E7%AE%97%E6%B3%95%E7%94%A8%E4%BA%8E%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96%E9%97%AE%E9%A2%98"><span class="nav-number">8.3.</span> <span class="nav-text">模拟退火算法用于组合优化问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%BB%E5%B0%94%E5%85%B9%E6%9B%BC%E6%9C%BA"><span class="nav-number">8.4.</span> <span class="nav-text">玻尔兹曼机</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E5%85%B6%E4%BB%96%E7%BD%91%E7%BB%9C%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">8.4.1.</span> <span class="nav-text">随机神经网络与其他网络的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%80%9D%E6%83%B3"><span class="nav-number">8.4.2.</span> <span class="nav-text">随机神经网络的基本思想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Boltzmann%E6%9C%BA%E7%9A%84%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">8.4.3.</span> <span class="nav-text">Boltzmann机的网络结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Boltzmann%E6%9C%BA%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">8.4.4.</span> <span class="nav-text">Boltzmann机的工作原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Boltzmann%E6%9C%BA%E7%9A%84%E8%BF%90%E8%A1%8C%E6%AD%A5%E9%AA%A4"><span class="nav-number">8.4.5.</span> <span class="nav-text">Boltzmann机的运行步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Boltzmann%E6%9C%BA%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%A7%84%E5%88%99"><span class="nav-number">8.4.6.</span> <span class="nav-text">Boltzmann机的学习规则</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Ruby Chen"
+      src="/images/head.jpg">
+  <p class="site-author-name" itemprop="name">Ruby Chen</p>
+  <div class="site-description" itemprop="description">自爱兼爱，善感而不多愁。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rubychen0611" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rubychen0611" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rubychen0611@yeah.net" title="E-Mail → mailto:rubychen0611@yeah.net" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://instagram.com/rubychen611" title="Instagram → https:&#x2F;&#x2F;instagram.com&#x2F;rubychen611" rel="noopener" target="_blank"><i class="fab fa-instagram fa-fw"></i>Instagram</a>
+      </span>
+  </div>
+
+
+
+      </div>
+	  
+	  
+  <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+  <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div id="myCanvasContainer" class="widget tagcloud">
+      <canvas width="250" height="250" id="resCanvas" style="width:100%">
+        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Concolic%E6%B5%8B%E8%AF%95/" rel="tag">Concolic测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNN%E5%88%86%E8%A7%A3/" rel="tag">DNN分解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNN%E6%B5%8B%E8%AF%95/" rel="tag">DNN测试</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MC-DC/" rel="tag">MC/DC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%94%E6%9C%AC%E5%8D%8E/" rel="tag">叔本华</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8F%98%E5%BC%82%E6%B5%8B%E8%AF%95/" rel="tag">变异测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AF%B9%E6%8A%97%E9%98%B2%E5%BE%A1/" rel="tag">对抗防御</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%AE%E5%88%86%E6%B5%8B%E8%AF%95/" rel="tag">差分测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F/" rel="tag">排序</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95/" rel="tag">模糊测试</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AF%94%E8%B5%9B/" rel="tag">比赛</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E6%A0%87%E5%87%86/" rel="tag">测试标准</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%E7%94%9F%E6%88%90/" rel="tag">测试输入生成</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="tag">神经网络</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A7%BB%E5%8A%A8%E5%BC%80%E5%8F%91/" rel="tag">移动开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A8%8B%E5%BA%8F%E5%88%87%E7%89%87/" rel="tag">程序切片</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AC%A6%E5%8F%B7%E6%89%A7%E8%A1%8C/" rel="tag">符号执行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA/" rel="tag">算法导论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%84%E5%90%88%E6%B5%8B%E8%AF%95/" rel="tag">组合测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%96%E8%AF%91%E5%99%A8%E6%B5%8B%E8%AF%95/" rel="tag">编译器测试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B/" rel="tag">计算模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/" rel="tag">论文笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%BE%93%E5%85%A5%E9%AA%8C%E8%AF%81/" rel="tag">输入验证</a><span class="tag-list-count">1</span></li></ul>
+      </canvas>
+    </div>
+  </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ruby Chen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">86k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:18</span>
+</div>
+
+<!--添加运行时间-->
+<span id="sitetime"></span>
+<script language=javascript>
+	function siteTime(){
+		window.setTimeout("siteTime()", 1000);
+		var seconds = 1000;
+		var minutes = seconds * 60;
+		var hours = minutes * 60;
+		var days = hours * 24;
+		var years = days * 365;
+		var today = new Date();
+		var todayYear = today.getFullYear();
+		var todayMonth = today.getMonth()+1;
+		var todayDate = today.getDate();
+		var todayHour = today.getHours();
+		var todayMinute = today.getMinutes();
+		var todaySecond = today.getSeconds();
+		/* 
+		Date.UTC() -- 返回date对象距世界标准时间(UTC)1970年1月1日午夜之间的毫秒数(时间戳)
+		year - 作为date对象的年份，为4位年份值
+		month - 0-11之间的整数，做为date对象的月份
+		day - 1-31之间的整数，做为date对象的天数
+		hours - 0(午夜24点)-23之间的整数，做为date对象的小时数
+		minutes - 0-59之间的整数，做为date对象的分钟数
+		seconds - 0-59之间的整数，做为date对象的秒数
+		microseconds - 0-999之间的整数，做为date对象的毫秒数
+        */
+		var t1 = Date.UTC(2020,08,19,20,19,00); 
+		var t2 = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+		var diff = t2-t1;
+		var diffYears = Math.floor(diff/years);
+		var diffDays = Math.floor((diff/days)-diffYears*365);
+		var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+		var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+		var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+		document.getElementById("sitetime").innerHTML=" 本站已安全运行 "+/*diffYears+" 年 "+*/diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+	}
+	siteTime();
+</script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="/lib/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz","app_key":"gosR0ey4a9G3xmN5tvWEcrBS","server_url":null,"security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='255,0,0' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz',
+      appKey     : 'gosR0ey4a9G3xmN5tvWEcrBS',
+      placeholder: "留下你的评论吧",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":175,"height":325},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
