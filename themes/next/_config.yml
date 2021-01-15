@@ -88,7 +88,7 @@ footer:
 creative_commons:
   license: by-nc-sa
   sidebar: false
-  post: false
+  post: true
   language:
 
 
@@ -466,11 +466,11 @@ exturl: false
 
 # Google Webmaster tools verification.
 # See: https://www.google.com/webmasters
-google_site_verification:
+google_site_verification: XDofhadHoQx92S_zQN-nchPmB54b_ndx1Hf561gampk
 
 # Bing Webmaster tools verification.
 # See: https://www.bing.com/webmaster
-bing_site_verification:
+bing_site_verification: 
 
 # Yandex Webmaster tools verification.
 # See: https://webmaster.yandex.ru
@@ -478,10 +478,10 @@ yandex_site_verification:
 
 # Baidu Webmaster tools verification.
 # See: https://ziyuan.baidu.com/site
-baidu_site_verification:
+baidu_site_verification: code-famAsDgLf7
 
 # Enable baidu push so that the blog will push the url to baidu automatically which is very helpful for SEO.
-baidu_push: false
+baidu_push: true
 
 
 # ---------------------------------------------------------------
@@ -692,7 +692,7 @@ cnzz_siteid:
 # AppID and AppKey are recommended to be the same as valine's for counter compatibility.
 # Do not enable both `valine.visitor` and `leancloud_visitors`.
 leancloud_visitors:
-  enable: false
+  enable: true
   app_id: LkYngmM5T7m5YgRxUb2BMpmU-gzGzoHsz # <your app id>
   app_key: gosR0ey4a9G3xmN5tvWEcrBS # <your app key>
   # Required for apps from CN region
@@ -700,7 +700,7 @@ leancloud_visitors:
   # Dependencies: https://github.com/theme-next/hexo-leancloud-counter-security
   # If you don't care about security in leancloud counter and just want to use it directly
   # (without hexo-leancloud-counter-security plugin), set `security` to `false`.
-  security: true
+  security: false
 
 # Another tool to show number of visitors to each article.
 # Visit https://console.firebase.google.com/u/0/ to get apiKey and projectId.
@@ -719,7 +719,7 @@ busuanzi_count:
   total_visitors_icon: fa fa-user
   total_views: true
   total_views_icon: fa fa-eye
-  post_views: true
+  post_views: false
   post_views_icon: fa fa-eye
 
 
@@ -1017,6 +1017,11 @@ mylinks:
   site: https://keyile.github.io/  #友链地址
   info: 知行合一  #友链说明
   avatar: https://keyile.github.io/images/avatar.jpg  #友链头像
+- nickname: Kikaslana  #友链名称
+  site: https://mr-ace-1997.github.io/  #友链地址
+  info: 理想主义殉道者  #友链说明
+  avatar: https://mr-ace-1997.github.io/images/head.jpg  #友链头像
+
 
 # hexo-tag-cloud
 tag_cloud:

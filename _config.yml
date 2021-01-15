@@ -3,8 +3,8 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Ruby's Blog
-subtitle: '十年水流东，十年水流西'
+title: 与我常在
+subtitle: '未经审视的人生不值一过'
 description: '自爱兼爱，善感而不多愁。'
 keywords:
 author: Ruby Chen
@@ -136,4 +136,13 @@ feed:
   limit: 10
   hub:
   content: 'true'
+  
+githubEmojis:
+  enable: true
+  className: github-emoji
+  inject: true
+  styles:
+  customEmojis:
 
+sitemap:
+    path: sitemap.xml
